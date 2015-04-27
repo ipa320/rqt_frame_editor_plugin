@@ -34,8 +34,19 @@ class Overview_Dialog(QtGui.QDialog):
     def __init__(self):
         super(Overview_Dialog, self).__init__()
 
+        ## Dispatcher ##
+        ##
         self.disp = dispatcher.Dispatcher()
         #self.disp.set_chooser(widget.choose_provider)
+
+
+        ## Load settings ##
+        ##
+        self.filename = rospy.get_param('~filename', None)
+        print "Filename: ", self.filename
+        if self.filename:
+            yaml_io.import_yaml(self.disp, self.filename)
+
 
         self.row = -1
 
@@ -72,8 +83,13 @@ class Overview_Dialog(QtGui.QDialog):
     ##
     @QtCore.Slot(int)
     def on_btn_save_as_clicked(self):
-        yaml_io.export_yaml("my_settings.yaml")
-
+        ## Ask for filename
+        saveDialog = QtGui.QFileDialog(self, 'Save settings', QtCore.QDir.currentPath(), 'YAML files(*.yaml)')
+        saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
+        saveDialog.selectFile(self.filename)
+        if (saveDialog.exec_()):
+            filename = str(saveDialog.selectedFiles()[0])
+            yaml_io.export_yaml(self.disp, filename)
 
 
     @QtCore.Slot(int)
