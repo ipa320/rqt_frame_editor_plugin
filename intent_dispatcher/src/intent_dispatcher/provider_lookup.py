@@ -9,7 +9,7 @@ import rosservice
 
 class ProviderLookup():
 
-    def __init__(self, skilltopic):
+    def __init__(self):
         self._master = xmlrpclib.ServerProxy(os.environ['ROS_MASTER_URI'])
 
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
         rospy.loginfo("Looking for provided services and actions")
 
-        pl = ProviderLookup('testTopic')
+        pl = ProviderLookup()
         services, actions = pl.lookup_providers()
 
         rospy.loginfo("Services:\n %s", str(services))
