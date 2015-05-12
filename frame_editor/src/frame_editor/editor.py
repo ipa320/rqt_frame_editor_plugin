@@ -44,6 +44,10 @@ class Frame:
         self.orientation = orientation
         self.parent = parent
 
+    @property
+    def pose(self):
+        return ToPose(self.position, self.orientation)
+
     def print_all(self):
         print "  {} (parent: {}) {} {}".format(self.name, self.parent, self.position, self.orientation)
 
@@ -63,16 +67,80 @@ class Frame_Editor:
         rospy.Service("remove_frame", RemoveFrame, self.callback_remove_frame)
         rospy.Service("set_frame", SetFrame, self.callback_set_frame)
 
+        self.set_marker_style(["x", "y", "z", "a", "b", "c"])
+
+
+    def set_marker_style(self, style, scale=0.25):
+        '''style is a list with any number of the following strings: ["x", "y", "z", "a", "b", "c"].'''
+
         ## Marker
         int_marker = InteractiveMarker()
         int_marker.header.frame_id = ""
         int_marker.name = ""
         int_marker.description = "Frame Editor"
+        int_marker.pose = Pose()
+        int_marker.scale = scale
 
-        rotate_control = InteractiveMarkerControl()
-        rotate_control.name = "move_x"
-        rotate_control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-        int_marker.controls.append(rotate_control);
+        if "x" in style:
+            control = InteractiveMarkerControl()
+            control.name = "move_x"
+            control.orientation.w = 1
+            control.orientation.x = 1
+            control.orientation.y = 0
+            control.orientation.z = 0
+            control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+            int_marker.controls.append(control);
+
+        if "y" in style:
+            control = InteractiveMarkerControl()
+            control.name = "move_y"
+            control.orientation.w = 1
+            control.orientation.x = 0
+            control.orientation.y = 1
+            control.orientation.z = 0
+            control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+            int_marker.controls.append(control);
+
+        if "z" in style:
+            control = InteractiveMarkerControl()
+            control.name = "move_z"
+            control.orientation.w = 1
+            control.orientation.x = 0
+            control.orientation.y = 0
+            control.orientation.z = 1
+            control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+            int_marker.controls.append(control);
+
+        if "a" in style:
+            control = InteractiveMarkerControl()
+            control.name = "rotate_x"
+            control.orientation.w = 1
+            control.orientation.x = 1
+            control.orientation.y = 0
+            control.orientation.z = 0
+            control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
+            int_marker.controls.append(control);
+
+        if "b" in style:
+            control = InteractiveMarkerControl()
+            control.name = "rotate_y"
+            control.orientation.w = 1
+            control.orientation.x = 0
+            control.orientation.y = 1
+            control.orientation.z = 0
+            control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
+            int_marker.controls.append(control);
+
+
+        if "c" in style:
+            control = InteractiveMarkerControl()
+            control.name = "rotate_z"
+            control.orientation.w = 1
+            control.orientation.x = 0
+            control.orientation.y = 0
+            control.orientation.z = 1
+            control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
+            int_marker.controls.append(control);
 
         self.int_marker = int_marker
 
@@ -84,6 +152,7 @@ class Frame_Editor:
         self.frames[frame.name] = frame
 
     def remove_frame(self, name):
+        print "> Removing frame", name
         del self.frames[name]
 
 
@@ -95,11 +164,14 @@ class Frame_Editor:
                 frame.name, frame.parent)
 
 
+    ## INTERACTION ##
+    ##
     def make_interactive(self, frame):
 
         ## Stop currently active frame
         if self.active_frame is not None:
-            self.server.remove(self.int_marker)
+            self.server.erase(self.active_frame.name)
+            self.server.applyChanges()
 
         self.active_frame = frame
 
@@ -108,14 +180,18 @@ class Frame_Editor:
 
         self.int_marker.name = frame.name
         self.int_marker.header.frame_id = frame.parent
+        self.int_marker.pose = frame.pose
 
         self.server.insert(self.int_marker, self.callback_marker)
         self.server.applyChanges()
 
     def callback_marker(self, feedback):
-        print feedback
+        self.active_frame.position = Position(feedback.pose.position)
+        self.active_frame.orientation = Orientation(feedback.pose.orientation)
 
 
+    ## PRINT ##
+    ##
     def print_all(self):
         print "> Printing all frames"
 
@@ -152,7 +228,7 @@ class Frame_Editor:
     ## SERVICE CALLBACKS ##
     ##
     def callback_edit_frame(self, request):
-        print "> Request to edit frame"
+        print "> Request to edit frame", request.name
 
         response = EditFrameResponse()
         response.error_code = 0
@@ -172,7 +248,7 @@ class Frame_Editor:
         return response
 
     def callback_get_frame(self, request):
-        print "> Request to get frame"
+        print "> Request to get frame", request.name
 
         response = GetFrameResponse()
         response.error_code = 0
@@ -195,7 +271,7 @@ class Frame_Editor:
         return response
 
     def callback_remove_frame(self, request):
-        print "> Request to remove frame"
+        print "> Request to remove frame", request.name
 
         response = RemoveFrameResponse()
         response.error_code = 0
@@ -215,7 +291,7 @@ class Frame_Editor:
 
 
     def callback_set_frame(self, request):
-        print "> Request to set (or add) frame"
+        print "> Request to set (or add) frame", request.name
 
         response = SetFrameResponse()
         response.error_code = 0
