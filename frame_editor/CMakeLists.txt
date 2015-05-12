@@ -5,14 +5,16 @@ project(frame_editor)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  interactive_markers
-  visualization_msgs
-  geometry_msgs
   rospy
   std_msgs
+  geometry_msgs
+  visualization_msgs
+  interactive_markers
   tf
   message_generation
   dynamic_reconfigure
+  rqt_gui
+  rqt_gui_py
 )
 
 ## System dependencies are found with CMake's conventions

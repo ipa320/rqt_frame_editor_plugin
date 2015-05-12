@@ -53,7 +53,7 @@ class Frame:
 
 
 
-class Frame_Editor:
+class FrameEditor:
     def __init__(self):
         self.frames = {}
         self.active_frame = None
@@ -314,7 +314,7 @@ if __name__ == "__main__":
 
     rospy.init_node('frame_editor')
 
-    editor = Frame_Editor()
+    editor = FrameEditor()
     editor.load_params(rospy.get_name())
 
     print "Frame editor ready!"

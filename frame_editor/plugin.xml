@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<library path="src">
+  <class name="Frame Editor" type="frame_editor.rqt_editor.FrameEditorGUI" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      An editor for defining tf frames.
+    </description>
+    <qtgui>
+      <label>Frame Editor Plugin</label>
+      <icon type="theme">document-new</icon>
+      <statustip>An editor for defining tf frames.</statustip>
+    </qtgui>
+  </class>
+</library>
