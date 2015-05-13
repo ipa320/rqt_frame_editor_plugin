@@ -74,6 +74,17 @@ class FrameEditorGUI(Plugin):
         self._widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
         self._widget.btn_refresh.clicked.connect(self.update_tf_list)
 
+        self._widget.btn_set_parent_rel.clicked.connect(self.btn_set_parent_rel_clicked)
+        self._widget.btn_set_parent_abs.clicked.connect(self.btn_set_parent_abs_clicked)
+        self._widget.btn_set_pose.clicked.connect(self.btn_set_pose_clicked)
+        self._widget.btn_set_position.clicked.connect(self.btn_set_position_clicked)
+        self._widget.btn_set_orientation.clicked.connect(self.btn_set_orientation_clicked)
+        self._widget.btn_set_x.clicked.connect(self.btn_set_x_clicked)
+        self._widget.btn_set_y.clicked.connect(self.btn_set_y_clicked)
+        self._widget.btn_set_z.clicked.connect(self.btn_set_z_clicked)
+        self._widget.btn_set_a.clicked.connect(self.btn_set_a_clicked)
+        self._widget.btn_set_b.clicked.connect(self.btn_set_b_clicked)
+        self._widget.btn_set_c.clicked.connect(self.btn_set_c_clicked)
 
         self._update_thread.start()
 
@@ -175,7 +186,7 @@ class FrameEditorGUI(Plugin):
         w.txt_c.setText(str(rot[2]))
 
         ## Absolute
-        (position, orientation) = self.editor.listener.lookupTransform('world', f.name, rospy.Time(0))
+        (position, orientation) = f.listener.lookupTransform('world', f.name, rospy.Time(0))
 
         w.txt_abs_x.setText(str(position[0]))
         w.txt_abs_y.setText(str(position[1]))
@@ -236,6 +247,107 @@ class FrameEditorGUI(Plugin):
             return
 
         self.editor.remove_frame(item.text())
+
+
+    @Slot(bool)
+    def btn_set_parent_rel_clicked(self, checked):
+        parent = self._widget.list_tf.currentItem()
+        if not parent:
+            return # none selected
+
+        if parent.text() == self.editor.active_frame.name:
+            return # you can't be your own parent
+
+        self.editor.active_frame.parent = parent.text()
+
+        self.editor.update_frame(self.editor.active_frame)
+
+
+    @Slot(bool)
+    def btn_set_parent_abs_clicked(self, checked):
+        parent = self._widget.list_tf.currentItem()
+        if not parent:
+            return # none selected
+
+        frame = self.editor.active_frame
+
+        if parent.text() == frame.name:
+            return # you can't be your own parent
+
+        frame.parent = parent.text()
+
+        ## Set pose
+        (position, orientation) = frame.listener.lookupTransform(parent.text(), frame.name, rospy.Time(0))
+        frame.position = position
+        frame.orientation = orientation
+
+        self.editor.update_frame(frame)
+
+
+    ## SET BUTTONS ##
+    ##
+    @Slot(bool)
+    def btn_set_pose_clicked(self, checked):
+        self.set_pose(["x", "y", "z", "a", "b", "c"])
+
+    @Slot(bool)
+    def btn_set_position_clicked(self, checked):
+        self.set_pose(["x", "y", "z"])
+
+    @Slot(bool)
+    def btn_set_orientation_clicked(self, checked):
+        self.set_pose(["a", "b", "c"])
+
+    @Slot(bool)
+    def btn_set_x_clicked(self, checked):
+        self.set_pose(["x"])
+    @Slot(bool)
+    def btn_set_y_clicked(self, checked):
+        self.set_pose(["y"])
+    @Slot(bool)
+    def btn_set_z_clicked(self, checked):
+        self.set_pose(["z"])
+    @Slot(bool)
+    def btn_set_a_clicked(self, checked):
+        self.set_pose(["a"])
+    @Slot(bool)
+    def btn_set_b_clicked(self, checked):
+        self.set_pose(["b"])
+    @Slot(bool)
+    def btn_set_c_clicked(self, checked):
+        self.set_pose(["c"])
+
+    def set_pose(self, mode):
+        target = self._widget.list_tf.currentItem()
+        if not target:
+            return # none selected
+
+        frame = self.editor.active_frame
+
+        (position, orientation) = frame.listener.lookupTransform(frame.parent, target.text(), rospy.Time(0))
+
+        pos = list(frame.position)
+        if "x" in mode:
+            pos[0] = position[0]
+        if "y" in mode:
+            pos[1] = position[1]
+        if "z" in mode:
+            pos[2] = position[2]
+        frame.position = tuple(pos)
+
+        rpy = list(tf.transformations.euler_from_quaternion(frame.orientation))
+        rpy_new = tf.transformations.euler_from_quaternion(orientation)
+        if "a" in mode:
+            rpy[0] = rpy_new[0]
+        if "b" in mode:
+            rpy[1] = rpy_new[1]
+        if "c" in mode:
+            rpy[2] = rpy_new[2]
+        if "a" in mode or "b" in mode or "c" in mode:
+            frame.orientation = tf.transformations.quaternion_from_euler(*rpy)
+
+        self.editor.update_frame(frame)
+
 
 
     ## PLUGIN ##

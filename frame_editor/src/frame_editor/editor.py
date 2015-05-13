@@ -3,6 +3,7 @@
 
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
+import time
 
 import rospy
 import rosparam
@@ -38,6 +39,10 @@ def ToPose(p, o):
 
 
 class Frame:
+
+    broadcaster = tf.TransformBroadcaster()
+    listener = tf.TransformListener()
+
     def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world"):
         self.name = name
         self.position = position
@@ -51,6 +56,10 @@ class Frame:
     def print_all(self):
         print "  {} (parent: {}) {} {}".format(self.name, self.parent, self.position, self.orientation)
 
+    def broadcast(self):
+        Frame.broadcaster.sendTransform(self.position, self.orientation,
+            rospy.Time.now(),
+            self.name, self.parent)
 
 
 class FrameEditor:
@@ -58,9 +67,6 @@ class FrameEditor:
     def __init__(self):
         self.frames = {}
         self.active_frame = None
-
-        self.broadcaster = tf.TransformBroadcaster()
-        self.listener = tf.TransformListener()
 
         self.server = InteractiveMarkerServer("frame_editor_interactive")
 
@@ -72,6 +78,13 @@ class FrameEditor:
         self.set_marker_style(["x", "y", "z", "a", "b", "c"])
 
         self.observers = []
+
+
+    def update_frame(self, frame):
+        frame.broadcast() # update tf
+        self.make_interactive(self.active_frame) # update marker (just in case)
+        time.sleep(0.1) # wait a bit for tf # TODO better way?
+        self.update_obsevers(4) # update GUI
 
 
     def update_obsevers(self, level):
@@ -175,15 +188,13 @@ class FrameEditor:
 
 
     def get_tf_frames(self):
-        return self.listener.getFrameStrings()
+        return Frame.listener.getFrameStrings()
 
 
     def broadcast(self):
         #print "> Broadcasting"
         for frame in self.frames.values():
-            self.broadcaster.sendTransform(frame.position, frame.orientation,
-                rospy.Time.now(),
-                frame.name, frame.parent)
+            frame.broadcast()
 
 
     ## INTERACTION ##
