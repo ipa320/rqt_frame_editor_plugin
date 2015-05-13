@@ -5,9 +5,13 @@ import rospy
 import rospkg
 
 from qt_gui.plugin import Plugin
-from python_qt_binding import loadUi
+from qt_gui_py_common.worker_thread import WorkerThread
+
+from python_qt_binding import loadUi, QtGui, QtCore
 from python_qt_binding.QtGui import QWidget
 from python_qt_binding.QtCore import Signal, Slot
+
+from frame_editor.editor import Frame, FrameEditor
 
 
 class FrameEditorGUI(Plugin):
@@ -31,6 +35,15 @@ class FrameEditorGUI(Plugin):
             print 'arguments: ', args
             print 'unknowns: ', unknowns
 
+
+        ## Editor ##
+        ##
+        self.editor = FrameEditor()
+        self.editor.load_params("frame_editor")
+
+        self._update_thread = WorkerThread(self._update_thread_run, self._update_finished)
+
+
         ## Create QWidget ##
         ##
         self._widget = QWidget()
@@ -44,9 +57,64 @@ class FrameEditorGUI(Plugin):
         context.add_widget(self._widget)
 
 
+        ## Connections ##
+        ##
+        self._widget.btn_add.clicked.connect(self.btn_add_clicked)
+        self._widget.btn_delete.clicked.connect(self.btn_delete_clicked)
+
+
+        self._update_thread.start()
+
+
+    def _update_thread_run(self):
+        print "> Going for some spins"
+        rate = rospy.Rate(100) # hz
+        while not rospy.is_shutdown():
+            self.editor.broadcast()
+            rate.sleep()
+
+    @Slot()
+    def _update_finished(self):
+        print "> Shutting down"
+
+
+    @Slot(bool)
+    def btn_add_clicked(self, checked):
+
+        ## Get Name ##
+        ##
+        name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Frame", "Name:", QtGui.QLineEdit.Normal, "my_frame");
+
+        while True:
+            if not ok or name == "":
+                return
+
+            if name not in self.editor.frames:
+                break
+
+            name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Frame", "Name (must be unique):", QtGui.QLineEdit.Normal, "my_frame");
+
+        ## Get Parent ##
+        ##
+        all_frames = self.editor.get_tf_frames()
+        if not all_frames:
+            all_frames = ["world"]
+        print all_frames
+        parent, ok = QtGui.QInputDialog.getItem(self._widget, "Add New Frame", "Parent Name:", all_frames);
+
+        if not ok or parent == "":
+            return
+
+        self.editor.add_frame(Frame(name, parent=parent))
+            
+
+
+    @Slot(bool)
+    def btn_delete_clicked(self, checked):
+        print "NARF2"
+
     def shutdown_plugin(self):
-        # TODO unregister all publishers here
-        pass
+        self._update_thread.kill()
 
     def save_settings(self, plugin_settings, instance_settings):
         # TODO save intrinsic configuration, usually using:

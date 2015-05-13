@@ -59,6 +59,7 @@ class FrameEditor:
         self.active_frame = None
 
         self.broadcaster = tf.TransformBroadcaster()
+        self.listener = tf.TransformListener()
 
         self.server = InteractiveMarkerServer(rospy.get_name()+"_interactive")
 
@@ -154,6 +155,10 @@ class FrameEditor:
     def remove_frame(self, name):
         print "> Removing frame", name
         del self.frames[name]
+
+
+    def get_tf_frames(self):
+        return self.listener.getFrameStrings()
 
 
     def broadcast(self):
