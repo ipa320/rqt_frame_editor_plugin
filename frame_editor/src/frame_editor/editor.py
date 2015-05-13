@@ -54,6 +54,7 @@ class Frame:
 
 
 class FrameEditor:
+
     def __init__(self):
         self.frames = {}
         self.active_frame = None
@@ -61,7 +62,7 @@ class FrameEditor:
         self.broadcaster = tf.TransformBroadcaster()
         self.listener = tf.TransformListener()
 
-        self.server = InteractiveMarkerServer(rospy.get_name()+"_interactive")
+        self.server = InteractiveMarkerServer("frame_editor_interactive")
 
         rospy.Service("edit_frame", EditFrame, self.callback_edit_frame)
         rospy.Service("get_frame", GetFrame, self.callback_get_frame)
@@ -69,6 +70,13 @@ class FrameEditor:
         rospy.Service("set_frame", SetFrame, self.callback_set_frame)
 
         self.set_marker_style(["x", "y", "z", "a", "b", "c"])
+
+        self.observers = []
+
+
+    def update_obsevers(self, level):
+        for observer in self.observers:
+            observer.update(self, level)
 
 
     def set_marker_style(self, style, scale=0.25):
@@ -152,9 +160,18 @@ class FrameEditor:
 
         self.frames[frame.name] = frame
 
+        self.update_obsevers(1)
+
     def remove_frame(self, name):
         print "> Removing frame", name
+
+        ## If active frame is deleted, deactivate
+        if self.active_frame and name == self.active_frame.name:
+            self.make_interactive(None)
+
         del self.frames[name]
+
+        self.update_obsevers(1)
 
 
     def get_tf_frames(self):
@@ -180,19 +197,21 @@ class FrameEditor:
 
         self.active_frame = frame
 
-        if frame is None:
-            return # nothing more to do here
+        if frame is not None:
+            self.int_marker.name = frame.name
+            self.int_marker.header.frame_id = frame.parent
+            self.int_marker.pose = frame.pose
 
-        self.int_marker.name = frame.name
-        self.int_marker.header.frame_id = frame.parent
-        self.int_marker.pose = frame.pose
+            self.server.insert(self.int_marker, self.callback_marker)
+            self.server.applyChanges()
 
-        self.server.insert(self.int_marker, self.callback_marker)
-        self.server.applyChanges()
+        self.update_obsevers(2)
 
     def callback_marker(self, feedback):
         self.active_frame.position = Position(feedback.pose.position)
         self.active_frame.orientation = Orientation(feedback.pose.orientation)
+
+        self.update_obsevers(4)
 
 
     ## PRINT ##

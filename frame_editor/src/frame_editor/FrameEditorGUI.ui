@@ -22,7 +22,9 @@
         <string>Save</string>
        </property>
        <property name="icon">
-        <iconset theme="document-save"/>
+        <iconset theme="document-save">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -32,7 +34,9 @@
         <string>Save As...</string>
        </property>
        <property name="icon">
-        <iconset theme="document-save-as"/>
+        <iconset theme="document-save-as">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -42,7 +46,9 @@
         <string>Open...</string>
        </property>
        <property name="icon">
-        <iconset theme="document-open"/>
+        <iconset theme="document-open">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -65,7 +71,9 @@
         <string>Clear All</string>
        </property>
        <property name="icon">
-        <iconset theme="document-revert"/>
+        <iconset theme="document-revert">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -89,13 +97,13 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>212</width>
+             <width>211</width>
              <height>468</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QListView" name="list_frames">
+             <widget class="QListWidget" name="list_frames">
               <property name="verticalScrollBarPolicy">
                <enum>Qt::ScrollBarAlwaysOn</enum>
               </property>
@@ -109,7 +117,9 @@
                  <string>Delete</string>
                 </property>
                 <property name="icon">
-                 <iconset theme="list-remove"/>
+                 <iconset theme="list-remove">
+                  <normaloff/>
+                 </iconset>
                 </property>
                </widget>
               </item>
@@ -119,7 +129,9 @@
                  <string>Add New</string>
                 </property>
                 <property name="icon">
-                 <iconset theme="list-add"/>
+                 <iconset theme="list-add">
+                  <normaloff/>
+                 </iconset>
                 </property>
                </widget>
               </item>
@@ -157,7 +169,11 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="txt_name"/>
+              <widget class="QLineEdit" name="txt_name">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -171,7 +187,11 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="txt_parent"/>
+              <widget class="QLineEdit" name="txt_parent">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -257,7 +277,9 @@
                 <string>Reset</string>
                </property>
                <property name="icon">
-                <iconset theme="edit-undo"/>
+                <iconset theme="edit-undo">
+                 <normaloff/>
+                </iconset>
                </property>
               </widget>
              </item>
@@ -267,7 +289,9 @@
                 <string>Reset</string>
                </property>
                <property name="icon">
-                <iconset theme="edit-undo"/>
+                <iconset theme="edit-undo">
+                 <normaloff/>
+                </iconset>
                </property>
               </widget>
              </item>
@@ -355,7 +379,9 @@
                 <string>Reset</string>
                </property>
                <property name="icon">
-                <iconset theme="edit-undo"/>
+                <iconset theme="edit-undo">
+                 <normaloff/>
+                </iconset>
                </property>
               </widget>
              </item>
@@ -365,7 +391,9 @@
                 <string>Reset</string>
                </property>
                <property name="icon">
-                <iconset theme="edit-undo"/>
+                <iconset theme="edit-undo">
+                 <normaloff/>
+                </iconset>
                </property>
               </widget>
              </item>
@@ -392,7 +420,9 @@
                 <string>Cancel</string>
                </property>
                <property name="icon">
-                <iconset theme="dialog-error"/>
+                <iconset theme="dialog-error">
+                 <normaloff/>
+                </iconset>
                </property>
               </widget>
              </item>
@@ -402,7 +432,9 @@
                 <string>Ok</string>
                </property>
                <property name="icon">
-                <iconset theme="dialog-apply"/>
+                <iconset theme="dialog-apply">
+                 <normaloff/>
+                </iconset>
                </property>
               </widget>
              </item>
@@ -586,15 +618,25 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>242</width>
+             <width>233</width>
              <height>484</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
-             <widget class="QListView" name="listView">
+             <widget class="QListWidget" name="list_tf">
               <property name="verticalScrollBarPolicy">
                <enum>Qt::ScrollBarAlwaysOn</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_refresh">
+              <property name="text">
+               <string>Refresh</string>
+              </property>
+              <property name="icon">
+               <iconset theme="view-refresh"/>
               </property>
              </widget>
             </item>
