@@ -412,34 +412,6 @@
              </property>
             </spacer>
            </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QPushButton" name="btn_edit_cancel">
-               <property name="text">
-                <string>Cancel</string>
-               </property>
-               <property name="icon">
-                <iconset theme="dialog-error">
-                 <normaloff/>
-                </iconset>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_edit_ok">
-               <property name="text">
-                <string>Ok</string>
-               </property>
-               <property name="icon">
-                <iconset theme="dialog-apply">
-                 <normaloff/>
-                </iconset>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
           </layout>
          </widget>
         </item>

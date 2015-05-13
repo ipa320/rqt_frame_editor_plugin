@@ -86,6 +86,11 @@ class FrameEditorGUI(Plugin):
         self._widget.btn_set_b.clicked.connect(self.btn_set_b_clicked)
         self._widget.btn_set_c.clicked.connect(self.btn_set_c_clicked)
 
+        self._widget.btn_reset_position_rel.clicked.connect(self.btn_reset_position_rel_clicked)
+        self._widget.btn_reset_position_abs.clicked.connect(self.btn_reset_position_abs_clicked)
+        self._widget.btn_reset_orientation_rel.clicked.connect(self.btn_reset_orientation_rel_clicked)
+        self._widget.btn_reset_orientation_abs.clicked.connect(self.btn_reset_orientation_abs_clicked)
+
         self._update_thread.start()
 
         self.update_all(3)
@@ -348,6 +353,28 @@ class FrameEditorGUI(Plugin):
 
         self.editor.update_frame(frame)
 
+
+    @Slot(bool)
+    def btn_reset_position_rel_clicked(self, checked):
+        self.editor.active_frame.position = (0, 0, 0)
+        self.editor.update_frame(self.editor.active_frame)
+
+    @Slot(bool)
+    def btn_reset_position_abs_clicked(self, checked):
+        (position, orientation) = self.editor.active_frame.listener.lookupTransform(self.editor.active_frame.parent, "world", rospy.Time(0))
+        self.editor.active_frame.position = position
+        self.editor.update_frame(self.editor.active_frame)
+
+    @Slot(bool)
+    def btn_reset_orientation_rel_clicked(self, checked):
+        self.editor.active_frame.orientation = (0, 0, 0, 1)
+        self.editor.update_frame(self.editor.active_frame)
+
+    @Slot(bool)
+    def btn_reset_orientation_abs_clicked(self, checked):
+        (position, orientation) = self.editor.active_frame.listener.lookupTransform(self.editor.active_frame.parent, "world", rospy.Time(0))
+        self.editor.active_frame.orientation = orientation
+        self.editor.update_frame(self.editor.active_frame)
 
 
     ## PLUGIN ##
