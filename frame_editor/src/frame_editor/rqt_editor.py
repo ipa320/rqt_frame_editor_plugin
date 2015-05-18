@@ -5,6 +5,7 @@ import os
 import rospy
 import rospkg
 import tf
+import actionlib
 
 from qt_gui.plugin import Plugin
 from qt_gui_py_common.worker_thread import WorkerThread
@@ -13,7 +14,10 @@ from python_qt_binding import loadUi, QtGui, QtCore
 from python_qt_binding.QtGui import QWidget
 from python_qt_binding.QtCore import Signal, Slot
 
-from frame_editor.editor import Frame, FrameEditor
+from frame_editor.editor import Frame, FrameEditor, Position, Orientation
+
+from toolbox.msg import *
+from toolbox.srv import *
 
 
 class FrameEditorGUI(Plugin):
@@ -90,6 +94,9 @@ class FrameEditorGUI(Plugin):
         self._widget.btn_reset_position_abs.clicked.connect(self.btn_reset_position_abs_clicked)
         self._widget.btn_reset_orientation_rel.clicked.connect(self.btn_reset_orientation_rel_clicked)
         self._widget.btn_reset_orientation_abs.clicked.connect(self.btn_reset_orientation_abs_clicked)
+
+        self._widget.btn_call_service.clicked.connect(self.btn_call_service_clicked)
+        self._widget.btn_call_action.clicked.connect(self.btn_call_action_clicked)
 
         self._update_thread.start()
 
@@ -375,6 +382,91 @@ class FrameEditorGUI(Plugin):
         (position, orientation) = self.editor.active_frame.listener.lookupTransform(self.editor.active_frame.parent, "world", rospy.Time(0))
         self.editor.active_frame.orientation = orientation
         self.editor.update_frame(self.editor.active_frame)
+
+
+    @Slot(bool)
+    def btn_call_service_clicked(self, checked):
+        '''Calls a service to request pose data'''
+
+        service_name = self._widget.txt_call_service.text()
+
+        if service_name == "":
+            print "Error: No service name has been set!"
+            return
+
+        frame = self.editor.active_frame
+
+        ## Service request
+        request = GetPoseServiceRequest()
+        request.frame_name = frame.name
+        request.parent_name = frame.parent
+        request.default_pose = frame.pose
+
+        service = rospy.ServiceProxy(service_name, GetPoseService)
+        result = service(request)
+        print result
+
+        ## Check result
+        if request.frame_name != result.frame_name:
+            print "Names don't match: ", request.frame_name, result.frame_name
+            return
+
+        ## Set result
+        frame.parent = result.parent_name
+        frame.position = Position(result.pose.position)
+        frame.orientation = Orientation(result.pose.orientation)
+
+        self.editor.update_frame(frame)
+
+
+    @Slot(bool)
+    def btn_call_action_clicked(self, checked):
+        '''Starts an action to request pose data'''
+
+        action_name = self._widget.txt_call_action.text()
+        if action_name == "":
+            print "Error: No action name has been set!"
+            return
+
+        frame = self.editor.active_frame
+
+        ## Create client
+        print "> Waiting for action server"
+        client = actionlib.SimpleActionClient(action_name, GetPoseAction)
+        client.wait_for_server()
+
+        ## Action request
+        goal = GetPoseGoal()
+        goal.frame_name = frame.name
+        goal.parent_name = frame.parent
+        goal.default_pose = frame.pose
+
+        print "> Calling action and waiting for result"
+        client.send_goal(goal, feedback_cb=self.action_feedback_callback)
+        ok = client.wait_for_result()
+        print "> Action completed, result", ok
+
+        if not ok:
+            return
+
+        ## Set result
+        result = client.get_result()
+
+        frame.parent = result.parent_name
+        frame.position = Position(result.pose.position)
+        frame.orientation = Orientation(result.pose.orientation)
+
+        self.editor.update_frame(frame)
+
+
+    def action_feedback_callback(self, feedback):
+        frame = self.editor.active_frame
+
+        frame.parent = feedback.parent_name
+        frame.position = Position(feedback.pose.position)
+        frame.orientation = Orientation(feedback.pose.orientation)
+
+        self.editor.update_frame(frame)
 
 
     ## PLUGIN ##

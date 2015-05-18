@@ -239,6 +239,10 @@ class FrameEditor:
     def load_params(self, namespace):
 
         ## Load yaml file
+        if not rosparam.list_params(namespace):
+            print "> No data to load"
+            return
+
         data = rosparam.get_param(namespace)
 
         ## Import data
