@@ -97,7 +97,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>241</width>
+             <width>223</width>
              <height>581</height>
             </rect>
            </property>
@@ -197,6 +197,54 @@
            </item>
            <item>
             <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLabel" name="label_17">
+               <property name="text">
+                <string>Orientation:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="btn_rad">
+               <property name="text">
+                <string>[rad]</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="btn_deg">
+               <property name="text">
+                <string>[deg]</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line_6">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -820,7 +868,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>242</width>
+             <width>249</width>
              <height>581</height>
             </rect>
            </property>

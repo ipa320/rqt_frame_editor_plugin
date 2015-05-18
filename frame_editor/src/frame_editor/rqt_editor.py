@@ -6,6 +6,7 @@ import rospy
 import rospkg
 import tf
 import actionlib
+import math
 
 from qt_gui.plugin import Plugin
 from qt_gui_py_common.worker_thread import WorkerThread
@@ -105,6 +106,8 @@ class FrameEditorGUI(Plugin):
         self._widget.txt_b.editingFinished.connect(self.b_valueChanged)
         self._widget.txt_c.editingFinished.connect(self.c_valueChanged)
 
+        self._widget.btn_rad.toggled.connect(self.update_fields)
+
         self._update_thread.start()
 
         self.update_all(3)
@@ -186,6 +189,7 @@ class FrameEditorGUI(Plugin):
         self.old_selected = name
 
 
+    @Slot()
     def update_fields(self):
 
         f = self.editor.active_frame
@@ -200,6 +204,9 @@ class FrameEditorGUI(Plugin):
         w.txt_z.setValue(f.position[2])
 
         rot = tf.transformations.euler_from_quaternion(f.orientation)
+        if self._widget.btn_deg.isChecked():
+            rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
+
         w.txt_a.setValue(rot[0])
         w.txt_b.setValue(rot[1])
         w.txt_c.setValue(rot[2])
@@ -212,6 +219,8 @@ class FrameEditorGUI(Plugin):
         w.txt_abs_z.setValue(position[2])
 
         rot = tf.transformations.euler_from_quaternion(orientation)
+        if self._widget.btn_deg.isChecked():
+            rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
         w.txt_abs_a.setValue(rot[0])
         w.txt_abs_b.setValue(rot[1])
         w.txt_abs_c.setValue(rot[2])
@@ -481,6 +490,11 @@ class FrameEditorGUI(Plugin):
     def set_value(self, widget, symbol):
         frame = self.editor.active_frame
         value = widget.value()
+
+        ## Deg to rad
+        if self._widget.btn_deg.isChecked() and symbol in ['a', 'b', 'c']:
+            value = value * math.pi / 180.0
+
         if frame.value(symbol) != value:
             frame.set_value(symbol, value)
             self.editor.update_frame(frame)
