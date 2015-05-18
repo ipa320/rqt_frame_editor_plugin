@@ -115,9 +115,16 @@ class FrameEditor:
 
         self.observers = []
 
+    def clear_all(self):
+        print "> Deleting all frames"
+        self.make_interactive(None)
+        self.frames = {}
+        time.sleep(0.1)
+        self.update_obsevers(1+2+4) # update GUI
 
     def update_frame(self, frame):
-        frame.broadcast() # update tf
+        if frame:
+            frame.broadcast() # update tf
         self.make_interactive(self.active_frame) # update marker (just in case)
         time.sleep(0.1) # wait a bit for tf # TODO better way?
         self.update_obsevers(4) # update GUI

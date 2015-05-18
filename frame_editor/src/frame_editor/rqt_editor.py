@@ -85,6 +85,7 @@ class FrameEditorGUI(Plugin):
         self._widget.btn_delete.clicked.connect(self.btn_delete_clicked)
         self._widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
         self._widget.btn_refresh.clicked.connect(self.update_tf_list)
+        self._widget.btn_clear.clicked.connect(self.clear_all)
 
         self._widget.btn_set_parent_rel.clicked.connect(self.btn_set_parent_rel_clicked)
         self._widget.btn_set_parent_abs.clicked.connect(self.btn_set_parent_abs_clicked)
@@ -200,6 +201,9 @@ class FrameEditorGUI(Plugin):
     def update_fields(self):
 
         f = self.editor.active_frame
+        if not f:
+            return
+
         w = self._widget
 
         w.txt_name.setText(f.name)
@@ -269,7 +273,11 @@ class FrameEditorGUI(Plugin):
         if filename:
             self.filename = filename
             self.save_file()
-            
+
+
+    @Slot()
+    def clear_all(self):
+        self.editor.clear_all()
 
 
     @Slot(bool)
