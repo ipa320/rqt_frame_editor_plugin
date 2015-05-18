@@ -272,14 +272,20 @@ class FrameEditor:
 
     ## FILE I/O ##
     ##
-    def load_params(self, namespace):
+    def load_file(self, filename, namespace = None):
+        print "> Loading file"
+        data = rosparam.load_file(filename, namespace)[0][0]
+        print data
+        self.load_data(data)
 
-        ## Load yaml file
+    def load_params(self, namespace):
         if not rosparam.list_params(namespace):
             print "> No data to load"
-            return
+        else:
+            data = rosparam.get_param(namespace)
+            self.load_data(data)
 
-        data = rosparam.get_param(namespace)
+    def load_data(self, data):
 
         ## Import data
         for name, frame in data["frames"].items():
@@ -295,9 +301,42 @@ class FrameEditor:
 
         print "> Loading done"
 
-    def save_params(self):
-        ## TODO
-        raise NotImplemented()
+    def save_file(self, filename, namespace):
+
+        ## Data
+        data = {}
+        frames = {}
+
+        for frame in self.frames.values():
+            t = {}
+            t["x"] = frame.position[0]
+            t["y"] = frame.position[1]
+            t["z"] = frame.position[2]
+
+            o = {}
+            o["x"] = frame.orientation[0]
+            o["y"] = frame.orientation[1]
+            o["z"] = frame.orientation[2]
+            o["w"] = frame.orientation[3]
+
+            f = {}
+            f["parent"] = frame.parent
+            f["position"] = t
+            f["orientation"] = o
+
+            frames[frame.name] = f
+
+        data["frames"] = frames
+
+        ## To parameter server
+        rospy.set_param(namespace, data)
+        print rospy.get_param(namespace)
+
+        ## Dump param to file
+        print "Saving to file", filename
+        rosparam.dump_params(filename, namespace)
+        print "Saving done"
+
 
 
     ## SERVICE CALLBACKS ##

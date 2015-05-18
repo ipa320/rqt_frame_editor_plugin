@@ -47,8 +47,11 @@ class FrameEditorGUI(Plugin):
 
         ## Editor ##
         ##
+        self.namespace = "frame_editor"
+        self.filename = ""
+
         self.editor = FrameEditor()
-        self.editor.load_params("frame_editor")
+        #self.editor.load_params(self.namespace)
         self.editor.observers.append(self)
 
         self.signal_update.connect(self.update_all)
@@ -74,6 +77,10 @@ class FrameEditorGUI(Plugin):
 
         ## Connections ##
         ##
+        self._widget.btn_open.clicked.connect(self.open_file)
+        self._widget.btn_save.clicked.connect(self.save_file)
+        self._widget.btn_saveAs.clicked.connect(self.save_as_file)
+
         self._widget.btn_add.clicked.connect(self.btn_add_clicked)
         self._widget.btn_delete.clicked.connect(self.btn_delete_clicked)
         self._widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
@@ -237,6 +244,34 @@ class FrameEditorGUI(Plugin):
 
     ## BUTTONS ##
     ##
+    @Slot()
+    def open_file(self):
+        files = QtGui.QFileDialog.getOpenFileNames(self._widget,
+            "Select one or more files to open", "",
+            "YAML files(*.yaml)");
+        for filename in files:
+            self.editor.load_file(str(filename), self.namespace)
+        if len(files) == 1:
+            self.filename = files[0]
+
+    @Slot()
+    def save_file(self):
+        if self.filename == "":
+            print "No filename set"
+        else:
+            self.editor.save_file(self.filename, self.namespace)
+
+    @Slot()
+    def save_as_file(self):
+        filename = str(QtGui.QFileDialog.getSaveFileName(self._widget,
+            "Save file as...", self.filename,
+            "YAML files(*.yaml)")[0])
+        if filename:
+            self.filename = filename
+            self.save_file()
+            
+
+
     @Slot(bool)
     def btn_add_clicked(self, checked):
 
