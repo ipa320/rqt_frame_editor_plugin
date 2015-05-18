@@ -97,8 +97,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>211</width>
-             <height>565</height>
+             <width>241</width>
+             <height>581</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -204,62 +204,47 @@
            </item>
            <item>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="1" column="3">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>a</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>y</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QLineEdit" name="txt_x"/>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_2">
-               <property name="text">
-                <string>x</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>z</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="4">
-              <widget class="QLineEdit" name="txt_a"/>
-             </item>
-             <item row="2" column="2">
-              <widget class="QLineEdit" name="txt_y"/>
-             </item>
-             <item row="2" column="3">
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>b</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="3">
+             <item row="4" column="3">
               <widget class="QLabel" name="label_7">
                <property name="text">
                 <string>c</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="2">
-              <widget class="QLineEdit" name="txt_z"/>
+             <item row="2" column="3">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>a</string>
+               </property>
+              </widget>
              </item>
-             <item row="2" column="4">
-              <widget class="QLineEdit" name="txt_b"/>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>y</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>x</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>z</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="3">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>b</string>
+               </property>
+              </widget>
              </item>
              <item row="0" column="2">
               <widget class="QLabel" name="label_8">
@@ -268,10 +253,7 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="4">
-              <widget class="QLineEdit" name="txt_c"/>
-             </item>
-             <item row="4" column="2">
+             <item row="5" column="2">
               <widget class="QPushButton" name="btn_reset_position_rel">
                <property name="text">
                 <string>Reset</string>
@@ -283,7 +265,7 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="4">
+             <item row="5" column="4">
               <widget class="QPushButton" name="btn_reset_orientation_rel">
                <property name="text">
                 <string>Reset</string>
@@ -292,6 +274,102 @@
                 <iconset theme="edit-undo">
                  <normaloff/>
                 </iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QDoubleSpinBox" name="txt_x">
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="4">
+              <widget class="QDoubleSpinBox" name="txt_c">
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="4">
+              <widget class="QDoubleSpinBox" name="txt_b">
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="4">
+              <widget class="QDoubleSpinBox" name="txt_a">
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QDoubleSpinBox" name="txt_y">
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QDoubleSpinBox" name="txt_z">
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
                </property>
               </widget>
              </item>
@@ -312,15 +390,6 @@
                 <string>z</string>
                </property>
               </widget>
-             </item>
-             <item row="3" column="2">
-              <widget class="QLineEdit" name="txt_abs_y"/>
-             </item>
-             <item row="4" column="2">
-              <widget class="QLineEdit" name="txt_abs_z"/>
-             </item>
-             <item row="4" column="4">
-              <widget class="QLineEdit" name="txt_abs_c"/>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_10">
@@ -343,18 +412,12 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="4">
-              <widget class="QLineEdit" name="txt_abs_b"/>
-             </item>
              <item row="2" column="3">
               <widget class="QLabel" name="label_9">
                <property name="text">
                 <string>a</string>
                </property>
               </widget>
-             </item>
-             <item row="2" column="4">
-              <widget class="QLineEdit" name="txt_abs_a"/>
              </item>
              <item row="3" column="3">
               <widget class="QLabel" name="label_13">
@@ -369,9 +432,6 @@
                 <string>c</string>
                </property>
               </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QLineEdit" name="txt_abs_x"/>
              </item>
              <item row="5" column="2">
               <widget class="QPushButton" name="btn_reset_position_abs">
@@ -394,6 +454,120 @@
                 <iconset theme="edit-undo">
                  <normaloff/>
                 </iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QDoubleSpinBox" name="txt_abs_x">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QDoubleSpinBox" name="txt_abs_y">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QDoubleSpinBox" name="txt_abs_z">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="4">
+              <widget class="QDoubleSpinBox" name="txt_abs_a">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="4">
+              <widget class="QDoubleSpinBox" name="txt_abs_b">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="4">
+              <widget class="QDoubleSpinBox" name="txt_abs_c">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>-999.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
                </property>
               </widget>
              </item>
@@ -646,7 +820,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>235</width>
+             <width>242</width>
              <height>581</height>
             </rect>
            </property>

@@ -98,6 +98,13 @@ class FrameEditorGUI(Plugin):
         self._widget.btn_call_service.clicked.connect(self.btn_call_service_clicked)
         self._widget.btn_call_action.clicked.connect(self.btn_call_action_clicked)
 
+        self._widget.txt_x.editingFinished.connect(self.x_valueChanged)
+        self._widget.txt_y.editingFinished.connect(self.y_valueChanged)
+        self._widget.txt_z.editingFinished.connect(self.z_valueChanged)
+        self._widget.txt_a.editingFinished.connect(self.a_valueChanged)
+        self._widget.txt_b.editingFinished.connect(self.b_valueChanged)
+        self._widget.txt_c.editingFinished.connect(self.c_valueChanged)
+
         self._update_thread.start()
 
         self.update_all(3)
@@ -188,26 +195,26 @@ class FrameEditorGUI(Plugin):
         w.txt_parent.setText(f.parent)
 
         ## Relative
-        w.txt_x.setText(str(f.position[0]))
-        w.txt_y.setText(str(f.position[1]))
-        w.txt_z.setText(str(f.position[2]))
+        w.txt_x.setValue(f.position[0])
+        w.txt_y.setValue(f.position[1])
+        w.txt_z.setValue(f.position[2])
 
         rot = tf.transformations.euler_from_quaternion(f.orientation)
-        w.txt_a.setText(str(rot[0]))
-        w.txt_b.setText(str(rot[1]))
-        w.txt_c.setText(str(rot[2]))
+        w.txt_a.setValue(rot[0])
+        w.txt_b.setValue(rot[1])
+        w.txt_c.setValue(rot[2])
 
         ## Absolute
         (position, orientation) = f.listener.lookupTransform('world', f.name, rospy.Time(0))
 
-        w.txt_abs_x.setText(str(position[0]))
-        w.txt_abs_y.setText(str(position[1]))
-        w.txt_abs_z.setText(str(position[2]))
+        w.txt_abs_x.setValue(position[0])
+        w.txt_abs_y.setValue(position[1])
+        w.txt_abs_z.setValue(position[2])
 
         rot = tf.transformations.euler_from_quaternion(orientation)
-        w.txt_abs_a.setText(str(rot[0]))
-        w.txt_abs_b.setText(str(rot[1]))
-        w.txt_abs_c.setText(str(rot[2]))
+        w.txt_abs_a.setValue(rot[0])
+        w.txt_abs_b.setValue(rot[1])
+        w.txt_abs_c.setValue(rot[2])
 
 
 
@@ -467,6 +474,35 @@ class FrameEditorGUI(Plugin):
         frame.orientation = Orientation(feedback.pose.orientation)
 
         self.editor.update_frame(frame)
+
+
+    ## Spin Boxes ##
+    ##
+    def set_value(self, widget, symbol):
+        frame = self.editor.active_frame
+        value = widget.value()
+        if frame.value(symbol) != value:
+            frame.set_value(symbol, value)
+            self.editor.update_frame(frame)
+
+    @Slot()
+    def x_valueChanged(self):
+        self.set_value(self._widget.txt_x, 'x')
+    @Slot()
+    def y_valueChanged(self):
+        self.set_value(self._widget.txt_y, 'y')
+    @Slot()
+    def z_valueChanged(self):
+        self.set_value(self._widget.txt_z, 'z')
+    @Slot()
+    def a_valueChanged(self):
+        self.set_value(self._widget.txt_a, 'a')
+    @Slot()
+    def b_valueChanged(self):
+        self.set_value(self._widget.txt_b, 'b')
+    @Slot()
+    def c_valueChanged(self):
+        self.set_value(self._widget.txt_c, 'c')
 
 
     ## PLUGIN ##

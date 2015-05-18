@@ -61,6 +61,42 @@ class Frame:
             rospy.Time.now(),
             self.name, self.parent)
 
+    def value(self, symbol):
+        if symbol == 'x':
+            return self.position[0]
+        elif symbol == 'y':
+            return self.position[1]
+        elif symbol == 'z':
+            return self.position[2]
+        else:
+            rpy = tf.transformations.euler_from_quaternion(self.orientation)
+            if symbol == 'a':
+                return rpy[0]
+            elif symbol == 'b':
+                return rpy[1]
+            elif symbol == 'c':
+                return rpy[2]
+
+    def set_value(self, symbol, value):
+        if symbol in ['x', 'y', 'z']:
+            position = list(self.position)
+            if symbol == 'x':
+                position[0] = value
+            elif symbol == 'y':
+                position[1] = value
+            elif symbol == 'z':
+                position[2] = value
+            self.position = tuple(position)
+        else:
+            rpy = list(tf.transformations.euler_from_quaternion(self.orientation))
+            if symbol == 'a':
+                rpy[0] = value
+            elif symbol == 'b':
+                rpy[1] = value
+            elif symbol == 'c':
+                rpy[2] = value
+            self.orientation = tf.transformations.quaternion_from_euler(*rpy)
+
 
 class FrameEditor:
 
