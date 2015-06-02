@@ -10,32 +10,13 @@ import rosparam
 
 import tf
 
+from frame_editor.constructors_geometry import *
+from frame_editor.constructors_std import *
 from frame_editor.srv import *
 from geometry_msgs.msg import Pose
 
 from interactive_markers.interactive_marker_server import *
-from visualization_msgs.msg import InteractiveMarkerControl
-
-
-## HELPERS ##
-##
-def Position(p):
-    return (p.x, p.y, p.z)
-
-def Orientation(o):
-    return (o.x, o.y, o.z, o.w)
-
-def ToPose(p, o):
-    pose = Pose()
-    pose.position.x = p[0]
-    pose.position.y = p[1]
-    pose.position.z = p[2]
-    pose.orientation.x = o[0]
-    pose.orientation.y = o[1]
-    pose.orientation.z = o[2]
-    pose.orientation.w = o[3]
-    return pose
-
+from visualization_msgs.msg import InteractiveMarkerControl, Marker
 
 
 class Frame:
@@ -43,11 +24,12 @@ class Frame:
     broadcaster = tf.TransformBroadcaster()
     listener = tf.TransformListener()
 
-    def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world"):
+    def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world", style="none"):
         self.name = name
         self.position = position
         self.orientation = orientation
         self.parent = parent
+        self.style = style
 
     @property
     def pose(self):
@@ -111,7 +93,7 @@ class FrameEditor:
         rospy.Service("remove_frame", RemoveFrame, self.callback_remove_frame)
         rospy.Service("set_frame", SetFrame, self.callback_set_frame)
 
-        self.set_marker_style(["x", "y", "z", "a", "b", "c"])
+        self.set_marker_settings(["x", "y", "z", "a", "b", "c"])
 
         self.observers = []
 
@@ -135,8 +117,8 @@ class FrameEditor:
             observer.update(self, level)
 
 
-    def set_marker_style(self, style, scale=0.25):
-        '''style is a list with any number of the following strings: ["x", "y", "z", "a", "b", "c"].'''
+    def set_marker_settings(self, arrows, style="none", scale=0.25):
+        '''arrows is a list with any number of the following strings: ["x", "y", "z", "a", "b", "c"].'''
 
         ## Marker
         int_marker = InteractiveMarker()
@@ -146,66 +128,76 @@ class FrameEditor:
         int_marker.pose = Pose()
         int_marker.scale = scale
 
-        if "x" in style:
+        if "x" in arrows:
             control = InteractiveMarkerControl()
             control.name = "move_x"
-            control.orientation.w = 1
-            control.orientation.x = 1
-            control.orientation.y = 0
-            control.orientation.z = 0
+            control.orientation = NewQuaternion(1, 0, 0, 1)
             control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
             int_marker.controls.append(control);
 
-        if "y" in style:
+        if "y" in arrows:
             control = InteractiveMarkerControl()
             control.name = "move_y"
-            control.orientation.w = 1
-            control.orientation.x = 0
-            control.orientation.y = 1
-            control.orientation.z = 0
+            control.orientation = NewQuaternion(0, 1, 0, 1)
             control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
             int_marker.controls.append(control);
 
-        if "z" in style:
+        if "z" in arrows:
             control = InteractiveMarkerControl()
             control.name = "move_z"
-            control.orientation.w = 1
-            control.orientation.x = 0
-            control.orientation.y = 0
-            control.orientation.z = 1
+            control.orientation = NewQuaternion(0, 0, 1, 1)
             control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
             int_marker.controls.append(control);
 
-        if "a" in style:
+        if "a" in arrows:
             control = InteractiveMarkerControl()
             control.name = "rotate_x"
-            control.orientation.w = 1
-            control.orientation.x = 1
-            control.orientation.y = 0
-            control.orientation.z = 0
+            control.orientation = NewQuaternion(1, 0, 0, 1)
             control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
             int_marker.controls.append(control);
 
-        if "b" in style:
+        if "b" in arrows:
             control = InteractiveMarkerControl()
             control.name = "rotate_y"
-            control.orientation.w = 1
-            control.orientation.x = 0
-            control.orientation.y = 1
-            control.orientation.z = 0
+            control.orientation = NewQuaternion(0, 1, 0, 1)
             control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
             int_marker.controls.append(control);
 
 
-        if "c" in style:
+        if "c" in arrows:
             control = InteractiveMarkerControl()
             control.name = "rotate_z"
-            control.orientation.w = 1
-            control.orientation.x = 0
-            control.orientation.y = 0
-            control.orientation.z = 1
+            control.orientation = NewQuaternion(0, 0, 1, 1)
             control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
             int_marker.controls.append(control);
+
+
+        ## Style ##
+        ##
+        style_marker = Marker()
+        style_marker.scale = NewVector3(0.75*scale, 0.75*scale, 0.75*scale)
+        style_marker.color = NewColor(0.0, 0.5, 0.5, 0.75)
+
+        if style == "cube":
+            style_marker.type = Marker.CUBE
+        elif style == "sphere":
+            style_marker.type = Marker.SPHERE
+        elif style == "plane":
+            style_marker.type = Marker.TRIANGLE_LIST
+            style_marker.points = [
+                NewPoint(-0.5, -0.5, 0.0), NewPoint(0.5, -0.5, 0.0), NewPoint(-0.5, 0.5, 0.0),
+                NewPoint(0.5, -0.5, 0.0), NewPoint(0.5, 0.5, 0.0), NewPoint(-0.5, 0.5, 0.0)
+            ]
+        else:
+            style = "none" # just in case
+
+        style_control = InteractiveMarkerControl()
+        style_control.always_visible = True
+        style_control.markers.append(style_marker)
+
+        if style != "none":
+            int_marker.controls.append(style_control)
+
 
         self.int_marker = int_marker
 
@@ -252,6 +244,8 @@ class FrameEditor:
         self.active_frame = frame
 
         if frame is not None:
+            self.set_marker_settings(["x", "y", "z", "a", "b", "c"], frame.style)
+
             self.int_marker.name = frame.name
             self.int_marker.header.frame_id = frame.parent
             self.int_marker.pose = frame.pose
@@ -262,8 +256,8 @@ class FrameEditor:
         self.update_obsevers(2)
 
     def callback_marker(self, feedback):
-        self.active_frame.position = Position(feedback.pose.position)
-        self.active_frame.orientation = Orientation(feedback.pose.orientation)
+        self.active_frame.position = FromPoint(feedback.pose.position)
+        self.active_frame.orientation = FromQuaternion(feedback.pose.orientation)
 
         self.update_obsevers(4)
 
@@ -299,10 +293,17 @@ class FrameEditor:
             t = frame["position"]
             o = frame["orientation"]
 
-            f = Frame(name, 
-                (t["x"], t["y"], t["z"]), 
-                (o["x"], o["y"], o["z"], o["w"]), 
-                frame["parent"])
+            if "style" in frame:
+                style = frame["style"]
+            else:
+                style = "none"
+
+            f = Frame(name,
+                (t["x"], t["y"], t["z"]),
+                (o["x"], o["y"], o["z"], o["w"]),
+                frame["parent"],
+                style
+                )
             
             self.add_frame(f)
 
@@ -330,6 +331,8 @@ class FrameEditor:
             f["parent"] = frame.parent
             f["position"] = t
             f["orientation"] = o
+
+            f["style"] = frame.style
 
             frames[frame.name] = f
 
@@ -425,7 +428,7 @@ class FrameEditor:
             if request.parent == "":
                 request.parent = "world"
 
-            f = Frame(request.name, Position(request.pose.position), Orientation(request.pose.orientation))
+            f = Frame(request.name, FromPoint(request.pose.position), FromQuaternion(request.pose.orientation))
             self.add_frame(f)
 
         return response

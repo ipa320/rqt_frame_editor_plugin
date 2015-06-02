@@ -15,7 +15,8 @@ from python_qt_binding import loadUi, QtGui, QtCore
 from python_qt_binding.QtGui import QWidget
 from python_qt_binding.QtCore import Signal, Slot
 
-from frame_editor.editor import Frame, FrameEditor, Position, Orientation
+from frame_editor.editor import Frame, FrameEditor
+from frame_editor.constructors_geometry import *
 
 from toolbox.msg import *
 from toolbox.srv import *
@@ -116,6 +117,8 @@ class FrameEditorGUI(Plugin):
 
         self._widget.btn_rad.toggled.connect(self.update_fields)
 
+        self._widget.combo_style.currentIndexChanged.connect(self.frame_style_changed)
+
         self._update_thread.start()
 
         self.update_all(3)
@@ -182,7 +185,10 @@ class FrameEditorGUI(Plugin):
     def update_active_frame(self):
         if not self.editor.active_frame:
             self._widget.list_frames.setCurrentItem(None)
+            self._widget.box_edit.setEnabled(False)
             return # deselect and quit
+
+        self._widget.box_edit.setEnabled(True)
 
         name = self.editor.active_frame.name
         if name == self.old_selected:
@@ -472,8 +478,8 @@ class FrameEditorGUI(Plugin):
 
         ## Set result
         frame.parent = result.parent_name
-        frame.position = Position(result.pose.position)
-        frame.orientation = Orientation(result.pose.orientation)
+        frame.position = FromPoint(result.pose.position)
+        frame.orientation = FromQuaternion(result.pose.orientation)
 
         self.editor.update_frame(frame)
 
@@ -512,8 +518,8 @@ class FrameEditorGUI(Plugin):
         result = client.get_result()
 
         frame.parent = result.parent_name
-        frame.position = Position(result.pose.position)
-        frame.orientation = Orientation(result.pose.orientation)
+        frame.position = FromPoint(result.pose.position)
+        frame.orientation = FromQuaternion(result.pose.orientation)
 
         self.editor.update_frame(frame)
 
@@ -522,8 +528,8 @@ class FrameEditorGUI(Plugin):
         frame = self.editor.active_frame
 
         frame.parent = feedback.parent_name
-        frame.position = Position(feedback.pose.position)
-        frame.orientation = Orientation(feedback.pose.orientation)
+        frame.position = FromPoint(feedback.pose.position)
+        frame.orientation = FromQuaternion(feedback.pose.orientation)
 
         self.editor.update_frame(frame)
 
@@ -560,6 +566,14 @@ class FrameEditorGUI(Plugin):
     @Slot()
     def c_valueChanged(self):
         self.set_value(self._widget.txt_c, 'c')
+
+
+    @Slot(int)
+    def frame_style_changed(self, id):
+        style = self._widget.combo_style.currentText().lower()
+        frame = self.editor.active_frame
+        frame.style = style
+        self.editor.update_frame(frame)
 
 
     ## PLUGIN ##
