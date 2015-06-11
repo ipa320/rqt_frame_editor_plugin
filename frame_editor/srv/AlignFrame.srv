@@ -1,0 +1,27 @@
+string name
+string source_name
+
+int32 mode
+
+## modes ##
+##
+int32 mode_none = 0
+
+int32 mode_x = 1
+int32 mode_y = 2
+int32 mode_z = 4
+int32 mode_a = 8
+int32 mode_b = 16
+int32 mode_c = 32
+
+## ToDo
+#int32 mode_parent_absolute = 64
+#int32 mode_parent_relative = 128
+
+## common binary combinations
+int32 mode_position = 7
+int32 mode_orientation = 56
+int32 mode_pose = 63
+
+---
+int32 error_code

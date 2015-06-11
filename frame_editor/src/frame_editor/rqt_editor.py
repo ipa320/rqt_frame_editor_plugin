@@ -326,6 +326,8 @@ class FrameEditorGUI(Plugin):
         self.editor.remove_frame(item.text())
 
 
+    ## PARENTING ##
+    ##
     @Slot(bool)
     def btn_set_parent_rel_clicked(self, checked):
         parent = self._widget.list_tf.currentItem()
@@ -395,37 +397,16 @@ class FrameEditorGUI(Plugin):
         self.set_pose(["c"])
 
     def set_pose(self, mode):
-        target = self._widget.list_tf.currentItem()
-        if not target:
+        source = self._widget.list_tf.currentItem()
+        if not source:
             return # none selected
 
         frame = self.editor.active_frame
-
-        (position, orientation) = frame.listener.lookupTransform(frame.parent, target.text(), rospy.Time(0))
-
-        pos = list(frame.position)
-        if "x" in mode:
-            pos[0] = position[0]
-        if "y" in mode:
-            pos[1] = position[1]
-        if "z" in mode:
-            pos[2] = position[2]
-        frame.position = tuple(pos)
-
-        rpy = list(tf.transformations.euler_from_quaternion(frame.orientation))
-        rpy_new = tf.transformations.euler_from_quaternion(orientation)
-        if "a" in mode:
-            rpy[0] = rpy_new[0]
-        if "b" in mode:
-            rpy[1] = rpy_new[1]
-        if "c" in mode:
-            rpy[2] = rpy_new[2]
-        if "a" in mode or "b" in mode or "c" in mode:
-            frame.orientation = tf.transformations.quaternion_from_euler(*rpy)
-
-        self.editor.update_frame(frame)
+        self.editor.align_frame(frame, source.text(), mode)
 
 
+    ## RESET BUTTONS ##
+    ##
     @Slot(bool)
     def btn_reset_position_rel_clicked(self, checked):
         self.editor.active_frame.position = (0, 0, 0)
@@ -449,6 +430,8 @@ class FrameEditorGUI(Plugin):
         self.editor.update_frame(self.editor.active_frame)
 
 
+    ## CALL BUTTONS ##
+    ##
     @Slot(bool)
     def btn_call_service_clicked(self, checked):
         '''Calls a service to request pose data'''
@@ -568,6 +551,8 @@ class FrameEditorGUI(Plugin):
         self.set_value(self._widget.txt_c, 'c')
 
 
+    ## FRAME STYLE ##
+    ##
     @Slot(int)
     def frame_style_changed(self, id):
         style = self._widget.combo_style.currentText().lower()

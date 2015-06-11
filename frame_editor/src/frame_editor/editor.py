@@ -88,6 +88,7 @@ class FrameEditor:
 
         self.server = InteractiveMarkerServer("frame_editor_interactive")
 
+        rospy.Service("align_frame", AlignFrame, self.callback_align_frame)
         rospy.Service("edit_frame", EditFrame, self.callback_edit_frame)
         rospy.Service("get_frame", GetFrame, self.callback_get_frame)
         rospy.Service("remove_frame", RemoveFrame, self.callback_remove_frame)
@@ -226,6 +227,33 @@ class FrameEditor:
         return Frame.listener.getFrameStrings()
 
 
+    def align_frame(self, frame, source_name, mode):
+
+        (position, orientation) = frame.listener.lookupTransform(frame.parent, source_name, rospy.Time(0))
+
+        pos = list(frame.position)
+        if "x" in mode:
+            pos[0] = position[0]
+        if "y" in mode:
+            pos[1] = position[1]
+        if "z" in mode:
+            pos[2] = position[2]
+        frame.position = tuple(pos)
+
+        rpy = list(tf.transformations.euler_from_quaternion(frame.orientation))
+        rpy_new = tf.transformations.euler_from_quaternion(orientation)
+        if "a" in mode:
+            rpy[0] = rpy_new[0]
+        if "b" in mode:
+            rpy[1] = rpy_new[1]
+        if "c" in mode:
+            rpy[2] = rpy_new[2]
+        if "a" in mode or "b" in mode or "c" in mode:
+            frame.orientation = tf.transformations.quaternion_from_euler(*rpy)
+
+        self.update_frame(frame)
+
+
     def broadcast(self):
         #print "> Broadcasting"
         for frame in self.frames.values():
@@ -351,6 +379,40 @@ class FrameEditor:
 
     ## SERVICE CALLBACKS ##
     ##
+    def callback_align_frame(self, request):
+        print "> Request to align frame", request.name, "with frame", request.source_name, "mode", request.mode
+
+        response = AlignFrameResponse()
+        response.error_code = 0
+
+        if request.name == "":
+            print " Error: No name given"
+            response.error_code = 1
+
+        elif request.source_name == "":
+            print " Error: No source name given"
+            response.error_code = 3
+
+        elif request.name not in self.frames:
+            print " Error: Frame not found:", request.name
+            response.error_code = 2
+
+        else:
+            frame = self.frames[request.name]
+
+            m = request.mode
+            mode = []
+            if m & 1: mode.append("x")
+            if m & 2: mode.append("y")
+            if m & 4: mode.append("z")
+            if m & 8: mode.append("a")
+            if m & 16: mode.append("b")
+            if m & 32: mode.append("c")
+
+            self.align_frame(frame, request.source_name, mode)
+
+        return response
+
     def callback_edit_frame(self, request):
         print "> Request to edit frame", request.name
 
