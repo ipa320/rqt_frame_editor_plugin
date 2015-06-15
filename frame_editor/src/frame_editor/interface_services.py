@@ -58,7 +58,7 @@ class FrameEditor_Services:
             if m & 16: mode.append("b")
             if m & 32: mode.append("c")
 
-            self.editor.align_frame(frame, request.source_name, mode)
+            self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, mode))
 
         return response
 

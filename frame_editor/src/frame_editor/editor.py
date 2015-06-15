@@ -79,33 +79,6 @@ class FrameEditor(QtCore.QObject):
         return Frame.listener.getFrameStrings()
 
 
-    def align_frame(self, frame, source_name, mode):
-
-        (position, orientation) = frame.listener.lookupTransform(frame.parent, source_name, rospy.Time(0))
-
-        pos = list(frame.position)
-        if "x" in mode:
-            pos[0] = position[0]
-        if "y" in mode:
-            pos[1] = position[1]
-        if "z" in mode:
-            pos[2] = position[2]
-        frame.position = tuple(pos)
-
-        rpy = list(tf.transformations.euler_from_quaternion(frame.orientation))
-        rpy_new = tf.transformations.euler_from_quaternion(orientation)
-        if "a" in mode:
-            rpy[0] = rpy_new[0]
-        if "b" in mode:
-            rpy[1] = rpy_new[1]
-        if "c" in mode:
-            rpy[2] = rpy_new[2]
-        if "a" in mode or "b" in mode or "c" in mode:
-            frame.orientation = tf.transformations.quaternion_from_euler(*rpy)
-
-        self.update_frame(frame)
-
-
     def broadcast(self):
         #print "> Broadcasting"
         for frame in self.frames.values():

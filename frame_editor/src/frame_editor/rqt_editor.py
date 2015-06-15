@@ -410,7 +410,7 @@ class FrameEditorGUI(Plugin):
             return # none selected
 
         frame = self.editor.active_frame
-        self.editor.align_frame(frame, source.text(), mode)
+        self.editor.command(Command_AlignElement(self.editor, frame, source.text(), mode))
 
 
     ## RESET BUTTONS ##

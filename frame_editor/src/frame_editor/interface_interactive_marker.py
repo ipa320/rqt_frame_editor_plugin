@@ -3,9 +3,10 @@
 
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
+import time
+
 import rospy
 import rosparam
-
 import tf
 
 from frame_editor.objects import *
@@ -34,14 +35,14 @@ class FrameEditor_InteractiveMarker:
     def update(self, editor, level):
 
         if level & 2:
-            self.make_interactive(self.editor.active_frame)
+            ## Check for change
+            if self.editor.active_frame is not self.old_frame:
+                self.make_interactive(self.editor.active_frame)
 
+        if level & 4:
+            self.make_interactive(self.editor.active_frame) ## TODO only pose
 
     def make_interactive(self, frame):
-
-        ## Check for change
-        if frame is self.old_frame:
-            return
 
         ## Stop currently active frame
         if self.old_frame is not None:
