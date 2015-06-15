@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import os
+import math
 
 import rospy
 import rospkg
 import tf
 import actionlib
-import math
 
 from qt_gui.plugin import Plugin
 from qt_gui_py_common.worker_thread import WorkerThread
@@ -236,6 +236,7 @@ class FrameEditorGUI(Plugin):
 
         ## Absolute
         (position, orientation) = f.listener.lookupTransform('world', f.name, rospy.Time(0))
+        ## TODO, tf is sometimes too slow! values may still be the old ones
 
         w.txt_abs_x.setValue(position[0])
         w.txt_abs_y.setValue(position[1])
@@ -539,9 +540,8 @@ class FrameEditorGUI(Plugin):
     @Slot(int)
     def frame_style_changed(self, id):
         style = self._widget.combo_style.currentText().lower()
-        frame = self.editor.active_frame
-        frame.style = style
-        self.editor.update_frame(frame)
+        if self.editor.active_frame.style != style:
+            self.editor.command(Command_SetStyle(self.editor, self.editor.active_frame, style))
 
 
     ## PLUGIN ##

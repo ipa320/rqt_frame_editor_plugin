@@ -35,14 +35,19 @@ class FrameEditor(QtCore.QObject):
         
         self.observers = []
 
+        ## Views
         self.interactive = FrameEditor_InteractiveMarker(self)
         self.services = FrameEditor_Services(self)
 
+        ## Undo/Redo
         self.undo_level = 0
         self.undo_stack = QUndoStack()
         self.undo_stack.indexChanged.connect(self.undo_stack_changed)
         self.__command_lock = threading.Lock()
 
+
+    ## Undo/Redo ##
+    ##
     @QtCore.Slot(int)
     def undo_stack_changed(self, idx):
         self.update_obsevers(self.undo_level)
@@ -53,20 +58,6 @@ class FrameEditor(QtCore.QObject):
     def command(self, command):
         with self.__command_lock:
             self.undo_stack.push(command)
-
-
-    def select_frame(self, frame):
-        if self.active_frame is not frame:
-            self.active_frame = frame
-            self.update_obsevers(2) # update GUI
-
-
-    def update_frame(self, frame):
-        if frame:
-            frame.broadcast() # update tf
-        self.select_frame(self.active_frame) # update marker (just in case)
-        time.sleep(0.1) # wait a bit for tf # TODO better way?
-        self.update_obsevers(4) # update GUI
 
 
     def update_obsevers(self, level):

@@ -4,7 +4,6 @@
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
 import rospy
-import tf
 
 from frame_editor.objects import *
 from frame_editor.commands import *

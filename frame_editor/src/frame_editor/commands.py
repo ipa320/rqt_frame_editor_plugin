@@ -10,6 +10,8 @@ import tf
 
 from python_qt_binding.QtGui import QUndoCommand
 
+from frame_editor.objects import *
+
 
 class Command_SelectElement(QUndoCommand):
 
@@ -301,5 +303,50 @@ class Command_SetParent(QUndoCommand):
 
         self.element.broadcast()
         self.editor.add_undo_level(4)
+
+
+
+class Command_SetStyle(QUndoCommand):
+
+    def __init__(self, editor, element, style):
+        QUndoCommand.__init__(self, "Style")
+        self.editor = editor
+
+        self.old_element = element
+
+        if style == "plane":
+            self.new_element = Object_Plane(element.name, element.position, element.orientation, element.parent)
+        elif style == "cube":
+            self.new_element = Object_Cube(element.name, element.position, element.orientation, element.parent)
+        elif style == "sphere":
+            self.new_element = Object_Sphere(element.name, element.position, element.orientation, element.parent)
+        elif style == "axis":
+            self.new_element = Object_Axis(element.name, element.position, element.orientation, element.parent)
+        else:
+            self.new_element = Frame(element.name, element.position, element.orientation, element.parent)
+
+        if editor.active_frame is element:
+            self.was_active = True
+        else:
+            self.was_active = False
+
+    def redo(self):
+        del self.editor.frames[self.old_element.name]
+        self.editor.frames[self.new_element.name] = self.new_element
+        self.editor.add_undo_level(1+4)
+
+        if self.was_active:
+            self.editor.active_frame = self.new_element
+            self.editor.add_undo_level(2)
+
+    def undo(self):
+        del self.editor.frames[self.new_element.name]
+        self.editor.frames[self.old_element.name] = self.old_element
+        self.editor.add_undo_level(1+4)
+
+        if self.was_active:
+            self.editor.active_frame = self.old_element
+            self.editor.add_undo_level(2)
+
 
 # eof
