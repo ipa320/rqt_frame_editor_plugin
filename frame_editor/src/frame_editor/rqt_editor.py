@@ -16,6 +16,7 @@ from python_qt_binding.QtGui import QWidget
 from python_qt_binding.QtCore import Signal, Slot
 
 from frame_editor.editor import Frame, FrameEditor
+from frame_editor.commands import *
 from frame_editor.constructors_geometry import *
 
 from toolbox.msg import *
@@ -74,6 +75,9 @@ class FrameEditorGUI(Plugin):
             self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
 
         context.add_widget(self._widget)
+
+        ## Undo View
+        self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
 
 
         ## Connections ##
@@ -161,7 +165,6 @@ class FrameEditorGUI(Plugin):
         self._widget.list_tf.sortItems()
 
     def update_frame_list(self):
-
         new_list = self.editor.frames.keys()
 
         ## Add missing
@@ -174,6 +177,8 @@ class FrameEditorGUI(Plugin):
         ## Delete removed
         for item in self.old_frame_list:
             if item not in new_list:
+                if self._widget.list_frames.currentItem() and item == self._widget.list_frames.currentItem().text():
+                    self._widget.list_frames.setCurrentItem(None)
                 found = self._widget.list_frames.findItems(item, QtCore.Qt.MatchExactly)
                 self._widget.list_frames.takeItem(self._widget.list_frames.row(found[0]))
 
@@ -184,6 +189,7 @@ class FrameEditorGUI(Plugin):
 
     def update_active_frame(self):
         if not self.editor.active_frame:
+            self.old_selected = ""
             self._widget.list_frames.setCurrentItem(None)
             self._widget.box_edit.setEnabled(False)
             return # deselect and quit
@@ -251,7 +257,8 @@ class FrameEditorGUI(Plugin):
         if name == "":
             return
 
-        self.editor.select_frame(self.editor.frames[name])
+        if not self.editor.active_frame or (self.editor.active_frame.name != name):
+            self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
 
 
     ## BUTTONS ##
@@ -325,7 +332,7 @@ class FrameEditorGUI(Plugin):
         if not item:
             return
 
-        self.editor.remove_frame(item.text())
+        self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text()]))
 
 
     ## PARENTING ##

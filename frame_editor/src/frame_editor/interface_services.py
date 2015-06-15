@@ -7,8 +7,11 @@ import rospy
 import tf
 
 from frame_editor.objects import *
+from frame_editor.commands import *
+
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
+
 from frame_editor.srv import *
 
 
@@ -67,7 +70,7 @@ class FrameEditor_Services:
 
         if request.name == "":
             ## Reset
-            self.editor.select_frame(None)
+            self.editor.command(Command_SelectElement(self.editor, None))
 
         elif request.name not in self.editor.frames:
             print " Error: Frame not found:", request.name
@@ -75,8 +78,7 @@ class FrameEditor_Services:
 
         else:
             ## Set
-            self.editor.select_frame(self.editor.frames[request.name])
-
+            self.editor.command(Command_SelectElement(self.editor, self.editor.frames[request.name]))
         return response
 
     def callback_get_frame(self, request):
@@ -112,12 +114,12 @@ class FrameEditor_Services:
             print " Error: No name given"
             response.error_code = 1
 
-        elif request.name not in self.frames:
+        elif request.name not in self.editor.frames:
             print " Error: Frame not found:", request.name
             response.error_code = 2
 
         else:
-            self.editor.remove_frame(request.name)
+            self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[request.name]))
 
         return response
 

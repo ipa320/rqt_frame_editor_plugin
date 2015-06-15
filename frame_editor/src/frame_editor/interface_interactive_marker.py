@@ -22,20 +22,33 @@ class FrameEditor_InteractiveMarker:
 
     def __init__(self, frame_editor):
         self.editor = frame_editor
+        self.editor.observers.append(self)
 
         self.server = InteractiveMarkerServer("frame_editor_interactive")
 
         self.set_marker_settings(["x", "y", "z", "a", "b", "c"])
 
+        self.old_frame = None
+
+
+    def update(self, editor, level):
+
+        if level & 2:
+            self.make_interactive(self.editor.active_frame)
+
 
     def make_interactive(self, frame):
 
+        ## Check for change
+        if frame is self.old_frame:
+            return
+
         ## Stop currently active frame
-        if self.editor.active_frame is not None:
-            self.server.erase(self.editor.active_frame.name)
+        if self.old_frame is not None:
+            self.server.erase(self.old_frame.name)
             self.server.applyChanges()
 
-        self.editor.active_frame = frame
+        self.old_frame = frame
 
         if frame is not None:
             self.set_marker_settings(["x", "y", "z", "a", "b", "c"], frame)
@@ -47,13 +60,12 @@ class FrameEditor_InteractiveMarker:
             self.server.insert(self.int_marker, self.callback_marker)
             self.server.applyChanges()
 
-        self.editor.update_obsevers(2)
 
     def callback_marker(self, feedback):
         self.editor.active_frame.position = FromPoint(feedback.pose.position)
         self.editor.active_frame.orientation = FromQuaternion(feedback.pose.orientation)
 
-        self.editor.update_obsevers(4)
+        self.editor.update_obsevers(4) ## TODO
 
 
     def set_marker_settings(self, arrows, frame=None, scale=0.25):

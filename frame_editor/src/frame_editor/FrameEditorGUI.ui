@@ -98,7 +98,7 @@
              <x>0</x>
              <y>0</y>
              <width>223</width>
-             <height>590</height>
+             <height>564</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -139,6 +139,17 @@
             </item>
            </layout>
           </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="undo_frame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_13"/>
          </widget>
         </item>
        </layout>

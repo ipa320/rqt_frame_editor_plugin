@@ -4,6 +4,7 @@
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
 import time
+import threading
 
 import rospy
 import rosparam
@@ -11,6 +12,8 @@ import rosparam
 import tf
 
 from frame_editor.objects import *
+from frame_editor.commands import *
+
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 
@@ -18,20 +21,44 @@ from frame_editor.constructors_std import *
 from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
 from frame_editor.interface_services import FrameEditor_Services
 
+from python_qt_binding import QtCore
+from python_qt_binding.QtGui import QUndoStack
 
-class FrameEditor:
+
+class FrameEditor(QtCore.QObject):
 
     def __init__(self):
+        super(FrameEditor, self).__init__()
+
         self.frames = {}
         self.active_frame = None
+        
+        self.observers = []
 
         self.interactive = FrameEditor_InteractiveMarker(self)
         self.services = FrameEditor_Services(self)
 
-        self.observers = []
+        self.undo_level = 0
+        self.undo_stack = QUndoStack()
+        self.undo_stack.indexChanged.connect(self.undo_stack_changed)
+        self.__command_lock = threading.Lock()
+
+    @QtCore.Slot(int)
+    def undo_stack_changed(self, idx):
+        self.update_obsevers(self.undo_level)
+
+    def add_undo_level(self, level):
+        self.undo_level = self.undo_level | level
+
+    def command(self, command):
+        with self.__command_lock:
+            self.undo_stack.push(command)
+
 
     def select_frame(self, frame):
-        self.interactive.make_interactive(frame)
+        if self.active_frame is not frame:
+            self.active_frame = frame
+            self.update_obsevers(2) # update GUI
 
 
     def clear_all(self):
@@ -52,6 +79,7 @@ class FrameEditor:
     def update_obsevers(self, level):
         for observer in self.observers:
             observer.update(self, level)
+        self.undo_level = 0
 
 
     def add_frame(self, frame):
@@ -59,17 +87,6 @@ class FrameEditor:
         frame.print_all()
 
         self.frames[frame.name] = frame
-
-        self.update_obsevers(1)
-
-    def remove_frame(self, name):
-        print "> Removing frame", name
-
-        ## If active frame is deleted, deactivate
-        if self.active_frame and name == self.active_frame.name:
-            self.select_frame(None)
-
-        del self.frames[name]
 
         self.update_obsevers(1)
 
