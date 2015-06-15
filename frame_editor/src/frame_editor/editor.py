@@ -10,6 +10,7 @@ import rosparam
 
 import tf
 
+from frame_editor.objects import *
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 from frame_editor.srv import *
@@ -17,67 +18,6 @@ from geometry_msgs.msg import Pose
 
 from interactive_markers.interactive_marker_server import *
 from visualization_msgs.msg import InteractiveMarkerControl, Marker
-
-
-class Frame:
-
-    broadcaster = tf.TransformBroadcaster()
-    listener = tf.TransformListener()
-
-    def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world", style="none"):
-        self.name = name
-        self.position = position
-        self.orientation = orientation
-        self.parent = parent
-        self.style = style
-
-    @property
-    def pose(self):
-        return ToPose(self.position, self.orientation)
-
-    def print_all(self):
-        print "  {} (parent: {}) {} {}".format(self.name, self.parent, self.position, self.orientation)
-
-    def broadcast(self):
-        Frame.broadcaster.sendTransform(self.position, self.orientation,
-            rospy.Time.now(),
-            self.name, self.parent)
-
-    def value(self, symbol):
-        if symbol == 'x':
-            return self.position[0]
-        elif symbol == 'y':
-            return self.position[1]
-        elif symbol == 'z':
-            return self.position[2]
-        else:
-            rpy = tf.transformations.euler_from_quaternion(self.orientation)
-            if symbol == 'a':
-                return rpy[0]
-            elif symbol == 'b':
-                return rpy[1]
-            elif symbol == 'c':
-                return rpy[2]
-
-    def set_value(self, symbol, value):
-        if symbol in ['x', 'y', 'z']:
-            position = list(self.position)
-            if symbol == 'x':
-                position[0] = value
-            elif symbol == 'y':
-                position[1] = value
-            elif symbol == 'z':
-                position[2] = value
-            self.position = tuple(position)
-        else:
-            rpy = list(tf.transformations.euler_from_quaternion(self.orientation))
-            if symbol == 'a':
-                rpy[0] = value
-            elif symbol == 'b':
-                rpy[1] = value
-            elif symbol == 'c':
-                rpy[2] = value
-            self.orientation = tf.transformations.quaternion_from_euler(*rpy)
 
 
 class FrameEditor:
@@ -118,8 +58,13 @@ class FrameEditor:
             observer.update(self, level)
 
 
-    def set_marker_settings(self, arrows, style="none", scale=0.25):
+    def set_marker_settings(self, arrows, frame=None, scale=0.25):
         '''arrows is a list with any number of the following strings: ["x", "y", "z", "a", "b", "c"].'''
+
+        if frame:
+            style = frame.style
+        else:
+            style = "none"
 
         ## Marker
         int_marker = InteractiveMarker()
@@ -179,18 +124,8 @@ class FrameEditor:
         style_marker.scale = NewVector3(0.75*scale, 0.75*scale, 0.75*scale)
         style_marker.color = NewColor(0.0, 0.5, 0.5, 0.75)
 
-        if style == "cube":
-            style_marker.type = Marker.CUBE
-        elif style == "sphere":
-            style_marker.type = Marker.SPHERE
-        elif style == "plane":
-            style_marker.type = Marker.TRIANGLE_LIST
-            style_marker.points = [
-                NewPoint(-0.5, -0.5, 0.0), NewPoint(0.5, -0.5, 0.0), NewPoint(-0.5, 0.5, 0.0),
-                NewPoint(0.5, -0.5, 0.0), NewPoint(0.5, 0.5, 0.0), NewPoint(-0.5, 0.5, 0.0)
-            ]
-        else:
-            style = "none" # just in case
+        if style != "none":
+            style_marker = frame.marker
 
         style_control = InteractiveMarkerControl()
         style_control.always_visible = True
@@ -272,7 +207,7 @@ class FrameEditor:
         self.active_frame = frame
 
         if frame is not None:
-            self.set_marker_settings(["x", "y", "z", "a", "b", "c"], frame.style)
+            self.set_marker_settings(["x", "y", "z", "a", "b", "c"], frame)
 
             self.int_marker.name = frame.name
             self.int_marker.header.frame_id = frame.parent
@@ -326,12 +261,22 @@ class FrameEditor:
             else:
                 style = "none"
 
-            f = Frame(name,
-                (t["x"], t["y"], t["z"]),
-                (o["x"], o["y"], o["z"], o["w"]),
-                frame["parent"],
-                style
-                )
+            if "data" in frame:
+                dat = frame["data"]
+
+            position = (t["x"], t["y"], t["z"])
+            orientation = (o["x"], o["y"], o["z"], o["w"])
+
+            if style == "plane":
+                f = Object_Plane(name, position, orientation, frame["parent"], dat["length"], dat["width"])
+            elif style == "cube":
+                f = Object_Cube(name, position, orientation, frame["parent"], dat["length"], dat["width"], dat["height"])
+            elif style == "sphere":
+                f = Object_Sphere(name, position, orientation, frame["parent"], dat["diameter"])
+            elif style == "axis":
+                f = Object_Axis(name, position, orientation, frame["parent"], dat["length"], dat["width"])
+            else:
+                f = Frame(name, position, orientation, frame["parent"])
             
             self.add_frame(f)
 
@@ -361,6 +306,18 @@ class FrameEditor:
             f["orientation"] = o
 
             f["style"] = frame.style
+
+            if frame.style == "plane":
+                f["data"] = { "length": frame.length, "width":frame.width }
+            
+            elif frame.style == "cube":
+                f["data"] = { "length": frame.length, "width": frame.width, "height": frame.height }
+            
+            elif frame.style == "sphere":
+                f["data"] = { "diameter": frame.diameter }
+            
+            elif frame.style == "axis":
+                f["data"] = { "length": frame.length, "width": frame.width }
 
             frames[frame.name] = f
 

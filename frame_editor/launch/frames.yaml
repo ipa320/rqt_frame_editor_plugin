@@ -4,8 +4,27 @@ frames:
     parent: world
     position: {x: 0.5, y: 0.5, z: 0.5}
     style: none
-  frame2:
+  frame_axis:
+    data: {length: 1.0, width: 0.05}
+    orientation: {w: 0.0, x: 0.0, y: 0.0, z: 1.0}
+    parent: frame1
+    position: {x: -0.47346997261047363, y: 0.20000000298023224, z: 0.30000001192092896}
+    style: axis
+  frame_cube:
+    data: {height: 1.0, length: 1.0, width: 1.0}
+    orientation: {w: 0.0, x: 0.0, y: 0.0, z: 1.0}
+    parent: frame1
+    position: {x: -0.47346997261047363, y: -0.20000000298023224, z: 0.30000001192092896}
+    style: cube
+  frame_plane:
+    data: {length: 1.0, width: 1.0}
     orientation: {w: 0.0, x: 0.0, y: 0.0, z: 1.0}
     parent: frame1
     position: {x: 0.47346997261047363, y: 0.20000000298023224, z: 0.30000001192092896}
     style: plane
+  frame_sphere:
+    data: {diameter: 1.0}
+    orientation: {w: 0.0, x: 0.0, y: 0.0, z: 1.0}
+    parent: frame1
+    position: {x: 0.47346997261047363, y: -0.20000000298023224, z: 0.30000001192092896}
+    style: sphere
