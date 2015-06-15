@@ -3,6 +3,8 @@
 
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
+import time
+
 import rospy
 import tf
 
@@ -143,6 +145,95 @@ class Command_AlignElement(QUndoCommand):
 
     def undo(self):
         self.element.position = self.old_position
+        self.element.orientation = self.old_orientation
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+
+class Command_SetPose(QUndoCommand):
+
+    def __init__(self, editor, element, position, orientation):
+        QUndoCommand.__init__(self, "Position")
+        self.editor = editor
+
+        self.element = element
+
+        self.time = time.time()
+
+        self.new_position = position
+        self.new_orientation = orientation
+        self.old_position = element.position
+        self.old_orientation = element.orientation
+
+    def redo(self):
+        self.element.position = self.new_position
+        self.element.orientation = self.new_orientation
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+    def undo(self):
+        self.element.position = self.old_position
+        self.element.orientation = self.old_orientation
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+    def id(self):
+        return 1
+
+    def mergeWith(self, command):
+        if self.id() != command.id():
+            return False
+        if self.element is not command.element:
+            return False
+        if time.time() - self.time > 1.0:
+            return False # don't merge if too old
+
+        ## Merge
+        self.time = time.time()
+        self.new_position = command.new_position
+        self.new_orientation = command.new_orientation
+        return True
+
+
+class Command_SetPosition(QUndoCommand):
+
+    def __init__(self, editor, element, position):
+        QUndoCommand.__init__(self, "Position")
+        self.editor = editor
+
+        self.element = element
+
+        self.new_position = position
+        self.old_position = element.position
+
+    def redo(self):
+        self.element.position = self.new_position
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+    def undo(self):
+        self.element.position = self.old_position
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+
+class Command_SetOrientation(QUndoCommand):
+
+    def __init__(self, editor, element, orientation):
+        QUndoCommand.__init__(self, "Orientation")
+        self.editor = editor
+
+        self.element = element
+
+        self.new_orientation = orientation
+        self.old_orientation = element.orientation
+
+    def redo(self):
+        self.element.orientation = self.new_orientation
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+    def undo(self):
         self.element.orientation = self.old_orientation
         self.element.broadcast()
         self.editor.add_undo_level(4)

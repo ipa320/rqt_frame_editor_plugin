@@ -10,6 +10,8 @@ import rosparam
 import tf
 
 from frame_editor.objects import *
+from frame_editor.commands import *
+
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 
@@ -40,7 +42,12 @@ class FrameEditor_InteractiveMarker:
                 self.make_interactive(self.editor.active_frame)
 
         if level & 4:
-            self.make_interactive(self.editor.active_frame) ## TODO only pose
+            self.int_marker.name = self.editor.active_frame.name
+            self.int_marker.header.frame_id = self.editor.active_frame.parent
+            self.int_marker.pose = self.editor.active_frame.pose
+            self.server.insert(self.int_marker, self.callback_marker)
+            self.server.applyChanges()
+
 
     def make_interactive(self, frame):
 
@@ -63,10 +70,7 @@ class FrameEditor_InteractiveMarker:
 
 
     def callback_marker(self, feedback):
-        self.editor.active_frame.position = FromPoint(feedback.pose.position)
-        self.editor.active_frame.orientation = FromQuaternion(feedback.pose.orientation)
-
-        self.editor.update_obsevers(4) ## TODO
+        self.editor.command(Command_SetPose(self.editor, self.editor.active_frame, FromPoint(feedback.pose.position), FromQuaternion(feedback.pose.orientation)))
 
 
     def set_marker_settings(self, arrows, frame=None, scale=0.25):

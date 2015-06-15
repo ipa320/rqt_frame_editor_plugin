@@ -417,25 +417,21 @@ class FrameEditorGUI(Plugin):
     ##
     @Slot(bool)
     def btn_reset_position_rel_clicked(self, checked):
-        self.editor.active_frame.position = (0, 0, 0)
-        self.editor.update_frame(self.editor.active_frame)
+        self.editor.command(Command_SetPosition(self.editor, self.editor.active_frame, (0, 0, 0)))
 
     @Slot(bool)
     def btn_reset_position_abs_clicked(self, checked):
         (position, orientation) = self.editor.active_frame.listener.lookupTransform(self.editor.active_frame.parent, "world", rospy.Time(0))
-        self.editor.active_frame.position = position
-        self.editor.update_frame(self.editor.active_frame)
+        self.editor.command(Command_SetPosition(self.editor, self.editor.active_frame, position))
 
     @Slot(bool)
     def btn_reset_orientation_rel_clicked(self, checked):
-        self.editor.active_frame.orientation = (0, 0, 0, 1)
-        self.editor.update_frame(self.editor.active_frame)
+        self.editor.command(Command_SetOrientation(self.editor, self.editor.active_frame, (0, 0, 0, 1)))
 
     @Slot(bool)
     def btn_reset_orientation_abs_clicked(self, checked):
         (position, orientation) = self.editor.active_frame.listener.lookupTransform(self.editor.active_frame.parent, "world", rospy.Time(0))
-        self.editor.active_frame.orientation = orientation
-        self.editor.update_frame(self.editor.active_frame)
+        self.editor.command(Command_SetOrientation(self.editor, self.editor.active_frame, orientation))
 
 
     ## CALL BUTTONS ##
