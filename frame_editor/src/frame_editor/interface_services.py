@@ -62,6 +62,7 @@ class FrameEditor_Services:
 
         return response
 
+
     def callback_edit_frame(self, request):
         print "> Request to edit frame", request.name
 
@@ -79,7 +80,9 @@ class FrameEditor_Services:
         else:
             ## Set
             self.editor.command(Command_SelectElement(self.editor, self.editor.frames[request.name]))
+
         return response
+
 
     def callback_get_frame(self, request):
         print "> Request to get frame", request.name
@@ -103,6 +106,7 @@ class FrameEditor_Services:
             response.pose = ToPose(f.position, f.orientation)
 
         return response
+
 
     def callback_remove_frame(self, request):
         print "> Request to remove frame", request.name
@@ -139,7 +143,7 @@ class FrameEditor_Services:
                 request.parent = "world"
 
             f = Frame(request.name, FromPoint(request.pose.position), FromQuaternion(request.pose.orientation))
-            self.editor.add_frame(f)
+            self.editor.command(Command_AddElement(self.editor, f))
 
         return response
 

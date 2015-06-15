@@ -24,6 +24,23 @@ class Command_SelectElement(QUndoCommand):
         self.editor.add_undo_level(2)
 
 
+class Command_AddElement(QUndoCommand):
+
+    def __init__(self, editor, element):
+        QUndoCommand.__init__(self, "Add")
+        self.editor = editor
+
+        self.element = element
+
+    def redo(self):
+        self.editor.frames[self.element.name] = self.element
+        self.editor.add_undo_level(1)
+
+    def undo(self):
+        del self.editor.frames[self.element.name]
+        self.editor.add_undo_level(1)
+
+
 class Command_RemoveElement(QUndoCommand):
 
     def __init__(self, editor, element):
@@ -52,5 +69,26 @@ class Command_RemoveElement(QUndoCommand):
         if self.was_active:
             self.editor.active_frame = self.element
             self.editor.add_undo_level(2)
+
+
+
+class Command_ClearAll(QUndoCommand):
+
+    def __init__(self, editor):
+        QUndoCommand.__init__(self, "Clear all")
+        self.editor = editor
+
+        self.elements = editor.frames
+        self.active_element = editor.active_frame
+
+    def redo(self):
+        self.editor.active_frame = None
+        self.editor.frames = {}
+        self.editor.add_undo_level(1+2)
+
+    def undo(self):
+        self.editor.active_frame = self.active_element
+        self.editor.frames = self.elements
+        self.editor.add_undo_level(1+2)
 
 # eof

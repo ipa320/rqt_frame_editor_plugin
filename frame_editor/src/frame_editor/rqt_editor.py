@@ -292,8 +292,7 @@ class FrameEditorGUI(Plugin):
 
     @Slot()
     def clear_all(self):
-        self.editor.clear_all()
-
+        self.editor.command(Command_ClearAll(self.editor))
 
     @Slot(bool)
     def btn_add_clicked(self, checked):
@@ -322,7 +321,7 @@ class FrameEditorGUI(Plugin):
         if not ok or parent == "":
             return
 
-        self.editor.add_frame(Frame(name, parent=parent))
+        self.editor.command(Command_AddElement(self.editor, Frame(name, parent=parent)))
             
 
 

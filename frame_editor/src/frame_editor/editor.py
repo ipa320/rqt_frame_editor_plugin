@@ -61,13 +61,6 @@ class FrameEditor(QtCore.QObject):
             self.update_obsevers(2) # update GUI
 
 
-    def clear_all(self):
-        print "> Deleting all frames"
-        self.select_frame(None)
-        self.frames = {}
-        time.sleep(0.1)
-        self.update_obsevers(1+2+4) # update GUI
-
     def update_frame(self, frame):
         if frame:
             frame.broadcast() # update tf
@@ -80,15 +73,6 @@ class FrameEditor(QtCore.QObject):
         for observer in self.observers:
             observer.update(self, level)
         self.undo_level = 0
-
-
-    def add_frame(self, frame):
-        print "> Adding frame:"
-        frame.print_all()
-
-        self.frames[frame.name] = frame
-
-        self.update_obsevers(1)
 
 
     def get_tf_frames(self):
@@ -182,7 +166,7 @@ class FrameEditor(QtCore.QObject):
             else:
                 f = Frame(name, position, orientation, frame["parent"])
             
-            self.add_frame(f)
+            self.command(Command_AddElement(self, f))
 
         print "> Loading done"
 
