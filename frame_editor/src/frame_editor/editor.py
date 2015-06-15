@@ -50,17 +50,21 @@ class FrameEditor(QtCore.QObject):
     ##
     @QtCore.Slot(int)
     def undo_stack_changed(self, idx):
+        '''Updates all observers, whenever a new command has been pushed to the undo stack'''
         self.update_obsevers(self.undo_level)
 
     def add_undo_level(self, level):
+        '''Used by commands to add a level for updating'''
         self.undo_level = self.undo_level | level
 
     def command(self, command):
+        '''Push a command to the stack (blocking)'''
         with self.__command_lock:
             self.undo_stack.push(command)
 
 
     def update_obsevers(self, level):
+        '''Updates all registered observers and resets the undo_level'''
         for observer in self.observers:
             observer.update(self, level)
         self.undo_level = 0
@@ -103,6 +107,8 @@ class FrameEditor(QtCore.QObject):
 
     def load_data(self, data):
 
+        self.undo_stack.beginMacro("Import file")
+
         ## Import data
         for name, frame in data["frames"].items():
             t = frame["position"]
@@ -131,6 +137,8 @@ class FrameEditor(QtCore.QObject):
                 f = Frame(name, position, orientation, frame["parent"])
             
             self.command(Command_AddElement(self, f))
+
+        self.undo_stack.endMacro()
 
         print "> Loading done"
 
