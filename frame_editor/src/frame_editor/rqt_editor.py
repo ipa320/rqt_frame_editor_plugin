@@ -331,13 +331,18 @@ class FrameEditorGUI(Plugin):
         if not item:
             return
 
-        self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text()]))
-
 
     ## PARENTING ##
     ##
     @Slot(bool)
     def btn_set_parent_rel_clicked(self, checked):
+        self.set_parent(False)
+
+    @Slot(bool)
+    def btn_set_parent_abs_clicked(self, checked):
+        self.set_parent(True)
+
+    def set_parent(self, keep_absolute):
         parent = self._widget.list_tf.currentItem()
         if not parent:
             return # none selected
@@ -345,30 +350,7 @@ class FrameEditorGUI(Plugin):
         if parent.text() == self.editor.active_frame.name:
             return # you can't be your own parent
 
-        self.editor.active_frame.parent = parent.text()
-
-        self.editor.update_frame(self.editor.active_frame)
-
-
-    @Slot(bool)
-    def btn_set_parent_abs_clicked(self, checked):
-        parent = self._widget.list_tf.currentItem()
-        if not parent:
-            return # none selected
-
-        frame = self.editor.active_frame
-
-        if parent.text() == frame.name:
-            return # you can't be your own parent
-
-        frame.parent = parent.text()
-
-        ## Set pose
-        (position, orientation) = frame.listener.lookupTransform(parent.text(), frame.name, rospy.Time(0))
-        frame.position = position
-        frame.orientation = orientation
-
-        self.editor.update_frame(frame)
+        self.editor.command(Command_SetParent(self.editor, self.editor.active_frame, parent.text(), keep_absolute))
 
 
     ## SET BUTTONS ##
@@ -464,11 +446,10 @@ class FrameEditorGUI(Plugin):
             return
 
         ## Set result
-        frame.parent = result.parent_name
-        frame.position = FromPoint(result.pose.position)
-        frame.orientation = FromQuaternion(result.pose.orientation)
+        if frame.parent != result.parent_name:
+            self.editor.command(Command_SetParent(self.editor, frame, result.parent_name, False))
 
-        self.editor.update_frame(frame)
+        self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
 
 
     @Slot(bool)
@@ -504,21 +485,20 @@ class FrameEditorGUI(Plugin):
         ## Set result
         result = client.get_result()
 
-        frame.parent = result.parent_name
-        frame.position = FromPoint(result.pose.position)
-        frame.orientation = FromQuaternion(result.pose.orientation)
+        if frame.parent != result.parent_name:
+            self.editor.command(Command_SetParent(self.editor, frame, result.parent_name, False))
 
-        self.editor.update_frame(frame)
+        self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
+
 
 
     def action_feedback_callback(self, feedback):
         frame = self.editor.active_frame
 
-        frame.parent = feedback.parent_name
-        frame.position = FromPoint(feedback.pose.position)
-        frame.orientation = FromQuaternion(feedback.pose.orientation)
+        if frame.parent != result.parent_name:
+            self.editor.command(Command_SetParent(self.editor, frame, result.parent_name, False))
 
-        self.editor.update_frame(frame)
+        self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
 
 
     ## Spin Boxes ##
@@ -532,8 +512,7 @@ class FrameEditorGUI(Plugin):
             value = value * math.pi / 180.0
 
         if frame.value(symbol) != value:
-            frame.set_value(symbol, value)
-            self.editor.update_frame(frame)
+            self.editor.command(Command_SetValue(self.editor, self.editor.active_frame, symbol, value))
 
     @Slot()
     def x_valueChanged(self):

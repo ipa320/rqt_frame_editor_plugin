@@ -238,4 +238,68 @@ class Command_SetOrientation(QUndoCommand):
         self.element.broadcast()
         self.editor.add_undo_level(4)
 
+
+class Command_SetValue(QUndoCommand):
+
+    def __init__(self, editor, element, symbol, value):
+        QUndoCommand.__init__(self, "Value")
+        self.editor = editor
+
+        self.element = element
+        self.symbol = symbol
+
+        self.new_value = value
+        self.old_value = element.value(symbol)
+
+    def redo(self):
+        self.element.set_value(self.symbol, self.new_value)
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+    def undo(self):
+        self.element.set_value(self.symbol, self.old_value)
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+
+class Command_SetParent(QUndoCommand):
+
+    def __init__(self, editor, element, parent_name, keep_absolute=True):
+        QUndoCommand.__init__(self, "Parent")
+        self.editor = editor
+
+        self.element = element
+        self.keep_absolute = keep_absolute
+
+        self.new_parent_name = parent_name
+        self.old_parent_name = element.parent
+
+        if self.keep_absolute:
+            (position, orientation) = element.listener.lookupTransform(parent_name, element.name, rospy.Time(0))
+            self.new_position = position
+            self.new_orientation = orientation
+
+            self.old_position = element.position
+            self.old_orientation = element.orientation
+
+    def redo(self):
+        self.element.parent = self.new_parent_name
+
+        if self.keep_absolute:
+            self.element.position = self.new_position
+            self.element.orientation = self.new_orientation
+
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
+    def undo(self):
+        self.element.parent = self.old_parent_name
+
+        if self.keep_absolute:
+            self.element.position = self.old_position
+            self.element.orientation = self.old_orientation
+
+        self.element.broadcast()
+        self.editor.add_undo_level(4)
+
 # eof
