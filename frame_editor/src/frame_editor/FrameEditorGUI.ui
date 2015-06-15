@@ -641,22 +641,27 @@
               <widget class="QComboBox" name="combo_style">
                <item>
                 <property name="text">
-                 <string>None</string>
+                 <string>none</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Cube</string>
+                 <string>plane</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Plane</string>
+                 <string>cube</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Sphere</string>
+                 <string>sphere</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>axis</string>
                 </property>
                </item>
               </widget>

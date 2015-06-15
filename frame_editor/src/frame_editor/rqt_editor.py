@@ -242,13 +242,15 @@ class FrameEditorGUI(Plugin):
         w.txt_abs_b.setValue(rot[1])
         w.txt_abs_c.setValue(rot[2])
 
+        ## Style
+        self._widget.combo_style.setCurrentIndex(self._widget.combo_style.findText(f.style))
 
 
     @Slot(str)
     def selected_frame_changed(self, name):
         if name == "":
             return
-        print name
+
         self.editor.select_frame(self.editor.frames[name])
 
 
