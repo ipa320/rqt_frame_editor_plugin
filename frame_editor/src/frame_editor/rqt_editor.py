@@ -249,7 +249,7 @@ class FrameEditorGUI(Plugin):
         if name == "":
             return
         print name
-        self.editor.make_interactive(self.editor.frames[name])
+        self.editor.select_frame(self.editor.frames[name])
 
 
     ## BUTTONS ##

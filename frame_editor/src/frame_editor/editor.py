@@ -14,12 +14,9 @@ from frame_editor.objects import *
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 
+## Views
+from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
 from frame_editor.interface_services import FrameEditor_Services
-
-from geometry_msgs.msg import Pose
-
-from interactive_markers.interactive_marker_server import *
-from visualization_msgs.msg import InteractiveMarkerControl, Marker
 
 
 class FrameEditor:
@@ -28,17 +25,18 @@ class FrameEditor:
         self.frames = {}
         self.active_frame = None
 
-        self.server = InteractiveMarkerServer("frame_editor_interactive")
-
+        self.interactive = FrameEditor_InteractiveMarker(self)
         self.services = FrameEditor_Services(self)
-
-        self.set_marker_settings(["x", "y", "z", "a", "b", "c"])
 
         self.observers = []
 
+    def select_frame(self, frame):
+        self.interactive.make_interactive(frame)
+
+
     def clear_all(self):
         print "> Deleting all frames"
-        self.make_interactive(None)
+        self.select_frame(None)
         self.frames = {}
         time.sleep(0.1)
         self.update_obsevers(1+2+4) # update GUI
@@ -46,7 +44,7 @@ class FrameEditor:
     def update_frame(self, frame):
         if frame:
             frame.broadcast() # update tf
-        self.make_interactive(self.active_frame) # update marker (just in case)
+        self.select_frame(self.active_frame) # update marker (just in case)
         time.sleep(0.1) # wait a bit for tf # TODO better way?
         self.update_obsevers(4) # update GUI
 
@@ -54,86 +52,6 @@ class FrameEditor:
     def update_obsevers(self, level):
         for observer in self.observers:
             observer.update(self, level)
-
-
-    def set_marker_settings(self, arrows, frame=None, scale=0.25):
-        '''arrows is a list with any number of the following strings: ["x", "y", "z", "a", "b", "c"].'''
-
-        if frame:
-            style = frame.style
-        else:
-            style = "none"
-
-        ## Marker
-        int_marker = InteractiveMarker()
-        int_marker.header.frame_id = ""
-        int_marker.name = ""
-        int_marker.description = "Frame Editor"
-        int_marker.pose = Pose()
-        int_marker.scale = scale
-
-        if "x" in arrows:
-            control = InteractiveMarkerControl()
-            control.name = "move_x"
-            control.orientation = NewQuaternion(1, 0, 0, 1)
-            control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-            int_marker.controls.append(control);
-
-        if "y" in arrows:
-            control = InteractiveMarkerControl()
-            control.name = "move_y"
-            control.orientation = NewQuaternion(0, 1, 0, 1)
-            control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-            int_marker.controls.append(control);
-
-        if "z" in arrows:
-            control = InteractiveMarkerControl()
-            control.name = "move_z"
-            control.orientation = NewQuaternion(0, 0, 1, 1)
-            control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-            int_marker.controls.append(control);
-
-        if "a" in arrows:
-            control = InteractiveMarkerControl()
-            control.name = "rotate_x"
-            control.orientation = NewQuaternion(1, 0, 0, 1)
-            control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
-            int_marker.controls.append(control);
-
-        if "b" in arrows:
-            control = InteractiveMarkerControl()
-            control.name = "rotate_y"
-            control.orientation = NewQuaternion(0, 1, 0, 1)
-            control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
-            int_marker.controls.append(control);
-
-
-        if "c" in arrows:
-            control = InteractiveMarkerControl()
-            control.name = "rotate_z"
-            control.orientation = NewQuaternion(0, 0, 1, 1)
-            control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
-            int_marker.controls.append(control);
-
-
-        ## Style ##
-        ##
-        style_marker = Marker()
-        style_marker.scale = NewVector3(0.75*scale, 0.75*scale, 0.75*scale)
-        style_marker.color = NewColor(0.0, 0.5, 0.5, 0.75)
-
-        if style != "none":
-            style_marker = frame.marker
-
-        style_control = InteractiveMarkerControl()
-        style_control.always_visible = True
-        style_control.markers.append(style_marker)
-
-        if style != "none":
-            int_marker.controls.append(style_control)
-
-
-        self.int_marker = int_marker
 
 
     def add_frame(self, frame):
@@ -149,7 +67,7 @@ class FrameEditor:
 
         ## If active frame is deleted, deactivate
         if self.active_frame and name == self.active_frame.name:
-            self.make_interactive(None)
+            self.select_frame(None)
 
         del self.frames[name]
 
@@ -192,35 +110,6 @@ class FrameEditor:
         for frame in self.frames.values():
             frame.broadcast()
 
-
-    ## INTERACTION ##
-    ##
-    def make_interactive(self, frame):
-
-        ## Stop currently active frame
-        if self.active_frame is not None:
-            self.server.erase(self.active_frame.name)
-            self.server.applyChanges()
-
-        self.active_frame = frame
-
-        if frame is not None:
-            self.set_marker_settings(["x", "y", "z", "a", "b", "c"], frame)
-
-            self.int_marker.name = frame.name
-            self.int_marker.header.frame_id = frame.parent
-            self.int_marker.pose = frame.pose
-
-            self.server.insert(self.int_marker, self.callback_marker)
-            self.server.applyChanges()
-
-        self.update_obsevers(2)
-
-    def callback_marker(self, feedback):
-        self.active_frame.position = FromPoint(feedback.pose.position)
-        self.active_frame.orientation = FromQuaternion(feedback.pose.orientation)
-
-        self.update_obsevers(4)
 
 
     ## PRINT ##

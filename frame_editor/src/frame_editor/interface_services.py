@@ -67,7 +67,7 @@ class FrameEditor_Services:
 
         if request.name == "":
             ## Reset
-            self.editor.make_interactive(None)
+            self.editor.select_frame(None)
 
         elif request.name not in self.editor.frames:
             print " Error: Frame not found:", request.name
@@ -75,7 +75,7 @@ class FrameEditor_Services:
 
         else:
             ## Set
-            self.editor.make_interactive(self.editor.frames[request.name])
+            self.editor.select_frame(self.editor.frames[request.name])
 
         return response
 
