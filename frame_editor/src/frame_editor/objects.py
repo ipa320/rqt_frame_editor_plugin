@@ -23,12 +23,22 @@ class Frame(object):
     broadcaster = tf.TransformBroadcaster()
     listener = tf.TransformListener()
 
+    __id_counter = -1
+
     def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world", style="none"):
         self.name = name
         self.position = position
         self.orientation = orientation
         self.parent = parent
         self.style = style
+
+        self.hidden = False
+        self.marker = None
+
+    @classmethod
+    def create_new_id(cls):
+        cls.__id_counter = cls.__id_counter + 1
+        return cls.__id_counter
 
     @property
     def pose(self):
@@ -88,9 +98,15 @@ class Object_Geometry(Frame):
         ## TODO: put this into interface_marker.py
         self.marker = Marker()
         self.marker.scale = NewVector3(1, 1, 1)
+        self.marker.pose = Pose()
         self.marker.color = NewColor(0.0, 0.5, 0.5, 0.75)
+        self.marker.id = Frame.create_new_id()
+        #self.marker.lifetime = 0 # forever
         self.update_marker()
 
+    def update_marker(self):
+        #self.marker.header.frame_id = self.parent
+        self.marker.header.stamp = rospy.Time.now()
 
 class Object_Plane(Object_Geometry):
 
@@ -102,6 +118,8 @@ class Object_Plane(Object_Geometry):
         super(Object_Plane, self).__init__(name, position, orientation, parent, "plane")
 
     def update_marker(self):
+        super(Object_Plane, self).update_marker()
+
         l = self.length*0.5
         w = self.width*0.5
 
@@ -123,6 +141,8 @@ class Object_Cube(Object_Geometry):
         super(Object_Cube, self).__init__(name, position, orientation, parent, "cube")
 
     def update_marker(self):
+        super(Object_Cube, self).update_marker()
+
         self.marker.type = Marker.CUBE
         self.marker.scale = NewVector3(self.length, self.width, self.height)
 
@@ -136,6 +156,8 @@ class Object_Sphere(Object_Geometry):
         super(Object_Sphere, self).__init__(name, position, orientation, parent, "sphere")
 
     def update_marker(self):
+        super(Object_Sphere, self).update_marker()
+
         self.marker.type = Marker.SPHERE
         self.marker.scale = NewVector3(self.diameter, self.diameter, self.diameter)
 
@@ -150,6 +172,8 @@ class Object_Axis(Object_Geometry):
         super(Object_Axis, self).__init__(name, position, orientation, parent, "axis")
 
     def update_marker(self):
+        super(Object_Axis, self).update_marker()
+
         self.marker.type = Marker.ARROW
         self.marker.scale = NewVector3(self.length, self.width, self.width)
 

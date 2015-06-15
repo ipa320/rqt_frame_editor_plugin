@@ -30,7 +30,7 @@ class FrameEditor_InteractiveMarker:
         self.old_frame = None
 
 
-    def update(self, editor, level):
+    def update(self, editor, level, elements):
 
         if level & 2:
             ## Check for change

@@ -141,7 +141,7 @@ class FrameEditorGUI(Plugin):
         print "> Shutting down"
 
 
-    def update(self, editor, level):
+    def update(self, editor, level, elements):
         self.signal_update.emit(level)
 
 
@@ -331,7 +331,8 @@ class FrameEditorGUI(Plugin):
         item = self._widget.list_frames.currentItem()
         if not item:
             return
-
+        self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text()]))
+        
 
     ## PARENTING ##
     ##

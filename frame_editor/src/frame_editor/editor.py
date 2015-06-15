@@ -20,6 +20,7 @@ from frame_editor.constructors_std import *
 ## Views
 from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
 from frame_editor.interface_services import FrameEditor_Services
+from frame_editor.interface_markers import FrameEditor_Markers
 
 from python_qt_binding import QtCore
 from python_qt_binding.QtGui import QUndoStack
@@ -38,9 +39,11 @@ class FrameEditor(QtCore.QObject):
         ## Views
         self.interactive = FrameEditor_InteractiveMarker(self)
         self.services = FrameEditor_Services(self)
+        self.interface_markers = FrameEditor_Markers(self)
 
         ## Undo/Redo
         self.undo_level = 0
+        self.undo_elements = []
         self.undo_stack = QUndoStack()
         self.undo_stack.indexChanged.connect(self.undo_stack_changed)
         self.__command_lock = threading.Lock()
@@ -50,12 +53,14 @@ class FrameEditor(QtCore.QObject):
     ##
     @QtCore.Slot(int)
     def undo_stack_changed(self, idx):
-        '''Updates all observers, whenever a new command has been pushed to the undo stack'''
+        '''Updates all observers, whenever a command has been undone/redone'''
         self.update_obsevers(self.undo_level)
 
-    def add_undo_level(self, level):
+    def add_undo_level(self, level, elements=None):
         '''Used by commands to add a level for updating'''
         self.undo_level = self.undo_level | level
+        if elements:
+            self.undo_elements.extend(elements)
 
     def command(self, command):
         '''Push a command to the stack (blocking)'''
@@ -66,8 +71,9 @@ class FrameEditor(QtCore.QObject):
     def update_obsevers(self, level):
         '''Updates all registered observers and resets the undo_level'''
         for observer in self.observers:
-            observer.update(self, level)
+            observer.update(self, level, self.undo_elements)
         self.undo_level = 0
+        self.undo_elements = []
 
 
     def get_tf_frames(self):

@@ -24,11 +24,11 @@ class Command_SelectElement(QUndoCommand):
 
     def redo(self):
         self.editor.active_frame = self.new_element
-        self.editor.add_undo_level(2)
+        self.editor.add_undo_level(2, [self.new_element, self.old_element])
 
     def undo(self):
         self.editor.active_frame = self.old_element
-        self.editor.add_undo_level(2)
+        self.editor.add_undo_level(2, [self.new_element, self.old_element])
 
 
 class Command_AddElement(QUndoCommand):
@@ -41,11 +41,13 @@ class Command_AddElement(QUndoCommand):
 
     def redo(self):
         self.editor.frames[self.element.name] = self.element
-        self.editor.add_undo_level(1)
+        self.element.hidden = False
+        self.editor.add_undo_level(1, [self.element])
 
     def undo(self):
         del self.editor.frames[self.element.name]
-        self.editor.add_undo_level(1)
+        self.element.hidden = True
+        self.editor.add_undo_level(1, [self.element])
 
 
 class Command_RemoveElement(QUndoCommand):
@@ -67,16 +69,17 @@ class Command_RemoveElement(QUndoCommand):
             self.editor.add_undo_level(2)
 
         del self.editor.frames[self.element.name]
-        self.editor.add_undo_level(1)
+        self.element.hidden = True
+        self.editor.add_undo_level(1, [self.element])
 
     def undo(self):
         self.editor.frames[self.element.name] = self.element
-        self.editor.add_undo_level(1)
+        self.element.hidden = False
+        self.editor.add_undo_level(1, [self.element])
 
         if self.was_active:
             self.editor.active_frame = self.element
             self.editor.add_undo_level(2)
-
 
 
 class Command_ClearAll(QUndoCommand):
@@ -91,12 +94,12 @@ class Command_ClearAll(QUndoCommand):
     def redo(self):
         self.editor.active_frame = None
         self.editor.frames = {}
-        self.editor.add_undo_level(1+2)
+        self.editor.add_undo_level(1+2, self.elements)
 
     def undo(self):
         self.editor.active_frame = self.active_element
         self.editor.frames = self.elements
-        self.editor.add_undo_level(1+2)
+        self.editor.add_undo_level(1+2, self.elements)
 
 
 class Command_AlignElement(QUndoCommand):
@@ -143,13 +146,13 @@ class Command_AlignElement(QUndoCommand):
         self.element.position = self.new_position
         self.element.orientation = self.new_orientation
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.position = self.old_position
         self.element.orientation = self.old_orientation
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
 
 class Command_SetPose(QUndoCommand):
@@ -171,13 +174,13 @@ class Command_SetPose(QUndoCommand):
         self.element.position = self.new_position
         self.element.orientation = self.new_orientation
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.position = self.old_position
         self.element.orientation = self.old_orientation
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
     def id(self):
         return 1
@@ -211,12 +214,12 @@ class Command_SetPosition(QUndoCommand):
     def redo(self):
         self.element.position = self.new_position
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.position = self.old_position
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
 
 class Command_SetOrientation(QUndoCommand):
@@ -233,12 +236,12 @@ class Command_SetOrientation(QUndoCommand):
     def redo(self):
         self.element.orientation = self.new_orientation
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.orientation = self.old_orientation
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
 
 class Command_SetValue(QUndoCommand):
@@ -256,12 +259,12 @@ class Command_SetValue(QUndoCommand):
     def redo(self):
         self.element.set_value(self.symbol, self.new_value)
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.set_value(self.symbol, self.old_value)
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
 
 class Command_SetParent(QUndoCommand):
@@ -292,7 +295,7 @@ class Command_SetParent(QUndoCommand):
             self.element.orientation = self.new_orientation
 
         self.element.broadcast()
-        self.editor.add_undo_level(4)
+        self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.parent = self.old_parent_name
@@ -302,8 +305,7 @@ class Command_SetParent(QUndoCommand):
             self.element.orientation = self.old_orientation
 
         self.element.broadcast()
-        self.editor.add_undo_level(4)
-
+        self.editor.add_undo_level(4, [self.element])
 
 
 class Command_SetStyle(QUndoCommand):
@@ -332,8 +334,12 @@ class Command_SetStyle(QUndoCommand):
 
     def redo(self):
         del self.editor.frames[self.old_element.name]
+        self.old_element.hidden = True
+
         self.editor.frames[self.new_element.name] = self.new_element
-        self.editor.add_undo_level(1+4)
+        self.new_element.hidden = False
+
+        self.editor.add_undo_level(1+4, [self.new_element, self.old_element])
 
         if self.was_active:
             self.editor.active_frame = self.new_element
@@ -341,8 +347,12 @@ class Command_SetStyle(QUndoCommand):
 
     def undo(self):
         del self.editor.frames[self.new_element.name]
+        self.new_element.hidden = True
+
         self.editor.frames[self.old_element.name] = self.old_element
-        self.editor.add_undo_level(1+4)
+        self.old_element.hidden = False
+
+        self.editor.add_undo_level(1+4, [self.new_element, self.old_element])
 
         if self.was_active:
             self.editor.active_frame = self.old_element
