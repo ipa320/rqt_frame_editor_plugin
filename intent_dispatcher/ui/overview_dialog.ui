@@ -126,7 +126,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btn_add_service_ool">
+         <widget class="QPushButton" name="btn_add_service_tool">
           <property name="text">
            <string>Add New Tool</string>
           </property>
@@ -173,12 +173,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Service</string>
+         <string>Type</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Type</string>
+         <string>Service</string>
         </property>
        </column>
        <column>
@@ -202,11 +202,57 @@
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QLabel" name="txtIntentDescription_2">
           <property name="text">
            <string>Action Tools</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>332</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_delete_action">
+          <property name="text">
+           <string>Delete</string>
+          </property>
+          <property name="icon">
+           <iconset theme="list-remove">
+            <normaloff>../../frame_editor/src/frame_editor</normaloff>../../frame_editor/src/frame_editor</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_add_action">
+          <property name="text">
+           <string>Add New Action</string>
+          </property>
+          <property name="icon">
+           <iconset theme="list-add">
+            <normaloff>../../frame_editor/src/frame_editor</normaloff>../../frame_editor/src/frame_editor</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_add_action_tool">
+          <property name="text">
+           <string>Add New Tool</string>
+          </property>
+          <property name="icon">
+           <iconset theme="list-add">
+            <normaloff>../../frame_editor/src/frame_editor</normaloff>../../frame_editor/src/frame_editor</iconset>
           </property>
          </widget>
         </item>
@@ -247,12 +293,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Action</string>
+         <string>Type</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Type</string>
+         <string>Action</string>
         </property>
        </column>
        <column>
@@ -260,57 +306,6 @@
          <string>Provider</string>
         </property>
        </column>
-      </widget>
-     </item>
-     <item>
-      <widget class="QFrame" name="frame_2">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QPushButton" name="btnAddTool">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>48</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Add tool</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnAddAction">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>48</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Add action provider</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </widget>
      </item>
     </layout>

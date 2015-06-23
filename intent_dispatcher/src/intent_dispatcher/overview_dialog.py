@@ -26,6 +26,7 @@ from python_qt_binding.QtCore import Signal, Slot
 from intent_dispatcher import dispatcher
 from intent_dispatcher import yaml_io
 from intent_dispatcher.provider_wizard import ProviderWizard
+from intent_dispatcher.proxy_wizard import ProxyWizard
 
 from intent_dispatcher.srv import *
 from intent_dispatcher.commands import *
@@ -100,11 +101,14 @@ class Overview_Dialog(Plugin):
 
         ## GUI ##
         ##
-        #ui.btn_add_service_tool.clicked.connect(self.btn_add_service_tool_cb)
+        ui.btn_add_service_tool.clicked.connect(self.btn_add_service_tool_cb)
         ui.btn_add_service.clicked.connect(self.btn_add_service_cb)
         ui.btn_delete_service.clicked.connect(self.btn_delete_service_cb)
 
-        #ui.btn_add_action.clicked.connect(self.btn_add_action_cb)
+        ui.btn_add_action_tool.clicked.connect(self.btn_add_action_tool_cb)
+        ui.btn_add_action.clicked.connect(self.btn_add_action_cb)
+        ui.btn_delete_action.clicked.connect(self.btn_delete_action_cb)
+        
         ui.btn_saveAs.clicked.connect(self.on_btn_save_as_clicked)
         ui.btn_save.clicked.connect(self.on_btn_save_clicked)
         ui.btn_open.clicked.connect(self.on_btn_open_clicked)
@@ -176,18 +180,66 @@ class Overview_Dialog(Plugin):
         pass
 
 
+    ## ADD/DELETE BUTTONS ##
+    ##
     @QtCore.Slot()
     def btn_add_service_tool_cb(self):
-        print "add tool"
+
+        ## Select type
+        wiz = ProxyWizard(is_action=False)
+        wiz.update_table()
+        wiz.exec_()
+
+        print "Selected:", wiz.selected_element
+
+        ## Get Name
+        name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Service Tool", "Name:", QtGui.QLineEdit.Normal, "my_service_tool");
+        while True:
+            if not ok or name == "":
+                return
+            elif name not in self.disp.proxies:
+                break
+            else:
+                name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Service Tool", "Name (must be unique):", QtGui.QLineEdit.Normal, name);
+
+        ## Add proxy
+        (proxy_type_module, proxy_type_name) = wiz.selected_element[1].split("/")
+
+        request = Proxy_Request("service", proxy_type_module, proxy_type_name, name, name, "...", None)
+        self.disp.command(Command_AddProxy(self.disp, request))
+
+
+    @QtCore.Slot()
+    def btn_add_action_tool_cb(self):
+        wiz = ProxyWizard(is_action=True)
+        wiz.update_table()
+        wiz.exec_()
+
+        print "Selected:", wiz.selected_element
+
 
     @QtCore.Slot()
     def btn_delete_service_cb(self):
         row = self._widget.table_services.currentRow()
         if row < 0:
             return # nothing selected
+
         proxy_name = self._widget.table_services.item(row, 0).text()
-        provider_name = self._widget.table_services.item(row, 1).text()
-        self.disp.command(Command_RemoveProvider(self.disp, provider_name, proxy_name))
+        provider_name = self._widget.table_services.item(row, 2).text()
+
+        if provider_name == "-":
+            self.disp.command(Command_RemoveProxy(self.disp, proxy_name))
+        else:
+            self.disp.command(Command_RemoveProvider(self.disp, provider_name, proxy_name))
+
+    @QtCore.Slot()
+    def btn_delete_action_cb(self):
+        row = self._widget.table_actions.currentRow()
+        if row < 0:
+            return # nothing selected
+        #proxy_name = self._widget.table_services.item(row, 0).text()
+        #provider_name = self._widget.table_services.item(row, 2).text()
+        #self.disp.command(Command_RemoveProvider(self.disp, provider_name, proxy_name))
 
     @QtCore.Slot()
     def btn_add_service_cb(self):
@@ -212,26 +264,17 @@ class Overview_Dialog(Plugin):
             if not tool_list:
                 ## Add a new tool ##
                 ##
-                request = AddProxy()
-                request.proxy_type = "service" # "action" or "service"
-                request.proxy_type_module = service_type[0]  # e.g. "std_srvs"
-                request.proxy_type_name = service_type[1] # e.g. "Empty"
-
                 input_dialog = QtGui.QInputDialog()
                 input_dialog.setComboBoxItems(tool_list)
                 input_dialog.setLabelText("Select tool for this provider:")
                 input_dialog.setOptions(QtGui.QInputDialog.UseListViewForComboBoxItems)
                 done = input_dialog.exec_()
-                request.proxy_name = input_dialog.textValue() # e.g. "my_new_service"
+                name = input_dialog.textValue() # e.g. "my_new_service"
 
-                request.name = "..." # human readable name
-                request.description = "..." # human readable description
-                request.icon_path = ""
+                request = Proxy_Request("service", service_type[0], service_type[1], name, name, "...", "")
+                self.disp.command(Command_AddProxy(self.disp, request))
 
-                self.disp.add_proxy_callback(request)
-                print ">>>", self.disp.proxies
-
-                user_choice = request.proxy_name
+                user_choice = name
 
             else:
                 ## Ask for tool to select ##
@@ -247,22 +290,16 @@ class Overview_Dialog(Plugin):
 
             print user_choice
 
-
             ## Add provider ##
             ##
-            request = AddProvider()
+            request = Provider_Request(service_type[0], service_type[1], wiz.selected_service[0], user_choice, user_choice, "...", "")
+            self.disp.command(Command_AddProvider(self.disp, request))
 
-            request.provider_type_module = service_type[0] # e.g. "std_srvs"
-            request.provider_type_name = service_type[1] # e.g. "Empty"
-            request.provider_name = wiz.selected_service[0] # e.g. "my_original_service"
-            request.proxy_name = user_choice # e.g. "my_new_service"
-            request.name = "..." # human readable name
-            request.description = "..." # human readable description
-            request.icon_path = ""
 
-            self.disp.add_provider_callback(request)
+    @QtCore.Slot()
+    def btn_add_action_cb(self):
+        pass
 
-            self.update_table()
 
 
     @QtCore.Slot()
@@ -273,35 +310,57 @@ class Overview_Dialog(Plugin):
 
         services = []
         actions = []
+        num_services = 0
+        num_actions = 0
         for proxy in self.disp.proxies.values():
-            for provider in proxy.providers.values():
-                if proxy.proxy_type == "service":
+            if proxy.proxy_type == "service":
+                for provider in proxy.providers.values():
                     services.append(provider)
-                elif proxy.proxy_type == "action":
+                    num_services = num_services+1
+                if len(proxy.providers.values()) < 1:
+                    num_services = num_services+1
+
+            elif proxy.proxy_type == "action":
+                for provider in proxy.providers.values():
                     actions.append(provider)
+                    num_actions = num_actions+1
+                if len(proxy.providers.values()) < 1:
+                    num_actions = num_actions+1
 
         ## Table ##
         ##
-        self.ui.table_services.setRowCount(len(services))
-        self.ui.table_actions.setRowCount(len(actions))
+        self.ui.table_services.setRowCount(num_services)
+        self.ui.table_actions.setRowCount(num_actions)
 
         i = 0
         for proxy in self.disp.proxies.values():
-            for provider in proxy.providers.values():
-                if proxy.proxy_type == "service":
-                    table = self.ui.table_services
-                elif proxy.proxy_type == "action":
-                     table = self.ui.table_actions
+            row = i
 
+            if proxy.proxy_type == "service":
+                table = self.ui.table_services
+            elif proxy.proxy_type == "action":
+                table = self.ui.table_actions
+
+            for provider in proxy.providers.values():
                 table.setItem(i, 0, QtGui.QTableWidgetItem(provider.proxy_name))
-                table.setItem(i, 1, QtGui.QTableWidgetItem(provider.provider_name))
+                table.setItem(i, 2, QtGui.QTableWidgetItem(provider.provider_name))
 
                 text = "Package: " + provider.provider_type_module + "\nType: " + provider.provider_type_name
-                table.setItem(i, 2, QtGui.QTableWidgetItem(text))
+                table.setItem(i, 1, QtGui.QTableWidgetItem(text))
 
                 table.setItem(i, 3, QtGui.QTableWidgetItem("..."))
 
                 i = i+1
+
+            ## In case there are no providers
+            if len(proxy.providers.values()) < 1:
+                table.setItem(i, 0, QtGui.QTableWidgetItem(proxy.proxy_name))
+                table.setItem(i, 1, QtGui.QTableWidgetItem("-"))
+                table.setItem(i, 2, QtGui.QTableWidgetItem("-"))
+                table.setItem(i, 3, QtGui.QTableWidgetItem("-"))
+                i = i+1
+            elif len(proxy.providers.values()) > 1:
+                table.setSpan(row, 0, i-row, 1)
 
         #self.adjustSize()
 
@@ -310,7 +369,8 @@ class Overview_Dialog(Plugin):
     ## PLUGIN ##
     ##
     def shutdown_plugin(self):
-        self._update_thread.kill()
+        #self._update_thread.kill()
+        pass
 
     def save_settings(self, plugin_settings, instance_settings):
         # TODO save intrinsic configuration, usually using:
@@ -326,59 +386,5 @@ class Overview_Dialog(Plugin):
         # Comment in to signal that the plugin has a way to configure
         # This will enable a setting button (gear icon) in each dock widget title bar
         # Usually used to open a modal configuration dialog
-
-
-
-## Qt ##
-##
-def qt_loop():
-    global widget
-
-    app = QtGui.QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False) # runs in background and doesn't quit once a dialog is closed
-
-    ## Widget (must be created in the main Qt thread) ##
-    ##
-    widget = Overview_Dialog()
-    widget.resize(1024, 768)
-    #widget.move(300, 300)
-    widget.setWindowTitle('Intent Dispatcher')
-    widget.setModal(True)
-
-    app.exec_()
-
-
-
-## Main ##
-##
-def main():
-
-    ## ROS ##
-    ##
-    rospy.init_node('intent_dispatcher_gui')
-
-
-    ## Qt ##
-    ##
-    thread.start_new_thread( qt_loop, () )
-
-
-    ## For Testing ##
-    ##
-    time.sleep(1)
-    QtCore.QMetaObject.invokeMethod(widget, "show", Qt.QueuedConnection);
-
-
-    ## ROS loop ##
-    ##
-    rate = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown():
-        rate.sleep()
-
-    return
-
-
-if __name__ == '__main__':
-    main()
 
 # eof

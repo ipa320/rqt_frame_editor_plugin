@@ -23,18 +23,19 @@ from python_qt_binding.QtCore import Qt
 from intent_dispatcher.provider_lookup import ProviderLookup
 
 
-class ProviderWizard(QtGui.QDialog):
+class ProxyWizard(QtGui.QDialog):
 
-    def __init__(self):
-        super(ProviderWizard, self).__init__()
+    def __init__(self, is_action):
+        super(ProxyWizard, self).__init__()
 
+        self.is_action = is_action
         self.row = -1
 
         ## Load UI file ##
         ##
         rospack = rospkg.RosPack()
         package_path = rospack.get_path('intent_dispatcher')
-        ui_file = os.path.join(package_path, 'ui', 'provider_wizard.ui')
+        ui_file = os.path.join(package_path, 'ui', 'proxy_wizard.ui')
         ui = loadUi(ui_file, self)
         self.ui = ui
 
@@ -45,7 +46,7 @@ class ProviderWizard(QtGui.QDialog):
         table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         table.verticalHeader().setDefaultSectionSize(80);
-        table.currentCellChanged.connect(self.provider_selected)
+        table.currentCellChanged.connect(self.element_selected)
 
         ## GUI ##
         ##
@@ -56,57 +57,63 @@ class ProviderWizard(QtGui.QDialog):
         ui.btnOk.clicked.connect(self.btn_ok_cb)
         ui.btnOk.setEnabled(False)
 
-        return
 
     @QtCore.Slot(int)
-    def provider_selected(self, currentRow):
+    def element_selected(self, currentRow):
         self.ui.btnOk.setEnabled(True)
 
     @QtCore.Slot(int)
     def btn_ok_cb(self):
         self.row = self.ui.table_services.currentRow()
-        self.selected_service = self.services[self.row]
+        if self.is_action:
+            self.selected_element = self.actions[self.row]
+        else:
+            self.selected_element = self.services[self.row]
         self.accept() # close dialog
 
     @QtCore.Slot()
     def rejected_cb(self):
         self.row = -1 # none selected
-        self.selected_service = None
+        self.selected_element = None
 
 
     @QtCore.Slot()
     def update_table(self):
         '''Runs in main Qt thread (necessary for using QIcons)'''
 
-        print "update"
-
+        ## Lookup ##
+        ##
         p = ProviderLookup()
         services, actions = p.lookup_providers()
+
+        if self.is_action:
+            elements = actions
+        else:
+            elements = services
+
         self.services = services
         self.actions = actions
         #print actions
         #print services
+
+        available_types = []
+        for element in elements:
+            available_types.append(element[1])
+        #print available_types
 
 
         ## Table ##
         ##
         self.ui.table_services.setRowCount(len(services))
 
-        for i, service in enumerate(services):
-            print service
+        for i, typ in enumerate(available_types):
+            print typ
+            element_type = typ.split("/")
 
-            item = QtGui.QTableWidgetItem(service[0])
+            item = QtGui.QTableWidgetItem(element_type[0])
             self.ui.table_services.setItem(i, 0, item)
-
-            ## Type
-            service_type = service[1].split("/")
-            text = "Package: " + service_type[0] + "\nType: " + service_type[1]
-            item = QtGui.QTableWidgetItem(text)
+            item = QtGui.QTableWidgetItem(element_type[1])
             self.ui.table_services.setItem(i, 1, item)
-
-            item = QtGui.QTableWidgetItem(service[2])
-            self.ui.table_services.setItem(i, 2, item)
-
 
         self.adjustSize()
 

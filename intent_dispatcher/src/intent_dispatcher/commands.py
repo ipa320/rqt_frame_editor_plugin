@@ -43,4 +43,38 @@ class Command_RemoveProvider(QUndoCommand):
         self.dispatcher.add_undo_level(1+2, [self.proxy, self.provider]) ## TODO
 
 
+
+class Command_AddProxy(QUndoCommand):
+
+    def __init__(self, dispatcher, request):
+        QUndoCommand.__init__(self, "Add proxy")
+        self.dispatcher = dispatcher
+
+        self.new_proxy = Proxy(request, dispatcher.default_chooser)
+
+    def redo(self):
+        self.dispatcher.proxies[self.new_proxy.proxy_name] = self.new_proxy
+        self.dispatcher.add_undo_level(1, [self.new_proxy]) ## TODO couple level and element
+
+    def undo(self):
+        del self.dispatcher.proxies[self.new_proxy.proxy_name]
+        self.dispatcher.add_undo_level(1, [self.new_proxy]) ## TODO
+
+
+class Command_RemoveProxy(QUndoCommand):
+
+    def __init__(self, dispatcher, proxy_name):
+        QUndoCommand.__init__(self, "Remove proxy")
+        self.dispatcher = dispatcher
+
+        self.proxy = dispatcher.proxies[proxy_name]
+
+    def redo(self):
+        del self.dispatcher.proxies[self.proxy.proxy_name]
+        self.dispatcher.add_undo_level(1, [self.proxy]) ## TODO couple level and element
+
+    def undo(self):
+        self.dispatcher.proxies[self.proxy.proxy_name] = self.proxy
+        self.dispatcher.add_undo_level(1, [self.proxy]) ## TODO
+
 # eof
