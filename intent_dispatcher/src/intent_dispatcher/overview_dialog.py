@@ -62,9 +62,8 @@ class Overview_Dialog(Plugin):
         ## Load settings ##
         ##
         self.filename = rospy.get_param('~filename', None)
-        print "Filename: ", self.filename
         if self.filename:
-            yaml_io.import_yaml(self.disp, self.filename)
+            self.load_file(self.filename)
 
 
         self.row = -1
@@ -97,24 +96,57 @@ class Overview_Dialog(Plugin):
         ui.btnAddTool.clicked.connect(self.btn_add_tool_cb)
         ui.btnAddAction.clicked.connect(self.btn_add_action_cb)
         ui.btnAddService.clicked.connect(self.btn_add_service_cb)
-        ui.btnSaveAs.clicked.connect(self.on_btn_save_as_clicked)
+        ui.btn_saveAs.clicked.connect(self.on_btn_save_as_clicked)
+        ui.btn_save.clicked.connect(self.on_btn_save_clicked)
+        ui.btn_open.clicked.connect(self.on_btn_open_clicked)
 
         self.update_table()
 
 
 
-
-    ## Import/Export ##
+    ## FILE I/O ##
     ##
-    @QtCore.Slot(int)
+    def load_file(self, filename, namespace = None):
+
+        ## ToDo: clean up
+
+        #self.undo_stack.beginMacro("Import file")
+
+        if filename:
+            yaml_io.import_yaml(self.disp, filename)
+            self.filename = filename
+
+        #self.undo_stack.endMacro()
+
+    @QtCore.Slot()
     def on_btn_save_as_clicked(self):
         ## Ask for filename
-        saveDialog = QtGui.QFileDialog(self, 'Save settings', QtCore.QDir.currentPath(), 'YAML files(*.yaml)')
+        saveDialog = QtGui.QFileDialog(self._widget, 'Save settings', QtCore.QDir.currentPath(), 'YAML files(*.yaml)')
         saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         saveDialog.selectFile(self.filename)
         if (saveDialog.exec_()):
             filename = str(saveDialog.selectedFiles()[0])
             yaml_io.export_yaml(self.disp, filename)
+            self.filename = filename
+
+    @QtCore.Slot()
+    def on_btn_save_clicked(self):
+        if self.filename:
+            yaml_io.export_yaml(self.disp, self.filename)
+
+    @QtCore.Slot()
+    def on_btn_open_clicked(self):
+        files = QtGui.QFileDialog.getOpenFileNames(self._widget,
+            "Select one or more files to open", "",
+            "YAML files(*.yaml)");
+
+        for filename in files:
+            self.load_file(str(filename))
+
+        if len(files) == 1:
+            self.filename = files[0]
+        else:
+            self.filename = None
 
 
     @QtCore.Slot(int)

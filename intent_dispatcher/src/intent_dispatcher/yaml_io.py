@@ -61,7 +61,7 @@ def export_yaml(disp, filename, namespace = "intent_dispatcher/"):
 
 
 def import_yaml(disp, filename, namespace = "intent_dispatcher/"):
-    print "Loading file"
+    print "Loading file '{}' into namespace '{}'".format(filename, namespace)
 
     ## Load yaml file
     data = rosparam.load_file(filename, namespace)[0][0]
