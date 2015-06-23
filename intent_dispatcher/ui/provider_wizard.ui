@@ -40,7 +40,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="table_services">
+    <widget class="QTableWidget" name="table_elements">
      <property name="styleSheet">
       <string notr="true">QTableView::item:hover {
     background-color: rgba(200,200,220,255);
@@ -126,7 +126,7 @@
  <tabstops>
   <tabstop>btnOk</tabstop>
   <tabstop>btnCancel</tabstop>
-  <tabstop>table_services</tabstop>
+  <tabstop>table_elements</tabstop>
  </tabstops>
  <resources/>
  <connections>

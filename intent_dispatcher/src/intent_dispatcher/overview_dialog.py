@@ -25,6 +25,7 @@ from python_qt_binding.QtCore import Signal, Slot
 
 from intent_dispatcher import dispatcher
 from intent_dispatcher import yaml_io
+from intent_dispatcher.qt_dispatcher import Dispatcher_Dialog
 from intent_dispatcher.provider_wizard import ProviderWizard
 from intent_dispatcher.proxy_wizard import ProxyWizard
 
@@ -58,12 +59,6 @@ class Overview_Dialog(Plugin):
             print 'unknowns: ', unknowns
 
 
-        ## Dispatcher ##
-        ##
-        self.disp = dispatcher.Dispatcher()
-        #self.disp.set_chooser(widget.choose_provider)
-        self.disp.observers.append(self)
-
         ## Load settings ##
         ##
         self.filename = rospy.get_param('~filename', None)
@@ -87,8 +82,6 @@ class Overview_Dialog(Plugin):
 
         context.add_widget(self._widget)
 
-        ## Undo View
-        self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.disp.undo_stack))
 
         ## Table ##
         ##
@@ -96,7 +89,14 @@ class Overview_Dialog(Plugin):
         table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        table.verticalHeader().setDefaultSectionSize(80);
+        table.verticalHeader().setDefaultSectionSize(60);
+        table.currentCellChanged.connect(self.provider_selected)
+
+        table = self.ui.table_actions
+        table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        table.verticalHeader().setDefaultSectionSize(60);
         table.currentCellChanged.connect(self.provider_selected)
 
         ## GUI ##
@@ -114,6 +114,19 @@ class Overview_Dialog(Plugin):
         ui.btn_open.clicked.connect(self.on_btn_open_clicked)
 
         self.signal_update.connect(self.update_all)
+
+
+        ## Dispatcher ##
+        ##
+        self.disp = dispatcher.Dispatcher()
+        self.disp.observers.append(self)
+
+        self.chooser = Dispatcher_Dialog(self._widget)
+        self.disp.set_chooser(self.chooser.choose_provider)
+
+
+        ## Undo View
+        self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.disp.undo_stack))
 
         self.update_table()
 
@@ -198,6 +211,9 @@ class Overview_Dialog(Plugin):
         wiz.update_table()
         wiz.exec_()
 
+        if not wiz.selected_element:
+            return
+
         ## Get Name
         name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Tool", "Name:", QtGui.QLineEdit.Normal, "my_tool");
         while True:
@@ -222,61 +238,70 @@ class Overview_Dialog(Plugin):
 
     @QtCore.Slot()
     def btn_add_service_cb(self):
-        wiz = ProviderWizard()
-        wiz.update_table()
-        wiz.exec_()
-
-        print "Selected:", wiz.selected_service
-
-        if wiz.selected_service is not None:
-
-            service_type = wiz.selected_service[1].split("/")
-
-            ## Find all tools that fit ##
-            ##
-            tool_list = []
-            for proxy in self.disp.proxies.values():
-                if proxy.proxy_type_module == service_type[0] and proxy.proxy_type_name == service_type[1]:
-                    tool_list.append(proxy.proxy_name)
-
-
-            if not tool_list:
-                ## Add a new tool ##
-                ##
-                input_dialog = QtGui.QInputDialog()
-                input_dialog.setComboBoxItems(tool_list)
-                input_dialog.setLabelText("Select tool for this provider:")
-                input_dialog.setOptions(QtGui.QInputDialog.UseListViewForComboBoxItems)
-                done = input_dialog.exec_()
-                name = input_dialog.textValue() # e.g. "my_new_service"
-
-                request = Proxy_Request("service", service_type[0], service_type[1], name, name, "...", "")
-                self.disp.command(Command_AddProxy(self.disp, request))
-
-                user_choice = name
-
-            else:
-                ## Ask for tool to select ##
-                ##
-                input_dialog = QtGui.QInputDialog()
-                input_dialog.setComboBoxItems(tool_list)
-                input_dialog.setLabelText("Select tool for this provider:")
-                input_dialog.setOptions(QtGui.QInputDialog.UseListViewForComboBoxItems)
-
-                done = input_dialog.exec_()
-
-                user_choice = input_dialog.textValue()
-
-            print user_choice
-
-            ## Add provider ##
-            ##
-            request = Provider_Request(service_type[0], service_type[1], wiz.selected_service[0], user_choice, user_choice, "...", "")
-            self.disp.command(Command_AddProvider(self.disp, request))
+        self.add_provider(is_action = False)
 
     @QtCore.Slot()
     def btn_add_action_cb(self):
-        pass
+        self.add_provider(is_action = True)
+
+    def add_provider(self, is_action):
+
+        ## Select type
+        wiz = ProviderWizard(is_action)
+        wiz.update_table()
+        wiz.exec_()
+
+        if not wiz.selected_element:
+            return
+
+        element_type = wiz.selected_element[1].split("/")
+
+        if is_action:
+            proxy_type = "action"
+        else:
+            proxy_type = "service"
+
+        ## Find all tools that fit ##
+        ##
+        tool_list = []
+        for proxy in self.disp.proxies.values():
+            if proxy.proxy_type_module == element_type[0] and proxy.proxy_type_name == element_type[1]:
+                tool_list.append(proxy.proxy_name)
+
+
+        if not tool_list:
+            ## Add a new tool ##
+            ##
+            input_dialog = QtGui.QInputDialog()
+            input_dialog.setComboBoxItems(tool_list)
+            input_dialog.setLabelText("Select tool for this provider:")
+            input_dialog.setOptions(QtGui.QInputDialog.UseListViewForComboBoxItems)
+            done = input_dialog.exec_()
+            name = input_dialog.textValue() # e.g. "my_new_service"
+
+            request = Proxy_Request(proxy_type, element_type[0], element_type[1], name, name, "...", "")
+            self.disp.command(Command_AddProxy(self.disp, request))
+
+            user_choice = name
+
+        else:
+            ## Ask for tool to select ##
+            ##
+            input_dialog = QtGui.QInputDialog()
+            input_dialog.setComboBoxItems(tool_list)
+            input_dialog.setLabelText("Select tool for this provider:")
+            input_dialog.setOptions(QtGui.QInputDialog.UseListViewForComboBoxItems)
+
+            done = input_dialog.exec_()
+
+            user_choice = input_dialog.textValue()
+
+        print user_choice
+
+        ## Add provider ##
+        ##
+        request = Provider_Request(element_type[0], element_type[1], wiz.selected_element[0], user_choice, wiz.selected_element[0], "...", "")
+        self.disp.command(Command_AddProvider(self.disp, request))
 
 
     ## Delete Buttons ##

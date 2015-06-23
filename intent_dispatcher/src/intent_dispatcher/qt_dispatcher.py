@@ -28,8 +28,8 @@ from intent_dispatcher import dispatcher
 
 class Dispatcher_Dialog(QtGui.QDialog):
 
-    def __init__(self):
-        super(Dispatcher_Dialog, self).__init__()
+    def __init__(self, parent=None):
+        super(Dispatcher_Dialog, self).__init__(parent)
 
         self.row = -1
 
@@ -75,6 +75,7 @@ class Dispatcher_Dialog(QtGui.QDialog):
     def rejected_cb(self):
         self.row = -1 # none selected
         self.event.set() # wake up chooser
+        self.reject() # close dialog
 
 
 
@@ -92,8 +93,8 @@ class Dispatcher_Dialog(QtGui.QDialog):
 
         ## Start dialog ##
         ##
-        QtCore.QMetaObject.invokeMethod(widget, "update_table", Qt.QueuedConnection);
-        QtCore.QMetaObject.invokeMethod(widget, "show", Qt.QueuedConnection);
+        QtCore.QMetaObject.invokeMethod(self, "update_table", Qt.QueuedConnection);
+        QtCore.QMetaObject.invokeMethod(self, "show", Qt.QueuedConnection);
 
         print "wait"
         self.event.wait()

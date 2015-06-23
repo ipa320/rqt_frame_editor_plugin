@@ -107,7 +107,6 @@ class ProxyWizard(QtGui.QDialog):
         self.ui.table_services.setRowCount(len(services))
 
         for i, typ in enumerate(available_types):
-            print typ
             element_type = typ.split("/")
 
             item = QtGui.QTableWidgetItem(element_type[0])
