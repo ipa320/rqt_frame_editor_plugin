@@ -129,6 +129,11 @@ class Overview_Dialog(Plugin):
         #if level & 2:
 
 
+    @QtCore.Slot(int)
+    def provider_selected(self, currentRow):
+        pass
+
+
 
     ## FILE I/O ##
     ##
@@ -175,71 +180,45 @@ class Overview_Dialog(Plugin):
             self.filename = None
 
 
-    @QtCore.Slot(int)
-    def provider_selected(self, currentRow):
-        pass
 
-
-    ## ADD/DELETE BUTTONS ##
+    ## Add Buttons ##
     ##
     @QtCore.Slot()
     def btn_add_service_tool_cb(self):
+        self.add_tool(is_action=False)
+
+    @QtCore.Slot()
+    def btn_add_action_tool_cb(self):
+        self.add_tool(is_action=True)
+
+    def add_tool(self, is_action):
 
         ## Select type
-        wiz = ProxyWizard(is_action=False)
+        wiz = ProxyWizard(is_action)
         wiz.update_table()
         wiz.exec_()
 
-        print "Selected:", wiz.selected_element
-
         ## Get Name
-        name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Service Tool", "Name:", QtGui.QLineEdit.Normal, "my_service_tool");
+        name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Tool", "Name:", QtGui.QLineEdit.Normal, "my_tool");
         while True:
             if not ok or name == "":
                 return
             elif name not in self.disp.proxies:
                 break
             else:
-                name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Service Tool", "Name (must be unique):", QtGui.QLineEdit.Normal, name);
+                name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Tool", "Name (must be unique):", QtGui.QLineEdit.Normal, name);
 
         ## Add proxy
         (proxy_type_module, proxy_type_name) = wiz.selected_element[1].split("/")
 
-        request = Proxy_Request("service", proxy_type_module, proxy_type_name, name, name, "...", None)
+        if is_action:
+            proxy_type = "action"
+        else:
+            proxy_type = "service"
+
+        request = Proxy_Request(proxy_type, proxy_type_module, proxy_type_name, name, name, "...", None)
         self.disp.command(Command_AddProxy(self.disp, request))
 
-
-    @QtCore.Slot()
-    def btn_add_action_tool_cb(self):
-        wiz = ProxyWizard(is_action=True)
-        wiz.update_table()
-        wiz.exec_()
-
-        print "Selected:", wiz.selected_element
-
-
-    @QtCore.Slot()
-    def btn_delete_service_cb(self):
-        row = self._widget.table_services.currentRow()
-        if row < 0:
-            return # nothing selected
-
-        proxy_name = self._widget.table_services.item(row, 0).text()
-        provider_name = self._widget.table_services.item(row, 2).text()
-
-        if provider_name == "-":
-            self.disp.command(Command_RemoveProxy(self.disp, proxy_name))
-        else:
-            self.disp.command(Command_RemoveProvider(self.disp, provider_name, proxy_name))
-
-    @QtCore.Slot()
-    def btn_delete_action_cb(self):
-        row = self._widget.table_actions.currentRow()
-        if row < 0:
-            return # nothing selected
-        #proxy_name = self._widget.table_services.item(row, 0).text()
-        #provider_name = self._widget.table_services.item(row, 2).text()
-        #self.disp.command(Command_RemoveProvider(self.disp, provider_name, proxy_name))
 
     @QtCore.Slot()
     def btn_add_service_cb(self):
@@ -295,10 +274,40 @@ class Overview_Dialog(Plugin):
             request = Provider_Request(service_type[0], service_type[1], wiz.selected_service[0], user_choice, user_choice, "...", "")
             self.disp.command(Command_AddProvider(self.disp, request))
 
-
     @QtCore.Slot()
     def btn_add_action_cb(self):
         pass
+
+
+    ## Delete Buttons ##
+    ##
+    @QtCore.Slot()
+    def btn_delete_service_cb(self):
+        self.delete_element(is_action=False)
+
+    @QtCore.Slot()
+    def btn_delete_action_cb(self):
+        self.delete_element(is_action=True)
+
+
+    def delete_element(self, is_action):
+        if is_action:
+            table = self._widget.table_services
+        else:
+            table = self._widget.table_actions
+
+        row = table.currentRow()
+        if row < 0:
+            return # nothing selected
+
+        proxy_name = table.item(row, 0).text()
+        provider_name = table.item(row, 2).text()
+
+        if provider_name == "-":
+            self.disp.command(Command_RemoveProxy(self.disp, proxy_name))
+        else:
+            self.disp.command(Command_RemoveProvider(self.disp, provider_name, proxy_name))
+
 
 
 
