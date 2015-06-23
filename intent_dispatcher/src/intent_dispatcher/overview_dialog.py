@@ -21,17 +21,21 @@ from python_qt_binding import loadUi
 from python_qt_binding import QtCore
 from python_qt_binding import QtGui
 from python_qt_binding.QtCore import Qt
+from python_qt_binding.QtCore import Signal, Slot
 
 from intent_dispatcher import dispatcher
 from intent_dispatcher import yaml_io
 from intent_dispatcher.provider_wizard import ProviderWizard
 
 from intent_dispatcher.srv import *
+from intent_dispatcher.commands import *
 
 ## ToDo make actual service calls instead of directly calling dispatcher functions
 
 
 class Overview_Dialog(Plugin):
+
+    signal_update = QtCore.Signal(int)
 
     def __init__(self, context):
         super(Overview_Dialog, self).__init__(context)
@@ -57,7 +61,7 @@ class Overview_Dialog(Plugin):
         ##
         self.disp = dispatcher.Dispatcher()
         #self.disp.set_chooser(widget.choose_provider)
-
+        self.disp.observers.append(self)
 
         ## Load settings ##
         ##
@@ -96,14 +100,29 @@ class Overview_Dialog(Plugin):
 
         ## GUI ##
         ##
-        ui.btnAddTool.clicked.connect(self.btn_add_tool_cb)
-        ui.btnAddAction.clicked.connect(self.btn_add_action_cb)
-        ui.btnAddService.clicked.connect(self.btn_add_service_cb)
+        #ui.btn_add_service_tool.clicked.connect(self.btn_add_service_tool_cb)
+        ui.btn_add_service.clicked.connect(self.btn_add_service_cb)
+        ui.btn_delete_service.clicked.connect(self.btn_delete_service_cb)
+
+        #ui.btn_add_action.clicked.connect(self.btn_add_action_cb)
         ui.btn_saveAs.clicked.connect(self.on_btn_save_as_clicked)
         ui.btn_save.clicked.connect(self.on_btn_save_clicked)
         ui.btn_open.clicked.connect(self.on_btn_open_clicked)
 
+        self.signal_update.connect(self.update_all)
+
         self.update_table()
+
+
+    def update(self, dispatcher, level, elements):
+        self.signal_update.emit(level)
+
+    @Slot(int)
+    def update_all(self, level):
+        if level & 1:
+            self.update_table()
+
+        #if level & 2:
 
 
 
@@ -157,19 +176,21 @@ class Overview_Dialog(Plugin):
         pass
 
 
-    @QtCore.Slot(int)
-    def btn_add_tool_cb(self):
+    @QtCore.Slot()
+    def btn_add_service_tool_cb(self):
         print "add tool"
 
-
     @QtCore.Slot()
-    def btn_add_action_cb(self):
-        print "add action"
-
+    def btn_delete_service_cb(self):
+        row = self._widget.table_services.currentRow()
+        if row < 0:
+            return # nothing selected
+        proxy_name = self._widget.table_services.item(row, 0).text()
+        provider_name = self._widget.table_services.item(row, 1).text()
+        self.disp.command(Command_RemoveProvider(self.disp, provider_name, proxy_name))
 
     @QtCore.Slot()
     def btn_add_service_cb(self):
-        print "add service"
         wiz = ProviderWizard()
         wiz.update_table()
         wiz.exec_()
