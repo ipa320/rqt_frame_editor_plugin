@@ -30,6 +30,6 @@
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
   </export>
 </package>

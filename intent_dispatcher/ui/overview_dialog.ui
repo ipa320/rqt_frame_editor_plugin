@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>849</width>
-    <height>634</height>
+    <width>875</width>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QFrame" name="frame">
      <property name="minimumSize">
@@ -252,10 +252,6 @@
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>btnAddService</tabstop>
-  <tabstop>table_services</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

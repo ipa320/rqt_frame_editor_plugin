@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<library path="src">
+  <class name="Intent Dispatcher" type="intent_dispatcher.overview_dialog.Overview_Dialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      An editor for defining tf frames.
+    </description>
+    <qtgui>
+      <label>Intent Dispatcher Plugin</label>
+      <icon type="theme">document-new</icon>
+      <statustip>A GUI for the intent dispatcher</statustip>
+    </qtgui>
+  </class>
+</library>
