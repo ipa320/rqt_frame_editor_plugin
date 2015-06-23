@@ -25,6 +25,8 @@ from python_qt_binding.QtCore import Signal, Slot
 
 from intent_dispatcher import dispatcher
 from intent_dispatcher import yaml_io
+from intent_dispatcher.proxy import *
+from intent_dispatcher.provider import *
 from intent_dispatcher.qt_dispatcher import Dispatcher_Dialog
 from intent_dispatcher.provider_wizard import ProviderWizard
 from intent_dispatcher.proxy_wizard import ProxyWizard
@@ -339,8 +341,6 @@ class Overview_Dialog(Plugin):
     @QtCore.Slot()
     def update_table(self):
         '''Runs in main Qt thread (necessary for using QIcons)'''
-
-        print "update"
 
         services = []
         actions = []

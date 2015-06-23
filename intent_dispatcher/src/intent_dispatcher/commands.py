@@ -3,7 +3,9 @@
 
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
-from dispatcher import *
+from intent_dispatcher.proxy import Proxy
+from intent_dispatcher.provider import Provider
+
 from python_qt_binding.QtGui import QUndoCommand
 
 
