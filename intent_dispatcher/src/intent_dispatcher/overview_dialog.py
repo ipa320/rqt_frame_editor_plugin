@@ -82,6 +82,9 @@ class Overview_Dialog(Plugin):
 
         context.add_widget(self._widget)
 
+        ## Undo View
+        self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.disp.undo_stack))
+
         ## Table ##
         ##
         table = self.ui.table_services
@@ -110,13 +113,13 @@ class Overview_Dialog(Plugin):
 
         ## ToDo: clean up
 
-        #self.undo_stack.beginMacro("Import file")
+        self.disp.undo_stack.beginMacro("Import file")
 
         if filename:
             yaml_io.import_yaml(self.disp, filename)
             self.filename = filename
 
-        #self.undo_stack.endMacro()
+        self.disp.undo_stack.endMacro()
 
     @QtCore.Slot()
     def on_btn_save_as_clicked(self):

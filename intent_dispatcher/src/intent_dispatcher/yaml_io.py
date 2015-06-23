@@ -8,6 +8,7 @@
 import rospy
 import rosparam
 
+from intent_dispatcher.commands import *
 from intent_dispatcher import dispatcher
 
 
@@ -74,6 +75,6 @@ def import_yaml(disp, filename, namespace = "intent_dispatcher/"):
     ## Import providers
     for provider in data['providers']:
         request = dispatcher.Provider_Request(**provider)
-        disp.add_provider_callback(request)
+        disp.command(Command_AddProvider(disp, request))
 
     print "Loading done"
