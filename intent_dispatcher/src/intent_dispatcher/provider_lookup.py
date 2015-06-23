@@ -13,7 +13,14 @@ class ProviderLookup():
         self._master = xmlrpclib.ServerProxy(os.environ['ROS_MASTER_URI'])
 
 
-    def lookup_providers(self, no_loggers=True):
+        self.blacklist = {
+            "/rviz/reload_shaders": True,
+            "/register_provider": True,
+            "/register_proxy": True,
+        }
+
+
+    def lookup_providers(self, no_loggers=True, use_blacklist=True):
 
         ## System State ##
         ##
@@ -44,7 +51,8 @@ class ProviderLookup():
             if no_loggers:
                 if service[0].endswith("/get_loggers") or service[0].endswith("/set_logger_level"):
                     continue
-
+            if use_blacklist and (service[0] in self.blacklist) and (self.blacklist[service[0]]):
+                continue
             services.append( (service[0], rosservice.get_service_type(service[0]), service[1][0]) )
 
 
