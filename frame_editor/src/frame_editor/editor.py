@@ -156,15 +156,15 @@ class FrameEditor(QtCore.QObject):
 
         for frame in self.frames.values():
             t = {}
-            t["x"] = frame.position[0]
-            t["y"] = frame.position[1]
-            t["z"] = frame.position[2]
+            t["x"] = float(frame.position[0])
+            t["y"] = float(frame.position[1])
+            t["z"] = float(frame.position[2])
 
             o = {}
-            o["x"] = frame.orientation[0]
-            o["y"] = frame.orientation[1]
-            o["z"] = frame.orientation[2]
-            o["w"] = frame.orientation[3]
+            o["x"] = float(frame.orientation[0])
+            o["y"] = float(frame.orientation[1])
+            o["z"] = float(frame.orientation[2])
+            o["w"] = float(frame.orientation[3])
 
             f = {}
             f["parent"] = frame.parent
