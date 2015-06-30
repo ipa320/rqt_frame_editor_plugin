@@ -86,7 +86,7 @@ class Frame(object):
                 rpy[1] = value
             elif symbol == 'c':
                 rpy[2] = value
-            self.orientation = tf.transformations.quaternion_from_euler(*rpy)
+            self.orientation = tuple(tf.transformations.quaternion_from_euler(*rpy))
 
 
 class Object_Geometry(Frame):
