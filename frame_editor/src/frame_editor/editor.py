@@ -34,11 +34,6 @@ class FrameEditor(QtCore.QObject):
         self.frames = {}
         self.active_frame = None
         
-        ## Views
-        self.interactive = FrameEditor_InteractiveMarker(self)
-        self.services = FrameEditor_Services(self)
-        self.interface_markers = FrameEditor_Markers(self)
-
         ## Undo/Redo
         self.observers = []
         self.undo_level = 0
@@ -46,6 +41,11 @@ class FrameEditor(QtCore.QObject):
         self.undo_stack = QUndoStack()
         self.undo_stack.indexChanged.connect(self.undo_stack_changed)
         self.__command_lock = threading.Lock()
+
+        ## Views
+        self.interactive = FrameEditor_InteractiveMarker(self)
+        self.services = FrameEditor_Services(self)
+        self.interface_markers = FrameEditor_Markers(self)
 
 
     ## Undo/Redo ##
