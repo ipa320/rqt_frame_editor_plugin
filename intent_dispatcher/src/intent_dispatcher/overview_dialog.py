@@ -319,9 +319,9 @@ class Overview_Dialog(Plugin):
 
     def delete_element(self, is_action):
         if is_action:
-            table = self._widget.table_services
-        else:
             table = self._widget.table_actions
+        else:
+            table = self._widget.table_services
 
         row = table.currentRow()
         if row < 0:

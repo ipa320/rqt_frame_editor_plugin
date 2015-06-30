@@ -34,14 +34,13 @@ class FrameEditor(QtCore.QObject):
         self.frames = {}
         self.active_frame = None
         
-        self.observers = []
-
         ## Views
         self.interactive = FrameEditor_InteractiveMarker(self)
         self.services = FrameEditor_Services(self)
         self.interface_markers = FrameEditor_Markers(self)
 
         ## Undo/Redo
+        self.observers = []
         self.undo_level = 0
         self.undo_elements = []
         self.undo_stack = QUndoStack()
