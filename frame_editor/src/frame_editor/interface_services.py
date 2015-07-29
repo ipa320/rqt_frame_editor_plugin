@@ -3,6 +3,8 @@
 
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
+import copy
+
 import rospy
 
 from frame_editor.objects import *
@@ -25,6 +27,7 @@ class FrameEditor_Services:
         rospy.Service("get_frame", GetFrame, self.callback_get_frame)
         rospy.Service("remove_frame", RemoveFrame, self.callback_remove_frame)
         rospy.Service("set_frame", SetFrame, self.callback_set_frame)
+        rospy.Service("copy_frame", CopyFrame, self.callback_copy_frame)
 
 
     def callback_align_frame(self, request):
@@ -143,6 +146,40 @@ class FrameEditor_Services:
 
             f = Frame(request.name, FromPoint(request.pose.position), FromQuaternion(request.pose.orientation))
             self.editor.command(Command_AddElement(self.editor, f))
+
+        return response
+
+
+    def callback_copy_frame(self, request):
+        print "> Request to copy frame '" + request.source_name + "' with new name '" + request.name + "' and new parent name '" + request.parent + "'"
+
+        response = CopyFrameResponse()
+        response.error_code = 0
+
+        if request.name == "":
+            print " Error: No name given"
+            response.error_code = 1
+
+        elif request.source_name == "":
+            print " Error: No source name given"
+            response.error_code = 3
+
+        else:
+
+            if request.name not in self.editor.frames:
+                ## If not existing yet: create frame
+                frame = copy.deepcopy(self.editor.frames[request.source_name])
+                frame.name = request.name
+                self.editor.command(Command_AddElement(self.editor, frame))
+            else:
+                ## Align with source frame
+                frame = self.editor.frames[request.name]
+                self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c', ]))
+
+            ## Set parent
+            if (request.parent != "") and (frame.parent != request.parent):
+                frame = self.editor.frames[request.name]
+                self.editor.command(Command_SetParent(self.editor, frame, request.parent, True))
 
         return response
 
