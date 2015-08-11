@@ -84,22 +84,23 @@ class FrameEditorGUI(Plugin):
 
         ## Load file ##
         ##
-        arg_path = args.file[0].split()
-        if len(arg_path) == 1:
-            #load file
-            filename = arg_path[0]
-            print "Loading", filename
-            self.editor.load_file(str(filename), self.namespace)
-        elif len(arg_path) == 2:
-            #load rospack
-            rospack = rospkg.RosPack()
-            filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
-            print "Loading", filename
-            self.editor.load_file(str(filename), self.namespace)
-        else:
-            print "Load argument not understood! --load", arg_path
-            print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
-            print "or use --load 'fullPathToMyYaml.yaml'"
+        if args.file:
+            arg_path = args.file[0].split()
+            if len(arg_path) == 1:
+                #load file
+                filename = arg_path[0]
+                print "Loading", filename
+                self.editor.load_file(str(filename), self.namespace)
+            elif len(arg_path) == 2:
+                #load rospack
+                rospack = rospkg.RosPack()
+                filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
+                print "Loading", filename
+                self.editor.load_file(str(filename), self.namespace)
+            else:
+                print "Load argument not understood! --load", arg_path
+                print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
+                print "or use --load 'fullPathToMyYaml.yaml'"
 
 
         ## Connections ##
