@@ -41,11 +41,14 @@ class FrameEditorGUI(Plugin):
         parser.add_argument("-q", "--quiet", action="store_true",
                       dest="quiet",
                       help="Put plugin in silent mode")
+        parser.add_argument("-l", "--load", action="append",
+                      dest="file",
+                      help="Load a file at startup. [rospack filepath/file]")
+
         args, unknowns = parser.parse_known_args(context.argv())
         if not args.quiet:
             print 'arguments: ', args
             print 'unknowns: ', unknowns
-
 
         ## Editor ##
         ##
@@ -63,7 +66,6 @@ class FrameEditorGUI(Plugin):
         self.old_frame_list = []
         self.old_selected = ""
 
-
         ## Create QWidget ##
         ##
         self._widget = QWidget()
@@ -78,6 +80,27 @@ class FrameEditorGUI(Plugin):
 
         ## Undo View
         self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
+
+
+        ## Load file ##
+        ##
+        if args.file:
+            arg_path = args.file[0].split()
+            if len(arg_path) == 1:
+                #load file
+                filename = arg_path[0]
+                print "Loading", filename
+                self.editor.load_file(str(filename), self.namespace)
+            elif len(arg_path) == 2:
+                #load rospack
+                rospack = rospkg.RosPack()
+                filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
+                print "Loading", filename
+                self.editor.load_file(str(filename), self.namespace)
+            else:
+                print "Load argument not understood! --load", arg_path
+                print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
+                print "or use --load 'fullPathToMyYaml.yaml'"
 
 
         ## Connections ##
