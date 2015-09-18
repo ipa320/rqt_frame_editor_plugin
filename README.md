@@ -13,6 +13,7 @@ When starting the rqt plugin twice, you will receive a long error message with t
     raise ServiceException(err)
 ServiceException: service [/align_frame] already registered
 ```
-* Note that rqt automatically starts in the last configuration, so the plugin may already be running, possibly minimized. You can check the "Running" entry in the header menu to see whether the plugin is already active.
+* Note that rqt automatically starts in the last configuration, so **the plugin may already be running, possibly minimized**. You can check the "Running" entry in the header menu to see whether the plugin is already active.
+* Hidden plugins can be recovered by rightclicking in the empty space and selecting the plugin (so far only called "Form")
 * Closing and starting the plugin doesn't seem to work, so:
 * The best way is to restart rqt. 
