@@ -154,7 +154,7 @@ class FrameEditorGUI(Plugin):
 
     def _update_thread_run(self):
         print "> Going for some spins"
-        rate = rospy.Rate(1000) # hz
+        rate = rospy.Rate(200) # hz
         while not rospy.is_shutdown():
             self.editor.broadcast()
             rate.sleep()
