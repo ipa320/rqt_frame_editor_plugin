@@ -675,6 +675,11 @@
                  <string>axis</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>mesh</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>

@@ -307,10 +307,9 @@ class Command_SetParent(QUndoCommand):
         self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
-
 class Command_SetStyle(QUndoCommand):
 
-    def __init__(self, editor, element, style):
+    def __init__(self, editor, element, style, path=None):
         QUndoCommand.__init__(self, "Style")
         self.editor = editor
 
@@ -324,6 +323,8 @@ class Command_SetStyle(QUndoCommand):
             self.new_element = Object_Sphere(element.name, element.position, element.orientation, element.parent)
         elif style == "axis":
             self.new_element = Object_Axis(element.name, element.position, element.orientation, element.parent)
+        elif style == "mesh":
+            self.new_element = Object_Mesh(element.name, element.position, element.orientation, element.parent, path)
         else:
             self.new_element = Frame(element.name, element.position, element.orientation, element.parent)
 

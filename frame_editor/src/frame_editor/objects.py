@@ -177,4 +177,23 @@ class Object_Axis(Object_Geometry):
         self.marker.type = Marker.ARROW
         self.marker.scale = NewVector3(self.length, self.width, self.width)
 
+
+class Object_Mesh(Object_Geometry):
+
+    def __init__(self, name, position, orientation, parent, mesh_path, scale=1.0):
+
+        self.scale = scale
+        self.path = mesh_path
+        # TODO remove
+        self.path = "package://frame_editor/mesh/weber_pitek.stl"
+
+        super(Object_Mesh, self).__init__(name, position, orientation, parent, "mesh")
+
+    def update_marker(self):
+        super(Object_Mesh, self).update_marker()
+
+        self.marker.type = Marker.MESH_RESOURCE
+        self.marker.mesh_resource = self.path
+        self.marker.scale = NewVector3(self.scale, self.scale, self.scale)
+
 # eof

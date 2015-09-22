@@ -138,6 +138,8 @@ class FrameEditor(QtCore.QObject):
                 f = Object_Sphere(name, position, orientation, frame["parent"], dat["diameter"])
             elif style == "axis":
                 f = Object_Axis(name, position, orientation, frame["parent"], dat["length"], dat["width"])
+            elif style == "mesh":
+                f = Object_Mesh(name, position, orientation, frame["parent"], dat["path"], dat["scale"])
             else:
                 f = Frame(name, position, orientation, frame["parent"])
             
@@ -184,6 +186,8 @@ class FrameEditor(QtCore.QObject):
             elif frame.style == "axis":
                 f["data"] = { "length": frame.length, "width": frame.width }
 
+            elif frame.style == "mesh":
+                f["data"] = { "path" : frame.path, "scale" : frame.scale }
             frames[frame.name] = f
 
         data["frames"] = frames
