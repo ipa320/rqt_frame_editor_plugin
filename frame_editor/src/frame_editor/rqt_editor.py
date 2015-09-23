@@ -565,9 +565,10 @@ class FrameEditorGUI(Plugin):
     def frame_style_changed(self, id):
         style = self._widget.combo_style.currentText().lower()
         if self.editor.active_frame.style != style:
-            path = None
             if style == "mesh":
-                path = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '/home')
+                path = QtGui.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
+            else:
+                path = None
             self.editor.command(Command_SetStyle(self.editor, self.editor.active_frame, style, path))
 
 

@@ -184,8 +184,6 @@ class Object_Mesh(Object_Geometry):
 
         self.scale = scale
         self.path = mesh_path
-        # TODO remove
-        self.path = "package://frame_editor/mesh/weber_pitek.stl"
 
         super(Object_Mesh, self).__init__(name, position, orientation, parent, "mesh")
 
@@ -193,7 +191,7 @@ class Object_Mesh(Object_Geometry):
         super(Object_Mesh, self).update_marker()
 
         self.marker.type = Marker.MESH_RESOURCE
-        self.marker.mesh_resource = self.path
+        self.marker.mesh_resource = "file:"+self.path
         self.marker.scale = NewVector3(self.scale, self.scale, self.scale)
 
 # eof
