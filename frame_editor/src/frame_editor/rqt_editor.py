@@ -145,6 +145,8 @@ class FrameEditorGUI(Plugin):
         self._widget.btn_rad.toggled.connect(self.update_fields)
 
         self._widget.combo_style.currentIndexChanged.connect(self.frame_style_changed)
+        self._widget.btn_style_color.clicked.connect(self.btn_style_color_clicked)
+        self._widget.btn_style_color.setEnabled(False)
 
         self._update_thread.start()
 
@@ -170,13 +172,16 @@ class FrameEditorGUI(Plugin):
 
     @Slot(int)
     def update_all(self, level):
+        ## Update list widgets
         if level & 1:
             self.update_frame_list()
             self.update_tf_list()
 
+        ## Update the currently selected frame
         if level & 2:
             self.update_active_frame()
 
+        ## Update only text fields, spin boxes,...
         if level & 4:
             self.update_fields()
 
@@ -284,6 +289,10 @@ class FrameEditorGUI(Plugin):
         if not self.editor.active_frame or (self.editor.active_frame.name != name):
             self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
 
+        if self.editor.active_frame.style != "none":
+            self._widget.btn_style_color.setEnabled(True)
+        else:
+            self._widget.btn_style_color.setEnabled(False)
 
     ## BUTTONS ##
     ##
@@ -515,7 +524,10 @@ class FrameEditorGUI(Plugin):
 
         self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
 
-
+    @Slot(bool)
+    def btn_style_color_clicked(self, checked):
+        color = QtGui.QColorDialog.getColor(QtGui.QColor(255,255,255,255), None, "Select Color", options=QtGui.QColorDialog.ShowAlphaChannel)
+        self.editor.command(Command_SetStyleColor(self.editor, self.editor.active_frame, color.getRgbF()))
 
     def action_feedback_callback(self, feedback):
         frame = self.editor.active_frame
@@ -570,6 +582,11 @@ class FrameEditorGUI(Plugin):
             else:
                 path = None
             self.editor.command(Command_SetStyle(self.editor, self.editor.active_frame, style, path))
+
+            if style != "none":
+                self._widget.btn_style_color.setEnabled(True)
+            else:
+                self._widget.btn_style_color.setEnabled(False)
 
 
     ## PLUGIN ##

@@ -682,6 +682,13 @@
                </item>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="btn_style_color">
+               <property name="text">
+                <string>Color</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
            <item>
