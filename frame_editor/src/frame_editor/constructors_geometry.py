@@ -15,6 +15,7 @@ def ToPose(p, o):
     pose.orientation.z = o[2]
     pose.orientation.w = o[3]
     return pose
+    # return Pose(ToPoint(p), ToQuaternion(o))
 
 
 ## Point ##
@@ -25,6 +26,7 @@ def ToPoint(p):
     point.y = p[1]
     point.z = p[2]
     return point
+    # return Point(*p)
 
 def NewPoint(x, y, z):
     point = Point()

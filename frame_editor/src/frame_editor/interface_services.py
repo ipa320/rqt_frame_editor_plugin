@@ -170,6 +170,7 @@ class FrameEditor_Services:
                 ## If not existing yet: create frame
                 frame = copy.deepcopy(self.editor.frames[request.source_name])
                 frame.name = request.name
+                frame.broadcast()
                 self.editor.command(Command_AddElement(self.editor, frame))
             else:
                 ## Align with source frame
@@ -179,6 +180,10 @@ class FrameEditor_Services:
             ## Set parent
             if (request.parent != "") and (frame.parent != request.parent):
                 frame = self.editor.frames[request.name]
+                
+                # If the frame was newly created, we have to wait for a transform
+                # Might introduce nasty delays in transitions.
+                frame.listener.waitForTransform(request.parent, frame.name, rospy.Time(0), rospy.Duration(1.0), polling_sleep_duration=rospy.Duration(0.001))
                 self.editor.command(Command_SetParent(self.editor, frame, request.parent, True))
 
         return response
