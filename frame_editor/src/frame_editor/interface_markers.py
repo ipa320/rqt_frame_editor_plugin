@@ -15,7 +15,7 @@ class FrameEditor_Markers:
         self.editor = frame_editor
         self.editor.observers.append(self)
 
-        self.publisher = rospy.Publisher("frame_editor_marker", Marker)
+        self.publisher = rospy.Publisher("frame_editor_marker", Marker, queue_size=10)
 
 
     def update(self, editor, level, elements):
