@@ -17,3 +17,4 @@ ServiceException: service [/align_frame] already registered
 * Hidden plugins can be recovered by rightclicking in the empty space and selecting the plugin (so far only called "Form")
 * Closing and starting the plugin doesn't seem to work, so:
 * The best way is to restart rqt. 
+* If the plugin is not found in rqt, try 'rqt --force-discover' to make rqt search for new plugins
