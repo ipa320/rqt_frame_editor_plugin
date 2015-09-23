@@ -65,6 +65,7 @@ add_service_files(
   GetFrame.srv
   RemoveFrame.srv
   SetFrame.srv
+  SetParentFrame.srv
 )
 
 ## Generate actions in the 'action' folder

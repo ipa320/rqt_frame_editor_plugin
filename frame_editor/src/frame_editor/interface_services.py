@@ -25,6 +25,7 @@ class FrameEditor_Services:
         rospy.Service("get_frame", GetFrame, self.callback_get_frame)
         rospy.Service("remove_frame", RemoveFrame, self.callback_remove_frame)
         rospy.Service("set_frame", SetFrame, self.callback_set_frame)
+        rospy.Service("set_parent", SetParentFrame, self.callback_set_parent_frame)
 
 
     def callback_align_frame(self, request):
@@ -143,6 +144,27 @@ class FrameEditor_Services:
 
             f = Frame(request.name, FromPoint(request.pose.position), FromQuaternion(request.pose.orientation))
             self.editor.command(Command_AddElement(self.editor, f))
+
+        return response
+
+
+    def callback_set_parent_frame(self, request):
+        print "> Request to set parent_frame", request.name
+
+        response = SetParentFrameResponse()
+        response.error_code = 0
+
+        if request.name == "":
+            print " Error: No frame_name given"
+            response.error_code = 1
+
+        elif request.parent == "":
+            print " Error: No parent_name given"
+            response.error_code = 2
+
+        else:
+            f = self.editor.frames[request.name]
+            self.editor.command(Command_SetParent(self.editor, f, request.parent, request.keep_absolute))
 
         return response
 
