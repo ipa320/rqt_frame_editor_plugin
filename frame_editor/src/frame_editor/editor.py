@@ -126,7 +126,10 @@ class FrameEditor(QtCore.QObject):
 
             if "data" in frame:
                 dat = frame["data"]
-                color = dat["color"]
+                if "color" in dat:
+                    color = dat["color"]
+                else:
+                    color = (0.0, 0.5, 0.5, 0.75)
 
             position = (t["x"], t["y"], t["z"])
             orientation = (o["x"], o["y"], o["z"], o["w"])
