@@ -192,6 +192,7 @@ class FrameEditor_Services:
                 frame.name = request.name
                 frame.broadcast()
                 self.editor.command(Command_AddElement(self.editor, frame))
+                frame = self.editor.frames[request.name]
             else:
                 ## Align with source frame
                 frame = self.editor.frames[request.name]
@@ -199,11 +200,9 @@ class FrameEditor_Services:
 
             ## Set parent
             if (request.parent != "") and (frame.parent != request.parent):
-                frame = self.editor.frames[request.name]
-                
-                # If the frame was newly created, we have to wait for a transform
-                # Might introduce nasty delays in transitions.
-                frame.listener.waitForTransform(request.parent, frame.name, rospy.Time(0), rospy.Duration(1.0), polling_sleep_duration=rospy.Duration(0.001))
+                frame.broadcast()
+                ## Make sure the listener knows the new frame / its new aligned position
+                frame.listener.waitForTransform(request.parent, request.name, rospy.Time(), rospy.Duration(1.0), rospy.Duration(0.01))
                 self.editor.command(Command_SetParent(self.editor, frame, request.parent, True))
 
         return response
