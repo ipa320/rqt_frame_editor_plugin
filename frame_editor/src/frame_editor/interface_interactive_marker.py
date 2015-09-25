@@ -38,11 +38,12 @@ class FrameEditor_InteractiveMarker:
                 self.make_interactive(self.editor.active_frame)
 
         if level & 4:
-            self.int_marker.name = self.editor.active_frame.name
-            self.int_marker.header.frame_id = self.editor.active_frame.parent
-            self.int_marker.pose = self.editor.active_frame.pose
-            self.server.insert(self.int_marker, self.callback_marker)
-            self.server.applyChanges()
+            if self.editor.active_frame is not None:
+                self.int_marker.name = self.editor.active_frame.name
+                self.int_marker.header.frame_id = self.editor.active_frame.parent
+                self.int_marker.pose = self.editor.active_frame.pose
+                self.server.insert(self.int_marker, self.callback_marker)
+                self.server.applyChanges()
 
 
     def make_interactive(self, frame):
