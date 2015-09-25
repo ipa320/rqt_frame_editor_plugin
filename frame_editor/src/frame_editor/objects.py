@@ -31,6 +31,7 @@ class Frame(object):
         self.orientation = orientation
         self.parent = parent
         self.style = style
+        self.color = (0.0, 0.5, 0.5, 0.75)
 
         self.hidden = False
         self.marker = None
@@ -99,7 +100,7 @@ class Object_Geometry(Frame):
         self.marker = Marker()
         self.marker.scale = NewVector3(1, 1, 1)
         self.marker.pose = Pose()
-        self.marker.color = NewColor(0.0, 0.5, 0.5, 0.75)
+        self.marker.color = NewColor(self.color[0], self.color[1], self.color[2], self.color[3])
         self.marker.id = Frame.create_new_id()
         #self.marker.lifetime = 0 # forever
         self.update_marker()
@@ -107,6 +108,13 @@ class Object_Geometry(Frame):
     def update_marker(self):
         #self.marker.header.frame_id = self.parent
         self.marker.header.stamp = rospy.Time.now()
+
+    def set_color(self, color):
+        self.color = color
+        self.marker.color = NewColor(color[0], color[1], color[2], color[3])
+        self.update_marker()
+        #self.marker.update()
+
 
 class Object_Plane(Object_Geometry):
 
@@ -176,5 +184,22 @@ class Object_Axis(Object_Geometry):
 
         self.marker.type = Marker.ARROW
         self.marker.scale = NewVector3(self.length, self.width, self.width)
+
+
+class Object_Mesh(Object_Geometry):
+
+    def __init__(self, name, position, orientation, parent, mesh_path, scale=1.0):
+
+        self.scale = scale
+        self.path = mesh_path
+
+        super(Object_Mesh, self).__init__(name, position, orientation, parent, "mesh")
+
+    def update_marker(self):
+        super(Object_Mesh, self).update_marker()
+
+        self.marker.type = Marker.MESH_RESOURCE
+        self.marker.mesh_resource = "file:"+self.path
+        self.marker.scale = NewVector3(self.scale, self.scale, self.scale)
 
 # eof

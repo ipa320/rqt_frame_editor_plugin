@@ -307,10 +307,9 @@ class Command_SetParent(QUndoCommand):
         self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
-
 class Command_SetStyle(QUndoCommand):
 
-    def __init__(self, editor, element, style):
+    def __init__(self, editor, element, style, path=None):
         QUndoCommand.__init__(self, "Style")
         self.editor = editor
 
@@ -324,6 +323,8 @@ class Command_SetStyle(QUndoCommand):
             self.new_element = Object_Sphere(element.name, element.position, element.orientation, element.parent)
         elif style == "axis":
             self.new_element = Object_Axis(element.name, element.position, element.orientation, element.parent)
+        elif style == "mesh":
+            self.new_element = Object_Mesh(element.name, element.position, element.orientation, element.parent, path)
         else:
             self.new_element = Frame(element.name, element.position, element.orientation, element.parent)
 
@@ -358,5 +359,24 @@ class Command_SetStyle(QUndoCommand):
             self.editor.active_frame = self.old_element
             self.editor.add_undo_level(2)
 
+class Command_SetStyleColor(QUndoCommand):
+
+    def __init__(self, editor, element, color_rgba):
+        QUndoCommand.__init__(self, "Style Color")
+        self.editor = editor
+
+        self.element = element
+        self.old_color = element.color
+        self.new_color = color_rgba
+
+    def redo(self):
+        self.element.set_color(self.new_color)
+        self.element.broadcast()
+        self.editor.add_undo_level(1, [self.element]) #TODO Adjust level
+
+    def undo(self):
+        self.element.set_color(self.old_color)
+        self.element.broadcast()
+        self.editor.add_undo_level(1, [self.element]) #TODO Adjust level
 
 # eof

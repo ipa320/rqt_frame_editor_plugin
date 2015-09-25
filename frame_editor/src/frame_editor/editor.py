@@ -126,18 +126,29 @@ class FrameEditor(QtCore.QObject):
 
             if "data" in frame:
                 dat = frame["data"]
+                if "color" in dat:
+                    color = dat["color"]
+                else:
+                    color = (0.0, 0.5, 0.5, 0.75)
 
             position = (t["x"], t["y"], t["z"])
             orientation = (o["x"], o["y"], o["z"], o["w"])
 
             if style == "plane":
                 f = Object_Plane(name, position, orientation, frame["parent"], dat["length"], dat["width"])
+                f.set_color(color)
             elif style == "cube":
                 f = Object_Cube(name, position, orientation, frame["parent"], dat["length"], dat["width"], dat["height"])
+                f.set_color(color)
             elif style == "sphere":
                 f = Object_Sphere(name, position, orientation, frame["parent"], dat["diameter"])
+                f.set_color(color)
             elif style == "axis":
                 f = Object_Axis(name, position, orientation, frame["parent"], dat["length"], dat["width"])
+                f.set_color(color)
+            elif style == "mesh":
+                f = Object_Mesh(name, position, orientation, frame["parent"], dat["path"], dat["scale"])
+                f.set_color(color)
             else:
                 f = Frame(name, position, orientation, frame["parent"])
             
@@ -173,16 +184,19 @@ class FrameEditor(QtCore.QObject):
             f["style"] = frame.style
 
             if frame.style == "plane":
-                f["data"] = { "length": frame.length, "width":frame.width }
+                f["data"] = { "length": frame.length, "width":frame.width, "color": frame.color }
             
             elif frame.style == "cube":
-                f["data"] = { "length": frame.length, "width": frame.width, "height": frame.height }
+                f["data"] = { "length": frame.length, "width": frame.width, "height": frame.height , "color": frame.color}
             
             elif frame.style == "sphere":
-                f["data"] = { "diameter": frame.diameter }
+                f["data"] = { "diameter": frame.diameter, "color": frame.color }
             
             elif frame.style == "axis":
-                f["data"] = { "length": frame.length, "width": frame.width }
+                f["data"] = { "length": frame.length, "width": frame.width, "color": frame.color }
+
+            elif frame.style == "mesh":
+                f["data"] = { "path" : frame.path, "scale" : frame.scale, "color": frame.color }
 
             frames[frame.name] = f
 
