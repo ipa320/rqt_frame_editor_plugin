@@ -79,7 +79,7 @@ class FrameEditorGUI(Plugin):
         context.add_widget(self._widget)
 
         ## Undo View
-        self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
+        #self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
 
 
         ## Load file ##
