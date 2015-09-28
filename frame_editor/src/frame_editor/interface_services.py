@@ -194,10 +194,10 @@ class FrameEditor_Services:
                     frame = Frame(request.name, parent=request.source_name)
                 frame.broadcast()
                 self.editor.command(Command_AddElement(self.editor, frame))
-
-            ## Align with source frame
-            frame = self.editor.frames[request.name]
-            self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c', ]))
+            else:
+                ## Align with source frame
+                frame = self.editor.frames[request.name]
+                self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c', ]))
 
             ## Set parent
             if (request.parent != "") and (frame.parent != request.parent):
