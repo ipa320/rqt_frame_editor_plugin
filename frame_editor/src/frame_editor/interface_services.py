@@ -185,18 +185,19 @@ class FrameEditor_Services:
             response.error_code = 3
 
         else:
-
+            ## If not existing yet: create frame
             if request.name not in self.editor.frames:
-                ## If not existing yet: create frame
-                frame = copy.deepcopy(self.editor.frames[request.source_name])
-                frame.name = request.name
+                if request.source_name in self.editor.frames:
+                    frame = copy.deepcopy(self.editor.frames[request.source_name])
+                    frame.name = request.name
+                else:
+                    frame = Frame(request.name, parent=request.source_name)
                 frame.broadcast()
                 self.editor.command(Command_AddElement(self.editor, frame))
-                frame = self.editor.frames[request.name]
-            else:
-                ## Align with source frame
-                frame = self.editor.frames[request.name]
-                self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c', ]))
+
+            ## Align with source frame
+            frame = self.editor.frames[request.name]
+            self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c', ]))
 
             ## Set parent
             if (request.parent != "") and (frame.parent != request.parent):
