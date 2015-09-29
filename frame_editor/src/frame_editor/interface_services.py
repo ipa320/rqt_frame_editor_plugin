@@ -203,7 +203,8 @@ class FrameEditor_Services:
             if (request.parent != "") and (frame.parent != request.parent):
                 frame.broadcast()
                 ## Make sure the listener knows the new frame / its new aligned position
-                frame.listener.waitForTransform(request.parent, request.name, rospy.Time(), rospy.Duration(1.0), rospy.Duration(0.01))
+                frame.listener.waitForTransform(frame.parent, frame.name, rospy.Time(), rospy.Duration(1.0), rospy.Duration(0.01))
+                frame.listener.waitForTransform(request.parent, frame.name, rospy.Time(), rospy.Duration(1.0), rospy.Duration(0.01))
                 self.editor.command(Command_SetParent(self.editor, frame, request.parent, True))
 
         return response
