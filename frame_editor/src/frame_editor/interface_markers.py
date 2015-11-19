@@ -19,38 +19,31 @@ class FrameEditor_Markers:
 
 
     def update(self, editor, level, elements):
-        if level & 1:
-            for element in elements:
-                if not element:
-                    continue
 
-                if element.marker:
+        ## Publish all changed markers
 
-                    marker = copy.deepcopy(element.marker) # copy
+        for element in elements:
+            if not element:
+                continue
 
-                    marker.header.frame_id = element.name
-                    marker.header.stamp = rospy.Time() # zero time
-                    marker.ns = "frame_editor_markers"
-                    marker.frame_locked = True # Tells rviz to retransform the marker into the current location of the specified frame every update cycle. 
+            if element.marker:
 
-                    if element.hidden:
+                marker = copy.deepcopy(element.marker) # copy
+
+                marker.header.frame_id = element.name
+                marker.header.stamp = rospy.Time() # zero time
+                marker.ns = "frame_editor_markers"
+                marker.frame_locked = True # Tells rviz to retransform the marker into the current location of the specified frame every update cycle.
+
+                if element.hidden:
+                    marker.action = Marker.DELETE
+                else:
+                    marker.action = Marker.ADD
+
+                if element.style == "mesh":
+                    if element.path == "" or element.path is None:
                         marker.action = Marker.DELETE
-                    else:
-                        marker.action = Marker.ADD
 
-                    if element.style == "mesh":
-                        if element.path == "" or element.path is None:
-                            marker.action = Marker.DELETE
-
-                    self.publisher.publish(marker)
-
-        if level & 2:
-            pass
-
-        if level & 4:
-            ## Check for change
-            pass
-        
-        
+                self.publisher.publish(marker)
 
 # eof

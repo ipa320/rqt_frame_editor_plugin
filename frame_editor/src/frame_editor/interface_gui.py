@@ -29,12 +29,19 @@ class FrameEditor_StyleWidget(object):
 
         self.diameter_label = QtGui.QLabel("Diameter:")
         self.diameter_spinbox = QtGui.QDoubleSpinBox()
+        self.diameter_spinbox.editingFinished.connect(self.diameter_changed)
+
         self.length_label = QtGui.QLabel("Length:")
         self.length_spinbox = QtGui.QDoubleSpinBox()
+        self.length_spinbox.editingFinished.connect(self.length_changed)
+
         self.width_label = QtGui.QLabel("Width:")
         self.width_spinbox = QtGui.QDoubleSpinBox()
+        self.width_spinbox.editingFinished.connect(self.width_changed)
+
         self.height_label = QtGui.QLabel("Height:")
         self.height_spinbox = QtGui.QDoubleSpinBox()
+        self.height_spinbox.editingFinished.connect(self.height_changed)
 
         self.layout.addWidget(self.mesh_label, 0, 0)
         self.layout.addWidget(self.mesh_button, 0, 1)
@@ -115,8 +122,28 @@ class FrameEditor_StyleWidget(object):
             if frame.style == "cube":
                 self.height_spinbox.setValue(frame.height)
 
+    @Slot(float)
+    def diameter_changed(self):
+        if self.editor.active_frame.diameter != self.diameter_spinbox.value():
+            self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "diameter", self.diameter_spinbox.value()))
 
-    @Slot(bool)
+    @Slot(float)
+    def length_changed(self):
+        if self.editor.active_frame.length != self.length_spinbox.value():
+            self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "length", self.length_spinbox.value()))
+
+    @Slot(float)
+    def width_changed(self):
+        if self.editor.active_frame.width != self.width_spinbox.value():
+            self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "width", self.width_spinbox.value()))
+
+    @Slot(float)
+    def height_changed(self):
+        if self.editor.active_frame.height != self.height_spinbox.value():
+            self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "height", self.height_spinbox.value()))
+
+
+    @Slot()
     def btn_open_mesh_clicked(self):
         path = QtGui.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
         self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
