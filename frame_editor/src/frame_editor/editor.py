@@ -17,11 +17,6 @@ from frame_editor.commands import *
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 
-## Views
-from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
-from frame_editor.interface_services import FrameEditor_Services
-from frame_editor.interface_markers import FrameEditor_Markers
-
 from python_qt_binding import QtCore
 from python_qt_binding.QtGui import QUndoStack
 
@@ -41,11 +36,6 @@ class FrameEditor(QtCore.QObject):
         self.undo_stack = QUndoStack()
         self.undo_stack.indexChanged.connect(self.undo_stack_changed)
         self.__command_lock = threading.Lock()
-
-        ## Views
-        self.interactive = FrameEditor_InteractiveMarker(self)
-        self.services = FrameEditor_Services(self)
-        self.interface_markers = FrameEditor_Markers(self)
 
         self.namespace = "frame_editor"
 

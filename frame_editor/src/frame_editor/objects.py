@@ -188,7 +188,7 @@ class Object_Axis(Object_Geometry):
 
 class Object_Mesh(Object_Geometry):
 
-    def __init__(self, name, position, orientation, parent, mesh_path, scale=1.0):
+    def __init__(self, name, position, orientation, parent, mesh_path="", scale=1.0):
 
         self.scale = scale
         self.path = mesh_path

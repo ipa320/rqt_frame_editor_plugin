@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1048</width>
-    <height>683</height>
+    <height>698</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,6 +24,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QGroupBox" name="box_frames">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>Frames</string>
        </property>
@@ -48,8 +54,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>223</width>
-              <height>549</height>
+              <width>310</width>
+              <height>564</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -107,6 +113,12 @@
      </item>
      <item>
       <widget class="QGroupBox" name="box_edit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>Edit Frame</string>
        </property>
@@ -642,6 +654,17 @@
             </layout>
            </item>
            <item>
+            <widget class="QFrame" name="style_frame">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_12"/>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer_2">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -880,6 +903,12 @@
         </item>
         <item>
          <widget class="QScrollArea" name="scrollArea_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -888,8 +917,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>249</width>
-             <height>575</height>
+             <width>137</width>
+             <height>590</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">

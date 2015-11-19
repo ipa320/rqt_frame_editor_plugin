@@ -38,6 +38,10 @@ class FrameEditor_Markers:
                     else:
                         marker.action = Marker.ADD
 
+                    if element.style == "mesh":
+                        if element.path == "" or element.path is None:
+                            marker.action = Marker.DELETE
+
                     self.publisher.publish(marker)
 
         if level & 2:

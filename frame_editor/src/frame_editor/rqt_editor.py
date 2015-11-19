@@ -24,6 +24,12 @@ from toolbox.project_plugin import ProjectPlugin
 from toolbox.msg import *
 from toolbox.srv import *
 
+## Views
+from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
+from frame_editor.interface_services import FrameEditor_Services
+from frame_editor.interface_markers import FrameEditor_Markers
+from frame_editor.interface_gui import FrameEditor_StyleWidget
+
 
 class FrameEditorGUI(ProjectPlugin):
 
@@ -100,8 +106,8 @@ class FrameEditorGUI(ProjectPlugin):
 
 
     def create_main_widget(self):
-        ## Create QWidget ##
-        ##
+
+        ## Main widget
         widget = QWidget()
         ui_file = os.path.join(rospkg.RosPack().get_path('frame_editor'), 'src/frame_editor', 'FrameEditorGUI.ui')
         loadUi(ui_file, widget)
@@ -110,8 +116,19 @@ class FrameEditorGUI(ProjectPlugin):
         #if context.serial_number() > 1:
         #    widget.setWindowTitle(widget.windowTitle() + (' (%d)' % context.serial_number()))
 
+
         ## Undo View
         widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
+
+
+        ## Views
+        self.interactive = FrameEditor_InteractiveMarker(self.editor)
+        self.services = FrameEditor_Services(self.editor)
+        self.interface_markers = FrameEditor_Markers(self.editor)
+        self.interface_style = FrameEditor_StyleWidget(self.editor)
+
+        widget.style_frame.layout().addWidget(self.interface_style.get_widget())
+
 
         ## Connections ##
         ##
@@ -557,11 +574,7 @@ class FrameEditorGUI(ProjectPlugin):
     def frame_style_changed(self, id):
         style = self.widget.combo_style.currentText().lower()
         if self.editor.active_frame.style != style:
-            if style == "mesh":
-                path = QtGui.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
-            else:
-                path = None
-            self.editor.command(Command_SetStyle(self.editor, self.editor.active_frame, style, path))
+            self.editor.command(Command_SetStyle(self.editor, self.editor.active_frame, style))
 
             if style != "none":
                 self.widget.btn_style_color.setEnabled(True)
