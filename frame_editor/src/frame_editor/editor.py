@@ -47,6 +47,7 @@ class FrameEditor(QtCore.QObject):
         self.services = FrameEditor_Services(self)
         self.interface_markers = FrameEditor_Markers(self)
 
+        self.namespace = "frame_editor"
 
     ## Undo/Redo ##
     ##
@@ -97,11 +98,18 @@ class FrameEditor(QtCore.QObject):
 
     ## FILE I/O ##
     ##
-    def load_file(self, filename, namespace = None):
-        print "> Loading file"
-        data = rosparam.load_file(filename, namespace)[0][0]
-        print data
-        self.load_data(data)
+    def load_file(self, file_name):
+        if file_name:
+            print "> Loading file"
+            data = rosparam.load_file(file_name, self.namespace)[0][0]
+            self.load_data(data)
+        else:
+            ## Clear everything
+            self.command(Command_ClearAll(self))
+
+        self.undo_stack.clear()
+
+        return True
 
     def load_params(self, namespace):
         if not rosparam.list_params(namespace):
@@ -158,7 +166,7 @@ class FrameEditor(QtCore.QObject):
 
         print "> Loading done"
 
-    def save_file(self, filename, namespace):
+    def save_file(self, filename):
 
         ## Data
         data = {}
@@ -203,13 +211,15 @@ class FrameEditor(QtCore.QObject):
         data["frames"] = frames
 
         ## To parameter server
-        rospy.set_param(namespace, data)
-        print rospy.get_param(namespace)
+        rospy.set_param(self.namespace, data)
+        print rospy.get_param(self.namespace)
 
         ## Dump param to file
         print "Saving to file", filename
-        rosparam.dump_params(filename, namespace)
+        rosparam.dump_params(filename, self.namespace)
         print "Saving done"
+
+        return True
 
 
 if __name__ == "__main__":

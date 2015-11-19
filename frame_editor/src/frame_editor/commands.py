@@ -94,12 +94,12 @@ class Command_ClearAll(QUndoCommand):
     def redo(self):
         self.editor.active_frame = None
         self.editor.frames = {}
-        self.editor.add_undo_level(1+2, self.elements)
+        self.editor.add_undo_level(1+2, self.elements.values())
 
     def undo(self):
         self.editor.active_frame = self.active_element
         self.editor.frames = self.elements
-        self.editor.add_undo_level(1+2, self.elements)
+        self.editor.add_undo_level(1+2, self.elements.values())
 
 
 class Command_AlignElement(QUndoCommand):

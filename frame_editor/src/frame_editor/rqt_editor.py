@@ -19,11 +19,13 @@ from frame_editor.editor import Frame, FrameEditor
 from frame_editor.commands import *
 from frame_editor.constructors_geometry import *
 
+from toolbox.project_plugin import ProjectPlugin
+
 from toolbox.msg import *
 from toolbox.srv import *
 
 
-class FrameEditorGUI(Plugin):
+class FrameEditorGUI(ProjectPlugin):
 
     signal_update = QtCore.Signal(int)
 
@@ -50,14 +52,36 @@ class FrameEditorGUI(Plugin):
             print 'arguments: ', args
             print 'unknowns: ', unknowns
 
-        ## Editor ##
+        ## Load file ##
         ##
-        self.namespace = "frame_editor"
         self.filename = ""
+        if args.file:
+            arg_path = args.file[0].split()
+            if len(arg_path) == 1:
+                #load file
+                filename = arg_path[0]
+                print "Loading", filename
+                self.editor.load_file(str(filename))
+            elif len(arg_path) == 2:
+                #load rospack
+                rospack = rospkg.RosPack()
+                filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
+                print "Loading", filename
+                self.editor.load_file(str(filename))
+            else:
+                print "Load argument not understood! --load", arg_path
+                print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
+                print "or use --load 'fullPathToMyYaml.yaml'"
 
-        self.editor = FrameEditor()
-        #self.editor.load_params(self.namespace)
-        self.editor.observers.append(self)
+        self._update_thread.start()
+
+        self.update_all(3)
+
+
+    def create_editor(self):
+        editor = FrameEditor()
+
+        editor.observers.append(self)
 
         self.signal_update.connect(self.update_all)
 
@@ -66,92 +90,64 @@ class FrameEditorGUI(Plugin):
         self.old_frame_list = []
         self.old_selected = ""
 
+        return editor
+
+
+    def create_main_widget(self):
         ## Create QWidget ##
         ##
-        self._widget = QWidget()
+        widget = QWidget()
         ui_file = os.path.join(rospkg.RosPack().get_path('frame_editor'), 'src/frame_editor', 'FrameEditorGUI.ui')
-        loadUi(ui_file, self._widget)
-        self._widget.setObjectName('FrameEditorGUIUi')
+        loadUi(ui_file, widget)
+        widget.setObjectName('FrameEditorGUIUi')
 
-        if context.serial_number() > 1:
-            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
-
-        context.add_widget(self._widget)
+        #if context.serial_number() > 1:
+        #    widget.setWindowTitle(widget.windowTitle() + (' (%d)' % context.serial_number()))
 
         ## Undo View
-        #self._widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
-
-
-        ## Load file ##
-        ##
-        if args.file:
-            arg_path = args.file[0].split()
-            if len(arg_path) == 1:
-                #load file
-                filename = arg_path[0]
-                print "Loading", filename
-                self.editor.load_file(str(filename), self.namespace)
-            elif len(arg_path) == 2:
-                #load rospack
-                rospack = rospkg.RosPack()
-                filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
-                print "Loading", filename
-                self.editor.load_file(str(filename), self.namespace)
-            else:
-                print "Load argument not understood! --load", arg_path
-                print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
-                print "or use --load 'fullPathToMyYaml.yaml'"
-
+        widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
 
         ## Connections ##
         ##
-        self._widget.btn_open.clicked.connect(self.open_file)
-        self._widget.btn_save.clicked.connect(self.save_file)
-        self._widget.btn_saveAs.clicked.connect(self.save_as_file)
+        widget.btn_add.clicked.connect(self.btn_add_clicked)
+        widget.btn_delete.clicked.connect(self.btn_delete_clicked)
+        widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
+        widget.btn_refresh.clicked.connect(self.update_tf_list)
 
-        self._widget.btn_add.clicked.connect(self.btn_add_clicked)
-        self._widget.btn_delete.clicked.connect(self.btn_delete_clicked)
-        self._widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
-        self._widget.btn_refresh.clicked.connect(self.update_tf_list)
-        self._widget.btn_clear.clicked.connect(self.clear_all)
+        widget.btn_set_parent_rel.clicked.connect(self.btn_set_parent_rel_clicked)
+        widget.btn_set_parent_abs.clicked.connect(self.btn_set_parent_abs_clicked)
+        widget.btn_set_pose.clicked.connect(self.btn_set_pose_clicked)
+        widget.btn_set_position.clicked.connect(self.btn_set_position_clicked)
+        widget.btn_set_orientation.clicked.connect(self.btn_set_orientation_clicked)
+        widget.btn_set_x.clicked.connect(self.btn_set_x_clicked)
+        widget.btn_set_y.clicked.connect(self.btn_set_y_clicked)
+        widget.btn_set_z.clicked.connect(self.btn_set_z_clicked)
+        widget.btn_set_a.clicked.connect(self.btn_set_a_clicked)
+        widget.btn_set_b.clicked.connect(self.btn_set_b_clicked)
+        widget.btn_set_c.clicked.connect(self.btn_set_c_clicked)
 
-        self._widget.btn_set_parent_rel.clicked.connect(self.btn_set_parent_rel_clicked)
-        self._widget.btn_set_parent_abs.clicked.connect(self.btn_set_parent_abs_clicked)
-        self._widget.btn_set_pose.clicked.connect(self.btn_set_pose_clicked)
-        self._widget.btn_set_position.clicked.connect(self.btn_set_position_clicked)
-        self._widget.btn_set_orientation.clicked.connect(self.btn_set_orientation_clicked)
-        self._widget.btn_set_x.clicked.connect(self.btn_set_x_clicked)
-        self._widget.btn_set_y.clicked.connect(self.btn_set_y_clicked)
-        self._widget.btn_set_z.clicked.connect(self.btn_set_z_clicked)
-        self._widget.btn_set_a.clicked.connect(self.btn_set_a_clicked)
-        self._widget.btn_set_b.clicked.connect(self.btn_set_b_clicked)
-        self._widget.btn_set_c.clicked.connect(self.btn_set_c_clicked)
+        widget.btn_reset_position_rel.clicked.connect(self.btn_reset_position_rel_clicked)
+        widget.btn_reset_position_abs.clicked.connect(self.btn_reset_position_abs_clicked)
+        widget.btn_reset_orientation_rel.clicked.connect(self.btn_reset_orientation_rel_clicked)
+        widget.btn_reset_orientation_abs.clicked.connect(self.btn_reset_orientation_abs_clicked)
 
-        self._widget.btn_reset_position_rel.clicked.connect(self.btn_reset_position_rel_clicked)
-        self._widget.btn_reset_position_abs.clicked.connect(self.btn_reset_position_abs_clicked)
-        self._widget.btn_reset_orientation_rel.clicked.connect(self.btn_reset_orientation_rel_clicked)
-        self._widget.btn_reset_orientation_abs.clicked.connect(self.btn_reset_orientation_abs_clicked)
+        widget.btn_call_service.clicked.connect(self.btn_call_service_clicked)
+        widget.btn_call_action.clicked.connect(self.btn_call_action_clicked)
 
-        self._widget.btn_call_service.clicked.connect(self.btn_call_service_clicked)
-        self._widget.btn_call_action.clicked.connect(self.btn_call_action_clicked)
+        widget.txt_x.editingFinished.connect(self.x_valueChanged)
+        widget.txt_y.editingFinished.connect(self.y_valueChanged)
+        widget.txt_z.editingFinished.connect(self.z_valueChanged)
+        widget.txt_a.editingFinished.connect(self.a_valueChanged)
+        widget.txt_b.editingFinished.connect(self.b_valueChanged)
+        widget.txt_c.editingFinished.connect(self.c_valueChanged)
 
-        self._widget.txt_x.editingFinished.connect(self.x_valueChanged)
-        self._widget.txt_y.editingFinished.connect(self.y_valueChanged)
-        self._widget.txt_z.editingFinished.connect(self.z_valueChanged)
-        self._widget.txt_a.editingFinished.connect(self.a_valueChanged)
-        self._widget.txt_b.editingFinished.connect(self.b_valueChanged)
-        self._widget.txt_c.editingFinished.connect(self.c_valueChanged)
+        widget.btn_rad.toggled.connect(self.update_fields)
 
-        self._widget.btn_rad.toggled.connect(self.update_fields)
+        widget.combo_style.currentIndexChanged.connect(self.frame_style_changed)
+        widget.btn_style_color.clicked.connect(self.btn_style_color_clicked)
+        widget.btn_style_color.setEnabled(False)
 
-        self._widget.combo_style.currentIndexChanged.connect(self.frame_style_changed)
-        self._widget.btn_style_color.clicked.connect(self.btn_style_color_clicked)
-        self._widget.btn_style_color.setEnabled(False)
-
-        self._update_thread.start()
-
-        self.update_all(3)
-
+        return widget
 
 
     def _update_thread_run(self):
@@ -188,9 +184,9 @@ class FrameEditorGUI(Plugin):
 
     @Slot()
     def update_tf_list(self):
-        self._widget.list_tf.clear()
-        self._widget.list_tf.addItems(self.editor.get_tf_frames())
-        self._widget.list_tf.sortItems()
+        self.widget.list_tf.clear()
+        self.widget.list_tf.addItems(self.editor.get_tf_frames())
+        self.widget.list_tf.sortItems()
 
     def update_frame_list(self):
         new_list = self.editor.frames.keys()
@@ -200,17 +196,17 @@ class FrameEditorGUI(Plugin):
         for item in new_list:
             if item not in self.old_frame_list:
                 items.append(item)
-        self._widget.list_frames.addItems(items)
+        self.widget.list_frames.addItems(items)
 
         ## Delete removed
         for item in self.old_frame_list:
             if item not in new_list:
-                if self._widget.list_frames.currentItem() and item == self._widget.list_frames.currentItem().text():
-                    self._widget.list_frames.setCurrentItem(None)
-                found = self._widget.list_frames.findItems(item, QtCore.Qt.MatchExactly)
-                self._widget.list_frames.takeItem(self._widget.list_frames.row(found[0]))
+                if self.widget.list_frames.currentItem() and item == self.widget.list_frames.currentItem().text():
+                    self.widget.list_frames.setCurrentItem(None)
+                found = self.widget.list_frames.findItems(item, QtCore.Qt.MatchExactly)
+                self.widget.list_frames.takeItem(self.widget.list_frames.row(found[0]))
 
-        self._widget.list_frames.sortItems()
+        self.widget.list_frames.sortItems()
 
         self.old_frame_list = new_list
 
@@ -218,19 +214,19 @@ class FrameEditorGUI(Plugin):
     def update_active_frame(self):
         if not self.editor.active_frame:
             self.old_selected = ""
-            self._widget.list_frames.setCurrentItem(None)
-            self._widget.box_edit.setEnabled(False)
+            self.widget.list_frames.setCurrentItem(None)
+            self.widget.box_edit.setEnabled(False)
             return # deselect and quit
 
-        self._widget.box_edit.setEnabled(True)
+        self.widget.box_edit.setEnabled(True)
 
         name = self.editor.active_frame.name
         if name == self.old_selected:
             return # no change
 
         ## Select item in list
-        items = self._widget.list_frames.findItems(name, QtCore.Qt.MatchExactly)
-        self._widget.list_frames.setCurrentItem(items[0])
+        items = self.widget.list_frames.findItems(name, QtCore.Qt.MatchExactly)
+        self.widget.list_frames.setCurrentItem(items[0])
 
         self.update_fields()
 
@@ -244,7 +240,7 @@ class FrameEditorGUI(Plugin):
         if not f:
             return
 
-        w = self._widget
+        w = self.widget
 
         w.txt_name.setText(f.name)
         w.txt_parent.setText(f.parent)
@@ -255,7 +251,7 @@ class FrameEditorGUI(Plugin):
         w.txt_z.setValue(f.position[2])
 
         rot = tf.transformations.euler_from_quaternion(f.orientation)
-        if self._widget.btn_deg.isChecked():
+        if self.widget.btn_deg.isChecked():
             rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
 
         w.txt_a.setValue(rot[0])
@@ -271,14 +267,14 @@ class FrameEditorGUI(Plugin):
         w.txt_abs_z.setValue(position[2])
 
         rot = tf.transformations.euler_from_quaternion(orientation)
-        if self._widget.btn_deg.isChecked():
+        if self.widget.btn_deg.isChecked():
             rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
         w.txt_abs_a.setValue(rot[0])
         w.txt_abs_b.setValue(rot[1])
         w.txt_abs_c.setValue(rot[2])
 
         ## Style
-        self._widget.combo_style.setCurrentIndex(self._widget.combo_style.findText(f.style))
+        self.widget.combo_style.setCurrentIndex(self.widget.combo_style.findText(f.style))
 
 
     @Slot(str)
@@ -290,37 +286,31 @@ class FrameEditorGUI(Plugin):
             self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
 
         if self.editor.active_frame.style != "none":
-            self._widget.btn_style_color.setEnabled(True)
+            self.widget.btn_style_color.setEnabled(True)
         else:
-            self._widget.btn_style_color.setEnabled(False)
+            self.widget.btn_style_color.setEnabled(False)
+
 
     ## BUTTONS ##
     ##
-    @Slot()
-    def open_file(self):
-        files = QtGui.QFileDialog.getOpenFileNames(self._widget,
-            "Select one or more files to open", "",
-            "YAML files(*.yaml)");
-        for filename in files:
-            self.editor.load_file(str(filename), self.namespace)
-        if len(files) == 1:
-            self.filename = files[0]
+    def open(self):
+        if self.ok_to_continue():
+            file_name, stuff = QtGui.QFileDialog.getOpenFileName(self.widget,
+                "Select a file to open", ".", "YAML files(*.yaml)")
 
-    @Slot()
-    def save_file(self):
-        if self.filename == "":
-            print "No filename set"
+            if not file_name == "":
+                self.load_file(file_name)
+
+    def save_as(self):
+        file_name, stuff = QtGui.QFileDialog.getSaveFileName(None, "Save File", ".", "YAML files(*.yaml)")
+        if file_name == "":
+            return False
         else:
-            self.editor.save_file(self.filename, self.namespace)
+            return self.save_file(file_name)
 
-    @Slot()
-    def save_as_file(self):
-        filename = str(QtGui.QFileDialog.getSaveFileName(self._widget,
-            "Save file as...", self.filename,
-            "YAML files(*.yaml)")[0])
-        if filename:
-            self.filename = filename
-            self.save_file()
+
+    def write_file(self, file_name):
+        return self.editor.save_file(file_name)
 
 
     @Slot()
@@ -332,7 +322,7 @@ class FrameEditorGUI(Plugin):
 
         ## Get Name ##
         ##
-        name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Frame", "Name:", QtGui.QLineEdit.Normal, "my_frame");
+        name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name:", QtGui.QLineEdit.Normal, "my_frame");
 
         while True:
             if not ok or name == "":
@@ -341,7 +331,7 @@ class FrameEditorGUI(Plugin):
             if name not in self.editor.frames:
                 break
 
-            name, ok = QtGui.QInputDialog.getText(self._widget, "Add New Frame", "Name (must be unique):", QtGui.QLineEdit.Normal, "my_frame");
+            name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name (must be unique):", QtGui.QLineEdit.Normal, "my_frame");
 
         ## Get Parent ##
         ##
@@ -349,7 +339,7 @@ class FrameEditorGUI(Plugin):
         if not all_frames:
             all_frames = ["world"]
         print all_frames
-        parent, ok = QtGui.QInputDialog.getItem(self._widget, "Add New Frame", "Parent Name:", all_frames);
+        parent, ok = QtGui.QInputDialog.getItem(self.widget, "Add New Frame", "Parent Name:", all_frames);
 
         if not ok or parent == "":
             return
@@ -360,7 +350,7 @@ class FrameEditorGUI(Plugin):
 
     @Slot(bool)
     def btn_delete_clicked(self, checked):
-        item = self._widget.list_frames.currentItem()
+        item = self.widget.list_frames.currentItem()
         if not item:
             return
         self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text()]))
@@ -377,7 +367,7 @@ class FrameEditorGUI(Plugin):
         self.set_parent(True)
 
     def set_parent(self, keep_absolute):
-        parent = self._widget.list_tf.currentItem()
+        parent = self.widget.list_tf.currentItem()
         if not parent:
             return # none selected
 
@@ -421,7 +411,7 @@ class FrameEditorGUI(Plugin):
         self.set_pose(["c"])
 
     def set_pose(self, mode):
-        source = self._widget.list_tf.currentItem()
+        source = self.widget.list_tf.currentItem()
         if not source:
             return # none selected
 
@@ -456,7 +446,7 @@ class FrameEditorGUI(Plugin):
     def btn_call_service_clicked(self, checked):
         '''Calls a service to request pose data'''
 
-        service_name = self._widget.txt_call_service.text()
+        service_name = self.widget.txt_call_service.text()
 
         if service_name == "":
             print "Error: No service name has been set!"
@@ -490,7 +480,7 @@ class FrameEditorGUI(Plugin):
     def btn_call_action_clicked(self, checked):
         '''Starts an action to request pose data'''
 
-        action_name = self._widget.txt_call_action.text()
+        action_name = self.widget.txt_call_action.text()
         if action_name == "":
             print "Error: No action name has been set!"
             return
@@ -545,7 +535,7 @@ class FrameEditorGUI(Plugin):
         value = widget.value()
 
         ## Deg to rad
-        if self._widget.btn_deg.isChecked() and symbol in ['a', 'b', 'c']:
+        if self.widget.btn_deg.isChecked() and symbol in ['a', 'b', 'c']:
             value = value * math.pi / 180.0
 
         if frame.value(symbol) != value:
@@ -553,29 +543,29 @@ class FrameEditorGUI(Plugin):
 
     @Slot()
     def x_valueChanged(self):
-        self.set_value(self._widget.txt_x, 'x')
+        self.set_value(self.widget.txt_x, 'x')
     @Slot()
     def y_valueChanged(self):
-        self.set_value(self._widget.txt_y, 'y')
+        self.set_value(self.widget.txt_y, 'y')
     @Slot()
     def z_valueChanged(self):
-        self.set_value(self._widget.txt_z, 'z')
+        self.set_value(self.widget.txt_z, 'z')
     @Slot()
     def a_valueChanged(self):
-        self.set_value(self._widget.txt_a, 'a')
+        self.set_value(self.widget.txt_a, 'a')
     @Slot()
     def b_valueChanged(self):
-        self.set_value(self._widget.txt_b, 'b')
+        self.set_value(self.widget.txt_b, 'b')
     @Slot()
     def c_valueChanged(self):
-        self.set_value(self._widget.txt_c, 'c')
+        self.set_value(self.widget.txt_c, 'c')
 
 
     ## FRAME STYLE ##
     ##
     @Slot(int)
     def frame_style_changed(self, id):
-        style = self._widget.combo_style.currentText().lower()
+        style = self.widget.combo_style.currentText().lower()
         if self.editor.active_frame.style != style:
             if style == "mesh":
                 path = QtGui.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
@@ -584,29 +574,15 @@ class FrameEditorGUI(Plugin):
             self.editor.command(Command_SetStyle(self.editor, self.editor.active_frame, style, path))
 
             if style != "none":
-                self._widget.btn_style_color.setEnabled(True)
+                self.widget.btn_style_color.setEnabled(True)
             else:
-                self._widget.btn_style_color.setEnabled(False)
+                self.widget.btn_style_color.setEnabled(False)
 
 
     ## PLUGIN ##
     ##
     def shutdown_plugin(self):
+        super(FrameEditorGUI, self).__init__(context)
         self._update_thread.kill()
-
-    def save_settings(self, plugin_settings, instance_settings):
-        # TODO save intrinsic configuration, usually using:
-        # instance_settings.set_value(k, v)
-        pass
-
-    def restore_settings(self, plugin_settings, instance_settings):
-        # TODO restore intrinsic configuration, usually using:
-        # v = instance_settings.value(k)
-        pass
-
-    #def trigger_configuration(self):
-        # Comment in to signal that the plugin has a way to configure
-        # This will enable a setting button (gear icon) in each dock widget title bar
-        # Usually used to open a modal configuration dialog
 
 # eof
