@@ -167,8 +167,6 @@ class FrameEditorGUI(ProjectPlugin):
         widget.btn_rad.toggled.connect(self.update_fields)
 
         widget.combo_style.currentIndexChanged.connect(self.frame_style_changed)
-        widget.btn_style_color.clicked.connect(self.btn_style_color_clicked)
-        widget.btn_style_color.setEnabled(False)
 
         return widget
 
@@ -307,11 +305,6 @@ class FrameEditorGUI(ProjectPlugin):
 
         if not self.editor.active_frame or (self.editor.active_frame.name != name):
             self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
-
-        if self.editor.active_frame.style != "none":
-            self.widget.btn_style_color.setEnabled(True)
-        else:
-            self.widget.btn_style_color.setEnabled(False)
 
 
     ## BUTTONS ##
@@ -521,10 +514,6 @@ class FrameEditorGUI(ProjectPlugin):
 
         self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
 
-    @Slot(bool)
-    def btn_style_color_clicked(self, checked):
-        color = QtGui.QColorDialog.getColor(QtGui.QColor(255,255,255,255), None, "Select Color", options=QtGui.QColorDialog.ShowAlphaChannel)
-        self.editor.command(Command_SetStyleColor(self.editor, self.editor.active_frame, color.getRgbF()))
 
     def action_feedback_callback(self, feedback):
         frame = self.editor.active_frame
@@ -575,11 +564,6 @@ class FrameEditorGUI(ProjectPlugin):
         style = self.widget.combo_style.currentText().lower()
         if self.editor.active_frame.style != style:
             self.editor.command(Command_SetStyle(self.editor, self.editor.active_frame, style))
-
-            if style != "none":
-                self.widget.btn_style_color.setEnabled(True)
-            else:
-                self.widget.btn_style_color.setEnabled(False)
 
 
     ## PLUGIN ##

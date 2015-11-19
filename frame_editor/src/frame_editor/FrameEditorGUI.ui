@@ -644,13 +644,6 @@
                </item>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="btn_style_color">
-               <property name="text">
-                <string>Color</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
            <item>
@@ -981,7 +974,6 @@
   <tabstop>list_frames</tabstop>
   <tabstop>btn_add</tabstop>
   <tabstop>combo_style</tabstop>
-  <tabstop>btn_style_color</tabstop>
   <tabstop>btn_set_parent_rel</tabstop>
   <tabstop>btn_set_parent_abs</tabstop>
   <tabstop>btn_set_pose</tabstop>

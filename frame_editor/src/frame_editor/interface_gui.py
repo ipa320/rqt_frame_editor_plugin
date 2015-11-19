@@ -7,7 +7,7 @@ from python_qt_binding import loadUi, QtGui, QtCore
 from python_qt_binding.QtGui import QWidget, QPushButton
 from python_qt_binding.QtCore import Signal, Slot
 
-from frame_editor.commands import Command_SetGeometry
+from frame_editor.commands import *
 
 
 class FrameEditor_StyleWidget(object):
@@ -43,6 +43,12 @@ class FrameEditor_StyleWidget(object):
         self.height_spinbox = QtGui.QDoubleSpinBox()
         self.height_spinbox.editingFinished.connect(self.height_changed)
 
+        self.color_label = QtGui.QLabel()
+        self.color_label.setAutoFillBackground(True)
+        self.update_color_label(None)
+        self.color_button = QtGui.QPushButton("Set Color")
+        self.color_button.clicked.connect(self.btn_color_clicked)
+
         self.layout.addWidget(self.mesh_label, 0, 0)
         self.layout.addWidget(self.mesh_button, 0, 1)
         self.layout.addWidget(self.diameter_label, 1, 0)
@@ -53,6 +59,10 @@ class FrameEditor_StyleWidget(object):
         self.layout.addWidget(self.width_spinbox, 3, 1)
         self.layout.addWidget(self.height_label, 4, 0)
         self.layout.addWidget(self.height_spinbox, 4, 1)
+        self.layout.addWidget(self.color_label, 5, 0)
+        self.layout.addWidget(self.color_button, 5, 1)
+
+        self.update_widget(None)
 
 
     def get_widget(self):
@@ -64,10 +74,13 @@ class FrameEditor_StyleWidget(object):
             ## Check for change
             if self.editor.active_frame is not self.old_frame:
                 self.update_widget(self.editor.active_frame)
+                self.update_values(self.editor.active_frame)
+            self.update_color_label(self.editor.active_frame)
 
-        if level & 4:
+        elif level & 4:
             if self.editor.active_frame is not None:
                 self.update_values(self.editor.active_frame)
+            self.update_color_label(self.editor.active_frame)
     
     def update_widget(self, frame):
 
@@ -122,6 +135,13 @@ class FrameEditor_StyleWidget(object):
             if frame.style == "cube":
                 self.height_spinbox.setValue(frame.height)
 
+    def update_color_label(self, frame):
+        if frame is None:
+            values = "{}, {}, {}, {}".format(200, 200, 200, 255)
+        else:
+            values = "{}, {}, {}, {}".format(frame.color[0]*255, frame.color[1]*255, frame.color[2]*255, frame.color[3]*255)
+        self.color_label.setStyleSheet("QLabel { background-color: rgba("+values+"); }")
+
     @Slot(float)
     def diameter_changed(self):
         if self.editor.active_frame.diameter != self.diameter_spinbox.value():
@@ -142,10 +162,16 @@ class FrameEditor_StyleWidget(object):
         if self.editor.active_frame.height != self.height_spinbox.value():
             self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "height", self.height_spinbox.value()))
 
-
     @Slot()
     def btn_open_mesh_clicked(self):
         path = QtGui.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
         self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
+
+
+    @Slot(bool)
+    def btn_color_clicked(self, checked):
+        frame = self.editor.active_frame
+        color = QtGui.QColorDialog.getColor(QtGui.QColor(frame.color[0]*255, frame.color[1]*255, frame.color[2]*255, frame.color[3]*255), None, "Select Color", options=QtGui.QColorDialog.ShowAlphaChannel)
+        self.editor.command(Command_SetStyleColor(self.editor, frame, color.getRgbF()))
 
 # eof

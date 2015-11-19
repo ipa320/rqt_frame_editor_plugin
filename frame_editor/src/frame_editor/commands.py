@@ -372,12 +372,12 @@ class Command_SetStyleColor(QUndoCommand):
     def redo(self):
         self.element.set_color(self.new_color)
         self.element.broadcast()
-        self.editor.add_undo_level(1, [self.element]) #TODO Adjust level
+        self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.set_color(self.old_color)
         self.element.broadcast()
-        self.editor.add_undo_level(1, [self.element]) #TODO Adjust level
+        self.editor.add_undo_level(4, [self.element])
 
 
 class Command_SetGeometry(QUndoCommand):
