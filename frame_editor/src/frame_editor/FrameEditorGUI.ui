@@ -917,6 +917,52 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txt_name</tabstop>
+  <tabstop>txt_parent</tabstop>
+  <tabstop>txt_x</tabstop>
+  <tabstop>txt_y</tabstop>
+  <tabstop>txt_z</tabstop>
+  <tabstop>txt_a</tabstop>
+  <tabstop>txt_b</tabstop>
+  <tabstop>txt_c</tabstop>
+  <tabstop>txt_abs_x</tabstop>
+  <tabstop>txt_abs_y</tabstop>
+  <tabstop>txt_abs_z</tabstop>
+  <tabstop>txt_abs_a</tabstop>
+  <tabstop>txt_abs_b</tabstop>
+  <tabstop>txt_abs_c</tabstop>
+  <tabstop>btn_rad</tabstop>
+  <tabstop>btn_deg</tabstop>
+  <tabstop>btn_reset_position_rel</tabstop>
+  <tabstop>btn_reset_orientation_rel</tabstop>
+  <tabstop>btn_reset_position_abs</tabstop>
+  <tabstop>btn_reset_orientation_abs</tabstop>
+  <tabstop>frames</tabstop>
+  <tabstop>btn_delete</tabstop>
+  <tabstop>list_frames</tabstop>
+  <tabstop>btn_add</tabstop>
+  <tabstop>combo_style</tabstop>
+  <tabstop>btn_style_color</tabstop>
+  <tabstop>btn_set_parent_rel</tabstop>
+  <tabstop>btn_set_parent_abs</tabstop>
+  <tabstop>btn_set_pose</tabstop>
+  <tabstop>btn_set_position</tabstop>
+  <tabstop>btn_set_x</tabstop>
+  <tabstop>btn_set_y</tabstop>
+  <tabstop>btn_set_z</tabstop>
+  <tabstop>btn_set_orientation</tabstop>
+  <tabstop>btn_set_a</tabstop>
+  <tabstop>btn_set_b</tabstop>
+  <tabstop>btn_set_c</tabstop>
+  <tabstop>btn_call_service</tabstop>
+  <tabstop>txt_call_service</tabstop>
+  <tabstop>btn_call_action</tabstop>
+  <tabstop>txt_call_action</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>list_tf</tabstop>
+  <tabstop>btn_refresh</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

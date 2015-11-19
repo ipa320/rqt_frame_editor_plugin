@@ -582,7 +582,7 @@ class FrameEditorGUI(ProjectPlugin):
     ## PLUGIN ##
     ##
     def shutdown_plugin(self):
-        super(FrameEditorGUI, self).__init__(context)
+        super(FrameEditorGUI, self).shutdown_plugin()
         self._update_thread.kill()
 
 # eof
