@@ -114,7 +114,7 @@ class ProjectPlugin(Plugin):
     def open(self):
         if self.ok_to_continue():
             file_name, stuff = QtGui.QFileDialog.getOpenFileName(self.widget,
-                "Select a file to open", ".", "XML files(*.xml)")
+                "Select a file to open", ".", self.file_type)
 
             if not file_name == "":
                 self.load_file(file_name)
@@ -155,7 +155,7 @@ class ProjectPlugin(Plugin):
             return self.save_file(self.file_name)
 
     def save_as(self):
-        file_name, stuff = QtGui.QFileDialog.getSaveFileName(None, "Save File", ".", "XML files (*.xml)")
+        file_name, stuff = QtGui.QFileDialog.getSaveFileName(None, "Save File", ".", self.file_type)
         if file_name == "":
             return False
         else:

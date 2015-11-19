@@ -34,6 +34,9 @@ class FrameEditorGUI(ProjectPlugin):
 
         self.setObjectName('FrameEditorGUI')
 
+        self.file_type = "YAML files(*.yaml)"
+
+
         ## Args ##
         ##
         # Process standalone plugin command-line arguments
@@ -52,6 +55,7 @@ class FrameEditorGUI(ProjectPlugin):
             print 'arguments: ', args
             print 'unknowns: ', unknowns
 
+
         ## Load file ##
         ##
         self.filename = ""
@@ -61,20 +65,22 @@ class FrameEditorGUI(ProjectPlugin):
                 #load file
                 filename = arg_path[0]
                 print "Loading", filename
-                self.editor.load_file(str(filename))
+                self.load_file(str(filename))
             elif len(arg_path) == 2:
                 #load rospack
                 rospack = rospkg.RosPack()
                 filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
                 print "Loading", filename
-                self.editor.load_file(str(filename))
+                self.load_file(str(filename))
             else:
                 print "Load argument not understood! --load", arg_path
                 print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
                 print "or use --load 'fullPathToMyYaml.yaml'"
 
-        self._update_thread.start()
 
+        ## Update thread ##
+        ##
+        self._update_thread.start()
         self.update_all(3)
 
 
@@ -293,22 +299,6 @@ class FrameEditorGUI(ProjectPlugin):
 
     ## BUTTONS ##
     ##
-    def open(self):
-        if self.ok_to_continue():
-            file_name, stuff = QtGui.QFileDialog.getOpenFileName(self.widget,
-                "Select a file to open", ".", "YAML files(*.yaml)")
-
-            if not file_name == "":
-                self.load_file(file_name)
-
-    def save_as(self):
-        file_name, stuff = QtGui.QFileDialog.getSaveFileName(None, "Save File", ".", "YAML files(*.yaml)")
-        if file_name == "":
-            return False
-        else:
-            return self.save_file(file_name)
-
-
     def write_file(self, file_name):
         return self.editor.save_file(file_name)
 
