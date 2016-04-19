@@ -133,19 +133,19 @@ class FrameEditor_InteractiveMarker(Interface):
 
         ## Style ##
         ##
-        style_marker = Marker()
-        style_marker.scale = NewVector3(0.75*scale, 0.75*scale, 0.75*scale)
-        style_marker.color = NewColor(0.0, 0.5, 0.5, 0.75)
+        #style_marker = Marker()
+        #style_marker.scale = NewVector3(0.75*scale, 0.75*scale, 0.75*scale)
+        #style_marker.color = NewColor(0.0, 0.5, 0.5, 0.75)
 
-        if style != "none":
-            style_marker = frame.marker
+        #if style != "none":
+        #    style_marker = frame.marker
 
-        style_control = InteractiveMarkerControl()
-        style_control.always_visible = True
-        style_control.markers.append(style_marker)
+        #style_control = InteractiveMarkerControl()
+        #style_control.always_visible = True
+        #style_control.markers.append(style_marker)
 
-        if style != "none":
-            int_marker.controls.append(style_control)
+        #if style != "none":
+        #    int_marker.controls.append(style_control)
 
 
         self.int_marker = int_marker
