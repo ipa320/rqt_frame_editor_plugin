@@ -65,15 +65,15 @@ class FrameEditor(QtCore.QObject):
         self.undo_level = 0
         self.undo_elements = []
 
+        ## Just in case: additional broadcast
+        self.broadcast()
+
+    def broadcast(self):
+        for observer in self.observers:
+            observer.broadcast(self)
 
     def get_tf_frames(self):
         return Frame.listener.getFrameStrings()
-
-
-    def broadcast(self):
-        #print "> Broadcasting"
-        for frame in self.frames.values():
-            frame.broadcast()
 
 
 

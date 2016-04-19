@@ -9,8 +9,10 @@ from python_qt_binding.QtCore import Signal, Slot
 
 from frame_editor.commands import *
 
+from frame_editor.interface import Interface
 
-class FrameEditor_StyleWidget(object):
+
+class FrameEditor_StyleWidget(Interface):
 
     def __init__(self, frame_editor):
         self.editor = frame_editor

@@ -24,14 +24,17 @@ from toolbox.project_plugin import ProjectPlugin
 from toolbox.msg import *
 from toolbox.srv import *
 
+from frame_editor.interface import Interface
+
 ## Views
 from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
 from frame_editor.interface_services import FrameEditor_Services
 from frame_editor.interface_markers import FrameEditor_Markers
 from frame_editor.interface_gui import FrameEditor_StyleWidget
+from frame_editor.interface_tf import FrameEditor_TF
 
 
-class FrameEditorGUI(ProjectPlugin):
+class FrameEditorGUI(ProjectPlugin, Interface):
 
     signal_update = QtCore.Signal(int)
 
@@ -122,6 +125,7 @@ class FrameEditorGUI(ProjectPlugin):
 
 
         ## Views
+        self.interface_tf = FrameEditor_TF(self.editor)
         self.interactive = FrameEditor_InteractiveMarker(self.editor)
         self.services = FrameEditor_Services(self.editor)
         self.interface_markers = FrameEditor_Markers(self.editor)

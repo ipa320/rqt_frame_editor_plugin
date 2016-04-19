@@ -145,13 +145,11 @@ class Command_AlignElement(QUndoCommand):
     def redo(self):
         self.element.position = self.new_position
         self.element.orientation = self.new_orientation
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.position = self.old_position
         self.element.orientation = self.old_orientation
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 
@@ -173,13 +171,11 @@ class Command_SetPose(QUndoCommand):
     def redo(self):
         self.element.position = self.new_position
         self.element.orientation = self.new_orientation
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.position = self.old_position
         self.element.orientation = self.old_orientation
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def id(self):
@@ -213,12 +209,10 @@ class Command_SetPosition(QUndoCommand):
 
     def redo(self):
         self.element.position = self.new_position
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.position = self.old_position
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 
@@ -235,12 +229,10 @@ class Command_SetOrientation(QUndoCommand):
 
     def redo(self):
         self.element.orientation = self.new_orientation
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.orientation = self.old_orientation
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 
@@ -258,12 +250,10 @@ class Command_SetValue(QUndoCommand):
 
     def redo(self):
         self.element.set_value(self.symbol, self.new_value)
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.set_value(self.symbol, self.old_value)
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 
@@ -294,7 +284,6 @@ class Command_SetParent(QUndoCommand):
             self.element.position = self.new_position
             self.element.orientation = self.new_orientation
 
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
@@ -304,7 +293,6 @@ class Command_SetParent(QUndoCommand):
             self.element.position = self.old_position
             self.element.orientation = self.old_orientation
 
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 class Command_SetStyle(QUndoCommand):
@@ -371,12 +359,10 @@ class Command_SetStyleColor(QUndoCommand):
 
     def redo(self):
         self.element.set_color(self.new_color)
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
     def undo(self):
         self.element.set_color(self.old_color)
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 
@@ -394,14 +380,12 @@ class Command_SetGeometry(QUndoCommand):
     def redo(self):
         setattr(self.element, self.parameter, self.new_value)
         self.element.update_marker()
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 
     def undo(self):
         setattr(self.element, self.parameter, self.old_value)
         self.element.update_marker()
-        self.element.broadcast()
         self.editor.add_undo_level(4, [self.element])
 
 # eof

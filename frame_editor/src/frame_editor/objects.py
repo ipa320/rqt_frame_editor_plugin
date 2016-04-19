@@ -48,11 +48,6 @@ class Frame(object):
     def print_all(self):
         print "  {} (parent: {}) {} {}".format(self.name, self.parent, self.position, self.orientation)
 
-    def broadcast(self):
-        Frame.broadcaster.sendTransform(self.position, self.orientation,
-            rospy.Time.now(),
-            self.name, self.parent)
-
     def value(self, symbol):
         if symbol == 'x':
             return self.position[0]
@@ -96,10 +91,6 @@ class Object_Geometry(Frame):
 
         super(Object_Geometry, self).__init__(name, position, orientation, parent, style)
 
-        self.publisher = rospy.Publisher("frame_editor_marker", Marker, queue_size=10, latch=False)
-        self.last_publish_time = None
-        self.publish_rate = rospy.Duration(1)/1 #Division for mathematical correctness
-
         ## TODO: put this into interface_marker.py
         self.marker = Marker()
         self.marker.scale = NewVector3(1, 1, 1)
@@ -119,13 +110,6 @@ class Object_Geometry(Frame):
         self.update_marker()
         #self.marker.update()
 
-    def broadcast(self):
-        super(Object_Geometry, self).broadcast()
-        if (self.last_publish_time is None or
-            (rospy.Time.now() - self.last_publish_time) >= self.publish_rate ):
-            self.last_publish_time = rospy.Time.now()
-            self.update_marker()
-            self.publisher.publish(self.marker)
 
 class Object_Plane(Object_Geometry):
 

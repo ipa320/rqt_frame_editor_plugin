@@ -7,6 +7,7 @@ import rospy
 
 from frame_editor.objects import *
 from frame_editor.commands import *
+from frame_editor.interface import Interface
 
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
@@ -17,7 +18,7 @@ from interactive_markers.interactive_marker_server import *
 from visualization_msgs.msg import InteractiveMarkerControl, Marker
 
 
-class FrameEditor_InteractiveMarker:
+class FrameEditor_InteractiveMarker(Interface):
 
     def __init__(self, frame_editor):
         self.editor = frame_editor

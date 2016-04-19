@@ -9,6 +9,7 @@ import rospy
 
 from frame_editor.objects import *
 from frame_editor.commands import *
+from frame_editor.interface import Interface
 
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
@@ -16,7 +17,7 @@ from frame_editor.constructors_std import *
 from frame_editor.srv import *
 
 
-class FrameEditor_Services:
+class FrameEditor_Services(Interface):
 
     def __init__(self, frame_editor):
 
