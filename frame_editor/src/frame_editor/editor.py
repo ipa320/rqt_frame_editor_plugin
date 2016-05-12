@@ -5,6 +5,7 @@
 
 import time
 import threading
+import yaml
 
 import rospy
 import rosparam
@@ -72,9 +73,27 @@ class FrameEditor(QtCore.QObject):
         for observer in self.observers:
             observer.broadcast(self)
 
-    def get_tf_frames(self):
-        return Frame.listener.getFrameStrings()
+    @staticmethod
+    def tf_dict():
+        y = Frame.tf_buffer.all_frames_as_yaml()
+        if y == '[]':
+            return {}
+        else:
+            return yaml.load(y)
 
+    @staticmethod
+    def frame_is_temporary(frame_id):
+        return frame_id.startswith('_')
+
+    @staticmethod
+    def all_frame_ids(include_temp=True):
+        return [f for f in FrameEditor.tf_dict() if
+                not FrameEditor.frame_is_temporary(f) or include_temp]
+
+    def iter_frames(self, include_temp=True):
+        for f in self.frames.itervalues():
+            if not self.frame_is_temporary(f.name) or include_temp:
+                yield f
 
 
     ## PRINT ##
@@ -162,7 +181,7 @@ class FrameEditor(QtCore.QObject):
         data = {}
         frames = {}
 
-        for frame in self.frames.values():
+        for frame in self.iter_frames(include_temp=False):
             t = {}
             t["x"] = float(frame.position[0])
             t["y"] = float(frame.position[1])

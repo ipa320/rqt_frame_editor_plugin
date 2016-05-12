@@ -210,8 +210,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
     @Slot()
     def update_tf_list(self):
         self.widget.list_tf.clear()
-        self.widget.list_tf.addItems(self.editor.get_tf_frames())
-        self.widget.list_tf.sortItems()
+        self.widget.list_tf.addItems(
+            sorted(self.editor.all_frame_ids(include_temp=False)))
 
     def update_frame_list(self):
         new_list = self.editor.frames.keys()
@@ -284,7 +284,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         w.txt_c.setValue(rot[2])
 
         ## Absolute
-        (position, orientation) = f.listener.lookupTransform('world', f.name, rospy.Time(0))
+        position, orientation = FromTransformStamped(
+            f.tf_buffer.lookup_transform('world', f.name, rospy.Time(0)))
         ## TODO, tf is sometimes too slow! values may still be the old ones
 
         w.txt_abs_x.setValue(position[0])
@@ -323,33 +324,27 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
     @Slot(bool)
     def btn_add_clicked(self, checked):
+        # Get a unique frame name
+        existing_frames = set(self.editor.all_frame_ids())
 
-        ## Get Name ##
-        ##
-        name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name:", QtGui.QLineEdit.Normal, "my_frame");
+        name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name:", QtGui.QLineEdit.Normal, "my_frame")
 
-        while True:
-            if not ok or name == "":
-                return
+        while ok and name in existing_frames:
+            name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name (must be unique):", QtGui.QLineEdit.Normal, "my_frame")
+        if not ok:
+            return
 
-            if name not in self.editor.frames:
-                break
-
-            name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name (must be unique):", QtGui.QLineEdit.Normal, "my_frame");
-
-        ## Get Parent ##
-        ##
-        all_frames = self.editor.get_tf_frames()
-        if not all_frames:
-            all_frames = ["world"]
-        print all_frames
-        parent, ok = QtGui.QInputDialog.getItem(self.widget, "Add New Frame", "Parent Name:", all_frames);
+        if not existing_frames:
+            available_parents = ["world"]
+        else:
+            available_parents = self.editor.all_frame_ids(include_temp=False)
+        parent, ok = QtGui.QInputDialog.getItem(self.widget, "Add New Frame", "Parent Name:", sorted(available_parents))
 
         if not ok or parent == "":
             return
 
         self.editor.command(Command_AddElement(self.editor, Frame(name, parent=parent)))
-            
+
 
 
     @Slot(bool)
@@ -431,7 +426,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
     @Slot(bool)
     def btn_reset_position_abs_clicked(self, checked):
-        (position, orientation) = self.editor.active_frame.listener.lookupTransform(self.editor.active_frame.parent, "world", rospy.Time(0))
+        position, orientation = FromTransformStamped(
+            self.editor.active_frame.tf_buffer.lookup_transform(
+                self.editor.active_frame.parent, "world", rospy.Time(0)))
         self.editor.command(Command_SetPosition(self.editor, self.editor.active_frame, position))
 
     @Slot(bool)
@@ -440,7 +437,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
     @Slot(bool)
     def btn_reset_orientation_abs_clicked(self, checked):
-        (position, orientation) = self.editor.active_frame.listener.lookupTransform(self.editor.active_frame.parent, "world", rospy.Time(0))
+        position, orientation = FromTransformStamped(
+            self.editor.active_frame.listener.lookupTransform(
+                self.editor.active_frame.parent, "world", rospy.Time(0)))
         self.editor.command(Command_SetOrientation(self.editor, self.editor.active_frame, orientation))
 
 

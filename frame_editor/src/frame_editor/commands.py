@@ -10,6 +10,7 @@ import tf
 
 from python_qt_binding.QtGui import QUndoCommand
 
+from constructors_geometry import FromTransformStamped
 from frame_editor.objects import *
 
 
@@ -69,6 +70,7 @@ class Command_RemoveElement(QUndoCommand):
             self.editor.add_undo_level(2)
 
         del self.editor.frames[self.element.name]
+        self.element.tf_buffer.clear()
         self.element.hidden = True
         self.editor.add_undo_level(1, [self.element])
 
@@ -115,7 +117,9 @@ class Command_AlignElement(QUndoCommand):
 
         ## New Pose ##
         ##
-        (position, orientation) = element.listener.lookupTransform(element.parent, source_name, rospy.Time(0))
+        position, orientation = FromTransformStamped(
+            element.tf_buffer.lookup_transform(
+                element.parent, source_name, rospy.Time(0)))
 
         ## Position
         pos = list(element.position)
@@ -270,7 +274,9 @@ class Command_SetParent(QUndoCommand):
         self.old_parent_name = element.parent
 
         if self.keep_absolute:
-            (position, orientation) = element.listener.lookupTransform(parent_name, element.name, rospy.Time(0))
+            position, orientation = FromTransformStamped(
+                element.tf_buffer.lookup_transform(
+                    parent_name, element.name, rospy.Time(0)))
             self.new_position = position
             self.new_orientation = orientation
 

@@ -8,7 +8,8 @@ import time
 import rospy
 import rosparam
 
-import tf
+import tf.transformations as tft
+import tf2_ros
 
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
@@ -20,8 +21,9 @@ from visualization_msgs.msg import InteractiveMarkerControl, Marker
 
 class Frame(object):
 
-    broadcaster = tf.TransformBroadcaster()
-    listener = tf.TransformListener()
+    tf_broadcaster = tf2_ros.TransformBroadcaster()
+    tf_buffer = tf2_ros.Buffer()
+    tf_listener = tf2_ros.TransformListener(tf_buffer)
 
     __id_counter = -1
 
@@ -56,7 +58,7 @@ class Frame(object):
         elif symbol == 'z':
             return self.position[2]
         else:
-            rpy = tf.transformations.euler_from_quaternion(self.orientation)
+            rpy = tft.euler_from_quaternion(self.orientation)
             if symbol == 'a':
                 return rpy[0]
             elif symbol == 'b':
@@ -75,14 +77,14 @@ class Frame(object):
                 position[2] = value
             self.position = tuple(position)
         else:
-            rpy = list(tf.transformations.euler_from_quaternion(self.orientation))
+            rpy = list(tft.euler_from_quaternion(self.orientation))
             if symbol == 'a':
                 rpy[0] = value
             elif symbol == 'b':
                 rpy[1] = value
             elif symbol == 'c':
                 rpy[2] = value
-            self.orientation = tuple(tf.transformations.quaternion_from_euler(*rpy))
+            self.orientation = tuple(tft.quaternion_from_euler(*rpy))
 
 
 class Object_Geometry(Frame):

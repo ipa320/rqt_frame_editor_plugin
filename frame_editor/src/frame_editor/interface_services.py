@@ -170,6 +170,8 @@ class FrameEditor_Services(Interface):
             f = self.editor.frames[request.name]
             self.editor.command(Command_SetParent(self.editor, f, request.parent, request.keep_absolute))
 
+        return response
+
 
     def callback_copy_frame(self, request):
         print "> Request to copy frame '" + request.source_name + "' with new name '" + request.name + "' and new parent name '" + request.parent + "'"
@@ -193,19 +195,20 @@ class FrameEditor_Services(Interface):
                     frame.name = request.name
                 else:
                     frame = Frame(request.name, parent=request.source_name)
-                frame.broadcast()
                 self.editor.command(Command_AddElement(self.editor, frame))
             else:
                 ## Align with source frame
                 frame = self.editor.frames[request.name]
-                self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c', ]))
+                self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
 
             ## Set parent
             if (request.parent != "") and (frame.parent != request.parent):
-                frame.broadcast()
                 ## Make sure the listener knows the new frame / its new aligned position
-                frame.listener.waitForTransform(frame.parent, frame.name, rospy.Time(), rospy.Duration(1.0), rospy.Duration(0.01))
-                frame.listener.waitForTransform(request.parent, frame.name, rospy.Time(), rospy.Duration(1.0), rospy.Duration(0.01))
+                frame_tf = frame.tf_buffer.can_transform(frame.parent, frame.name, rospy.Time.now(), rospy.Duration(1.0), rospy.Duration(0.01))
+                new_tf = frame.tf_buffer.can_transform(request.parent, frame.name, rospy.Time.now(), rospy.Duration(1.0), rospy.Duration(0.01))
+                if not (frame_tf and new_tf):
+                    print " Error: tf can not transform."
+                    response.error_code = 4
                 self.editor.command(Command_SetParent(self.editor, frame, request.parent, True))
 
         return response
