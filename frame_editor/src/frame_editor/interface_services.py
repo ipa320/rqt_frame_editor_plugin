@@ -204,6 +204,7 @@ class FrameEditor_Services(Interface):
             ## Set parent
             if (request.parent != "") and (frame.parent != request.parent):
                 ## Make sure the listener knows the new frame / its new aligned position
+                self.editor.broadcast() # apparently you can't broadcast often enough
                 frame_tf = frame.tf_buffer.can_transform(frame.parent, frame.name, rospy.Time.now(), rospy.Duration(1.0), rospy.Duration(0.01))
                 new_tf = frame.tf_buffer.can_transform(request.parent, frame.name, rospy.Time.now(), rospy.Duration(1.0), rospy.Duration(0.01))
                 if not (frame_tf and new_tf):
