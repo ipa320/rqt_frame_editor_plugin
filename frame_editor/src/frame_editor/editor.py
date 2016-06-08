@@ -76,10 +76,12 @@ class FrameEditor(QtCore.QObject):
     @staticmethod
     def tf_dict():
         y = Frame.tf_buffer.all_frames_as_yaml()
-        if y == '[]':
-            return {}
+        d = yaml.load(y)
+        if isinstance(d, dict):
+            return d
         else:
-            return yaml.load(y)
+            rospy.logwarn('Got invalid yaml from tf2: '+y)
+            return {}
 
     @staticmethod
     def frame_is_temporary(frame_id):
