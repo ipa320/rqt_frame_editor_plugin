@@ -121,7 +121,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
 
         ## Undo View
-        widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
+        #widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
 
 
         ## Views
