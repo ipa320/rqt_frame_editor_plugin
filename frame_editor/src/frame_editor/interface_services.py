@@ -133,7 +133,7 @@ class FrameEditor_Services(Interface):
 
 
     def callback_set_frame(self, request):
-        print "> Request to set (or add) frame", request.name
+        print "> Request to set (or add) frame", request.name, request.parent
 
         response = SetFrameResponse()
         response.error_code = 0
@@ -146,14 +146,17 @@ class FrameEditor_Services(Interface):
             if request.parent == "":
                 request.parent = "world"
 
-            f = Frame(request.name, FromPoint(request.pose.position), FromQuaternion(request.pose.orientation))
+            f = Frame(request.name,
+                      FromPoint(request.pose.position),
+                      FromQuaternion(request.pose.orientation),
+                      request.parent)
             self.editor.command(Command_AddElement(self.editor, f))
 
         return response
 
 
     def callback_set_parent_frame(self, request):
-        print "> Request to set parent_frame", request.name
+        print "> Request to set parent_frame", request.name, request.parent
 
         response = SetParentFrameResponse()
         response.error_code = 0
@@ -199,6 +202,10 @@ class FrameEditor_Services(Interface):
             else:
                 ## Align with source frame
                 frame = self.editor.frames[request.name]
+                frame_tf = frame.tf_buffer.can_transform(request.name, request.source_name, rospy.Time.now(), rospy.Duration(1.0), rospy.Duration(0.01))
+                if not frame_tf:
+                    print " Error: tf can not transform. (Align)"
+                    response.error_code = 4
                 self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
 
             ## Set parent
