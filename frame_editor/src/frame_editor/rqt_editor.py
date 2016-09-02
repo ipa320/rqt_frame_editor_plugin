@@ -11,8 +11,8 @@ import actionlib
 from qt_gui.plugin import Plugin
 from qt_gui_py_common.worker_thread import WorkerThread
 
-from python_qt_binding import loadUi, QtGui, QtCore
-from python_qt_binding.QtGui import QWidget
+from python_qt_binding import loadUi, QtCore, QtWidgets
+from python_qt_binding.QtWidgets import QWidget
 from python_qt_binding.QtCore import Signal, Slot
 
 from frame_editor.editor import Frame, FrameEditor
@@ -121,7 +121,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
 
         ## Undo View
-        #widget.undo_frame.layout().addWidget(QtGui.QUndoView(self.editor.undo_stack))
+        widget.undo_frame.layout().addWidget(QtWidgets.QUndoView(self.editor.undo_stack))
 
 
         ## Views
@@ -327,7 +327,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         # Get a unique frame name
         existing_frames = set(self.editor.all_frame_ids())
 
-        name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name:", QtGui.QLineEdit.Normal, "my_frame")
+        name, ok = QtWidgets.QInputDialog.getText(self.widget, "Add New Frame", "Name:", QtWidgets.QLineEdit.Normal, "my_frame");
 
         while ok and name in existing_frames:
             name, ok = QtGui.QInputDialog.getText(self.widget, "Add New Frame", "Name (must be unique):", QtGui.QLineEdit.Normal, "my_frame")
@@ -339,6 +339,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         else:
             available_parents = self.editor.all_frame_ids(include_temp=False)
         parent, ok = QtGui.QInputDialog.getItem(self.widget, "Add New Frame", "Parent Name:", sorted(available_parents))
+
 
         if not ok or parent == "":
             return

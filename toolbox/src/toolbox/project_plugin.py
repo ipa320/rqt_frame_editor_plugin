@@ -3,8 +3,8 @@
 from qt_gui.plugin import Plugin
 from qt_gui_py_common.worker_thread import WorkerThread
 
-from python_qt_binding import loadUi, QtGui, QtCore
-from python_qt_binding.QtGui import QWidget
+from python_qt_binding import loadUi, QtWidgets, QtCore, QtGui
+from python_qt_binding.QtWidgets import QWidget
 from python_qt_binding.QtCore import Signal, Slot
 
 
@@ -40,25 +40,25 @@ class ProjectPlugin(Plugin):
 
         ## ACTIONS ##
         ##
-        newAction = QtGui.QAction("&New", self)
+        newAction = QtWidgets.QAction("&New", self)
         newAction.setShortcuts(QtGui.QKeySequence.New)
         newAction.setStatusTip("Create a new file")
         newAction.setIcon(QtGui.QIcon.fromTheme("document-new"))
         newAction.triggered.connect(self.new_file)
 
-        openAction = QtGui.QAction("&Open", self)
+        openAction = QtWidgets.QAction("&Open", self)
         openAction.setShortcuts(QtGui.QKeySequence.Open)
         openAction.setStatusTip("Open a file")
         openAction.setIcon(QtGui.QIcon.fromTheme("document-open"))
         openAction.triggered.connect(self.open)
 
-        saveAction = QtGui.QAction("&Save", self)
+        saveAction = QtWidgets.QAction("&Save", self)
         saveAction.setShortcuts(QtGui.QKeySequence.Save)
         saveAction.setStatusTip("Save file")
         saveAction.setIcon(QtGui.QIcon.fromTheme("document-save"))
         saveAction.triggered.connect(self.save)
 
-        saveAsAction = QtGui.QAction("Save_&As", self)
+        saveAsAction = QtWidgets.QAction("Save_&As", self)
         saveAsAction.setShortcuts(QtGui.QKeySequence.SaveAs)
         saveAsAction.setStatusTip("Save file as...")
         saveAsAction.setIcon(QtGui.QIcon.fromTheme("document-save-as"))
@@ -87,9 +87,9 @@ class ProjectPlugin(Plugin):
         ## Tool bar
         tool_bar = self.widget.mainToolBar
 
-        undoButton = QtGui.QToolButton()
+        undoButton = QtWidgets.QToolButton()
         undoButton.setDefaultAction(undoAction)
-        redoButton = QtGui.QToolButton()
+        redoButton = QtWidgets.QToolButton()
         redoButton.setDefaultAction(redoAction)
 
         tool_bar.addAction(newAction)
@@ -113,7 +113,7 @@ class ProjectPlugin(Plugin):
 
     def open(self):
         if self.ok_to_continue():
-            file_name, stuff = QtGui.QFileDialog.getOpenFileName(self.widget,
+            file_name, stuff = QtWidgets.QFileDialog.getOpenFileName(self.widget,
                 "Select a file to open", ".", self.file_type)
 
             if not file_name == "":
@@ -133,15 +133,15 @@ class ProjectPlugin(Plugin):
         Returns False when the user reconsiders in case of an unmodified file.
         """
         if self.widget.isWindowModified():
-            reply = QtGui.QMessageBox.warning(self.widget, "pitasc Qt",
+            reply = QtWidgets.QMessageBox.warning(self.widget, "pitasc Qt",
                 "The file has been modified.\nDo you want to save your changes?",
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                QtGui.QMessageBox.No,
-                QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default,
+                QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape)
 
-            if reply == QtGui.QMessageBox.Yes:
+            if reply == QtWidgets.QMessageBox.Yes:
                 return self.save()
-            elif reply == QtGui.QMessageBox.Cancel:
+            elif reply == QtWidgets.QMessageBox.Cancel:
                 return False
 
         return True
@@ -155,7 +155,7 @@ class ProjectPlugin(Plugin):
             return self.save_file(self.file_name)
 
     def save_as(self):
-        file_name, stuff = QtGui.QFileDialog.getSaveFileName(None, "Save File", ".", self.file_type)
+        file_name, stuff = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", ".", self.file_type)
         if file_name == "":
             return False
         else:
@@ -203,12 +203,12 @@ class ProjectPlugin(Plugin):
 
         ## Ask for permission to close
         if self.widget.isWindowModified():
-            reply = QtGui.QMessageBox.warning(self.widget, "pitasc Qt",
+            reply = QtWidgets.QMessageBox.warning(self.widget, "pitasc Qt",
                 "The file has been modified.\nDo you want to save your changes before exiting (Save As...)?",
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                QtGui.QMessageBox.No)
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default,
+                QtWidgets.QMessageBox.No)
 
-            if reply == QtGui.QMessageBox.Yes:
+            if reply == QtWidgets.QMessageBox.Yes:
                 self.save_as()
 
 

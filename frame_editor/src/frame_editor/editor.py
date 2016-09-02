@@ -19,7 +19,7 @@ from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 
 from python_qt_binding import QtCore
-from python_qt_binding.QtGui import QUndoStack
+from python_qt_binding.QtWidgets import QUndoStack
 
 
 class FrameEditor(QtCore.QObject):

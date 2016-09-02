@@ -3,8 +3,8 @@
 
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
-from python_qt_binding import loadUi, QtGui, QtCore
-from python_qt_binding.QtGui import QWidget, QPushButton
+from python_qt_binding import loadUi, QtWidgets, QtCore
+from python_qt_binding.QtWidgets import QWidget, QPushButton
 from python_qt_binding.QtCore import Signal, Slot
 
 from frame_editor.commands import *
@@ -20,35 +20,35 @@ class FrameEditor_StyleWidget(Interface):
 
         self.old_frame = None
 
-        self.layout = QtGui.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
         self.widget = QWidget()
         self.widget.setLayout(self.layout)
 
-        self.mesh_label = QtGui.QLineEdit("File:")
-        self.mesh_label.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
-        self.mesh_button = QtGui.QPushButton("Open")
+        self.mesh_label = QtWidgets.QLineEdit("File:")
+        self.mesh_label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
+        self.mesh_button = QtWidgets.QPushButton("Open")
         self.mesh_button.clicked.connect(self.btn_open_mesh_clicked)
 
-        self.diameter_label = QtGui.QLabel("Diameter:")
-        self.diameter_spinbox = QtGui.QDoubleSpinBox()
+        self.diameter_label = QtWidgets.QLabel("Diameter:")
+        self.diameter_spinbox = QtWidgets.QDoubleSpinBox()
         self.diameter_spinbox.editingFinished.connect(self.diameter_changed)
 
-        self.length_label = QtGui.QLabel("Length:")
-        self.length_spinbox = QtGui.QDoubleSpinBox()
+        self.length_label = QtWidgets.QLabel("Length:")
+        self.length_spinbox = QtWidgets.QDoubleSpinBox()
         self.length_spinbox.editingFinished.connect(self.length_changed)
 
-        self.width_label = QtGui.QLabel("Width:")
-        self.width_spinbox = QtGui.QDoubleSpinBox()
+        self.width_label = QtWidgets.QLabel("Width:")
+        self.width_spinbox = QtWidgets.QDoubleSpinBox()
         self.width_spinbox.editingFinished.connect(self.width_changed)
 
-        self.height_label = QtGui.QLabel("Height:")
-        self.height_spinbox = QtGui.QDoubleSpinBox()
+        self.height_label = QtWidgets.QLabel("Height:")
+        self.height_spinbox = QtWidgets.QDoubleSpinBox()
         self.height_spinbox.editingFinished.connect(self.height_changed)
 
-        self.color_label = QtGui.QLabel()
+        self.color_label = QtWidgets.QLabel()
         self.color_label.setAutoFillBackground(True)
         self.update_color_label(None)
-        self.color_button = QtGui.QPushButton("Set Color")
+        self.color_button = QtWidgets.QPushButton("Set Color")
         self.color_button.clicked.connect(self.btn_color_clicked)
 
         self.layout.addWidget(self.mesh_label, 0, 0)
@@ -166,14 +166,14 @@ class FrameEditor_StyleWidget(Interface):
 
     @Slot()
     def btn_open_mesh_clicked(self):
-        path = QtGui.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
+        path = QtWidgets.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
         self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
 
 
     @Slot(bool)
     def btn_color_clicked(self, checked):
         frame = self.editor.active_frame
-        color = QtGui.QColorDialog.getColor(QtGui.QColor(frame.color[0]*255, frame.color[1]*255, frame.color[2]*255, frame.color[3]*255), None, "Select Color", options=QtGui.QColorDialog.ShowAlphaChannel)
+        color = QtWidgets.QColorDialog.getColor(QtWidgets.QColor(frame.color[0]*255, frame.color[1]*255, frame.color[2]*255, frame.color[3]*255), None, "Select Color", options=QtWidgets.QColorDialog.ShowAlphaChannel)
         self.editor.command(Command_SetStyleColor(self.editor, frame, color.getRgbF()))
 
 # eof

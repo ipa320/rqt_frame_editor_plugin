@@ -8,7 +8,7 @@ import time
 import rospy
 import tf
 
-from python_qt_binding.QtGui import QUndoCommand
+from python_qt_binding.QtWidgets import QUndoCommand
 
 from constructors_geometry import FromTransformStamped
 from frame_editor.objects import *
