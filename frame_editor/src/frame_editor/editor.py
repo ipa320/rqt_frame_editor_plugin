@@ -10,8 +10,6 @@ import yaml
 import rospy
 import rosparam
 
-import tf
-
 from frame_editor.objects import *
 from frame_editor.commands import *
 

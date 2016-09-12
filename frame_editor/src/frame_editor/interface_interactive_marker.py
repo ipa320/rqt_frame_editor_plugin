@@ -15,7 +15,7 @@ from frame_editor.constructors_std import *
 from geometry_msgs.msg import Pose
 
 from interactive_markers.interactive_marker_server import *
-from visualization_msgs.msg import InteractiveMarkerControl, Marker
+from visualization_msgs.msg import InteractiveMarkerControl
 
 
 class FrameEditor_InteractiveMarker(Interface):

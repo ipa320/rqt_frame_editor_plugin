@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
 from qt_gui.plugin import Plugin
-from qt_gui_py_common.worker_thread import WorkerThread
 
-from python_qt_binding import loadUi, QtWidgets, QtCore, QtGui
-from python_qt_binding.QtWidgets import QWidget
-from python_qt_binding.QtCore import Signal, Slot
+from python_qt_binding import QtWidgets, QtCore, QtGui
 
 
 class ProjectPlugin(Plugin):
