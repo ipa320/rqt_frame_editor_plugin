@@ -157,6 +157,42 @@ class Command_AlignElement(QUndoCommand):
         self.editor.add_undo_level(4, [self.element])
 
 
+class Command_CopyElement(QUndoCommand):
+    '''Copys a source frame's transformation and sets a new parent
+    '''
+
+    def __init__(self, editor, new_name, source_name, parent_name):
+        QUndoCommand.__init__(self, "Rebase")
+        self.editor = editor
+
+        if source_name in self.editor.frames:
+            element = copy.deepcopy(self.editor.frames[source_name])
+            element.name = new_name
+        else:
+            element = Frame(new_name, parent=parent_name)
+        element.parent = parent_name
+
+        # Pose
+        position, orientation = FromTransformStamped(
+            element.tf_buffer.lookup_transform(
+                parent_name, source_name, rospy.Time(0)))
+        element.position = position
+        element.orientation = orientation
+
+        self.element = element
+
+    def redo(self):
+        self.editor.frames[self.element.name] = self.element
+        self.element.hidden = False
+        self.editor.add_undo_level(1, [self.element])
+
+    def undo(self):
+        del self.editor.frames[self.element.name]
+        self.element.hidden = True
+        self.editor.add_undo_level(1, [self.element])
+
+
+
 class Command_RebaseElement(QUndoCommand):
     '''Copys a source frame's transformation and sets a new parent
     '''
