@@ -157,6 +157,41 @@ class Command_AlignElement(QUndoCommand):
         self.editor.add_undo_level(4, [self.element])
 
 
+class Command_RebaseElement(QUndoCommand):
+    '''Copys a source frame's transformation and sets a new parent
+    '''
+
+    def __init__(self, editor, element, source_name, new_parent):
+        QUndoCommand.__init__(self, "Rebase")
+        self.editor = editor
+
+        self.element = element
+
+        self.old_position = element.position
+        self.old_orientation = element.orientation
+
+        self.new_parent = new_parent
+        self.old_parent = element.parent
+
+        # New Pose
+        self.new_position, self.new_orientation = FromTransformStamped(
+            element.tf_buffer.lookup_transform(
+                new_parent, source_name, rospy.Time(0)))
+
+
+    def redo(self):
+        self.element.position = self.new_position
+        self.element.orientation = self.new_orientation
+        self.element.parent = self.new_parent
+        self.editor.add_undo_level(4, [self.element])
+
+    def undo(self):
+        self.element.position = self.old_position
+        self.element.orientation = self.old_orientation
+        self.element.parent = self.old_parent
+        self.editor.add_undo_level(4, [self.element])
+
+
 class Command_SetPose(QUndoCommand):
 
     def __init__(self, editor, element, position, orientation):
@@ -301,6 +336,7 @@ class Command_SetParent(QUndoCommand):
 
         self.editor.add_undo_level(4, [self.element])
 
+
 class Command_SetStyle(QUndoCommand):
 
     def __init__(self, editor, element, style):
@@ -352,6 +388,7 @@ class Command_SetStyle(QUndoCommand):
         if self.was_active:
             self.editor.active_frame = self.old_element
             self.editor.add_undo_level(2)
+
 
 class Command_SetStyleColor(QUndoCommand):
 
