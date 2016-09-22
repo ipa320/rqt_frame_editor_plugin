@@ -14,6 +14,8 @@ import tf2_ros
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 from frame_editor.srv import *
+import utils_tf
+
 from geometry_msgs.msg import Pose
 
 from visualization_msgs.msg import InteractiveMarkerControl, Marker
@@ -88,24 +90,13 @@ class Frame(object):
 
     @staticmethod
     def can_transform(target_frame, source_frame, time_):
-        return Frame.tf_buffer.can_transform_core(
-            target_frame, source_frame, time_)[0]
+        return utils_tf.can_transform(
+            Frame.tf_buffer, target_frame, source_frame, time_)
 
     @staticmethod
     def wait_for_transform(target_frame, source_frame, timeout):
-        request_time = rospy.Time.now()
-        r = rospy.Rate(100)
-        while rospy.Time.now() < request_time + timeout:
-            # Try to get the most recent transform
-            if Frame.can_transform(target_frame, source_frame, rospy.Time(0)):
-                transform = Frame.tf_buffer.lookup_transform_core(
-                    target_frame, source_frame, rospy.Time(0))
-                # Success if it is newer than the initial time
-                if transform.header.stamp > request_time:
-                    break
-            r.sleep()
-        else:
-            raise RuntimeError('Transform timeout.')
+        return utils_tf.wait_for_transform(
+            Frame.tf_buffer, target_frame, source_frame, timeout)
 
 
 class Object_Geometry(Frame):
