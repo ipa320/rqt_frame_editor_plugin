@@ -86,6 +86,27 @@ class Frame(object):
                 rpy[2] = value
             self.orientation = tuple(tft.quaternion_from_euler(*rpy))
 
+    @staticmethod
+    def can_transform(target_frame, source_frame, time_):
+        return Frame.tf_buffer.can_transform_core(
+            target_frame, source_frame, time_)[0]
+
+    @staticmethod
+    def wait_for_transform(target_frame, source_frame, timeout):
+        request_time = rospy.Time.now()
+        r = rospy.Rate(100)
+        while rospy.Time.now() < request_time + timeout:
+            # Try to get the most recent transform
+            if Frame.can_transform(target_frame, source_frame, rospy.Time(0)):
+                transform = Frame.tf_buffer.lookup_transform_core(
+                    target_frame, source_frame, rospy.Time(0))
+                # Success if it is newer than the initial time
+                if transform.header.stamp > request_time:
+                    break
+            r.sleep()
+        else:
+            raise RuntimeError('Transform timeout.')
+
 
 class Object_Geometry(Frame):
 

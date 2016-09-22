@@ -18,14 +18,16 @@ class FrameEditor_TF(Interface):
 
     def broadcast(self, editor):
         #print "> Broadcasting"
-
+        transforms = []
+        now = rospy.Time.now()
         for frame in editor.frames.values():
-            Frame.tf_broadcaster.sendTransform(ToTransformStamped(
+            transforms.append(ToTransformStamped(
                 frame.position,
                 frame.orientation,
-                rospy.Time.now(),
+                now,
                 frame.name,
                 frame.parent
             ))
+        Frame.tf_broadcaster.sendTransform(transforms)
 
 # eof

@@ -208,7 +208,10 @@ class FrameEditor_Services(Interface):
                             response.error_code = 3
                             return response
 
+                    Frame.wait_for_transform(request.source_name, request.parent, rospy.Duration(1.0))
                     self.editor.command(Command_CopyElement(self.editor, request.name, request.source_name, request.parent))
+                    Frame.wait_for_transform(request.parent, request.name, rospy.Duration(1.0))
+
 
                 else:
                     frame = self.editor.frames[request.name]
@@ -219,6 +222,8 @@ class FrameEditor_Services(Interface):
                     else:
                         print ">> align"
                         self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
+
+                    Frame.wait_for_transform(frame.parent, frame.name, rospy.Duration(1.0))
 
             except Exception, e:
                 print "Error: unhandled exception", e

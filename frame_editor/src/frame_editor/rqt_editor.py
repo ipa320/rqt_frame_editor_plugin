@@ -282,21 +282,25 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         w.txt_b.setValue(rot[1])
         w.txt_c.setValue(rot[2])
 
+        txt_abs_pos = (w.txt_abs_x, w.txt_abs_y, w.txt_abs_z)
+        txt_abs_rot = (w.txt_abs_a, w.txt_abs_b, w.txt_abs_c)
+
         ## Absolute
-        position, orientation = FromTransformStamped(
-            f.tf_buffer.lookup_transform('world', f.name, rospy.Time(0)))
-        ## TODO, tf is sometimes too slow! values may still be the old ones
-
-        w.txt_abs_x.setValue(position[0])
-        w.txt_abs_y.setValue(position[1])
-        w.txt_abs_z.setValue(position[2])
-
-        rot = tf.transformations.euler_from_quaternion(orientation)
-        if self.widget.btn_deg.isChecked():
-            rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
-        w.txt_abs_a.setValue(rot[0])
-        w.txt_abs_b.setValue(rot[1])
-        w.txt_abs_c.setValue(rot[2])
+        try:
+            position, orientation = FromTransformStamped(
+                f.tf_buffer.lookup_transform('world', f.name, rospy.Time(0)))
+            for txt, p in zip(txt_abs_pos, position):
+                txt.setEnabled(True)
+                txt.setValue(p)
+            rot = tf.transformations.euler_from_quaternion(orientation)
+            if self.widget.btn_deg.isChecked():
+                rot = map(math.degrees, rot)
+            for txt, r in zip(txt_abs_rot, rot):
+                txt.setEnabled(True)
+                txt.setValue(r)
+        except:
+            for txt in txt_abs_rot + txt_abs_pos:
+                txt.setEnabled(False)
 
         ## Style
         self.widget.combo_style.setCurrentIndex(self.widget.combo_style.findText(f.style))
