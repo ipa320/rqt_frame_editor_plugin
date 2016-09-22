@@ -3,6 +3,7 @@
 
 ## TODO: DISCLAIMER, LICENSE, STUFF,...
 
+import copy
 import time
 
 import rospy
@@ -70,7 +71,6 @@ class Command_RemoveElement(QUndoCommand):
             self.editor.add_undo_level(2)
 
         del self.editor.frames[self.element.name]
-        self.element.tf_buffer.clear()
         self.element.hidden = True
         self.editor.add_undo_level(1, [self.element])
 

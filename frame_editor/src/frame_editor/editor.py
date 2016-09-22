@@ -64,9 +64,6 @@ class FrameEditor(QtCore.QObject):
         self.undo_level = 0
         self.undo_elements = []
 
-        ## Just in case: additional broadcast
-        self.broadcast()
-
     def broadcast(self):
         for observer in self.observers:
             observer.broadcast(self)
