@@ -130,7 +130,7 @@ class ProjectPlugin(Plugin):
         Returns False when the user reconsiders in case of an unmodified file.
         """
         if self.widget.isWindowModified():
-            reply = QtWidgets.QMessageBox.warning(self.widget, "pitasc Qt",
+            reply = QtWidgets.QMessageBox.warning(self.widget, "frame editor",
                 "The file has been modified.\nDo you want to save your changes?",
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default,
                 QtWidgets.QMessageBox.No,
@@ -183,7 +183,7 @@ class ProjectPlugin(Plugin):
         if not self.file_name == "":
             shown_name = self.stripped_name(file_name)
             # recent files...
-        self.widget.setWindowTitle(self.tr('{} [*] - {}'.format(shown_name, "pitasc Qt")))
+        self.widget.setWindowTitle(self.tr('{} [*] - {}'.format(shown_name, "frame editor")))
 
     def stripped_name(self, full_name):
         return QtCore.QFileInfo(full_name).fileName()
@@ -200,13 +200,14 @@ class ProjectPlugin(Plugin):
 
         ## Ask for permission to close
         if self.widget.isWindowModified():
-            reply = QtWidgets.QMessageBox.warning(self.widget, "pitasc Qt",
+            reply = QtWidgets.QMessageBox.warning(self.widget, "frame editor",
                 "The file has been modified.\nDo you want to save your changes before exiting (Save As...)?",
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default,
                 QtWidgets.QMessageBox.No)
 
             if reply == QtWidgets.QMessageBox.Yes:
                 self.save_as()
+        # unregister interfaces
 
 
     def save_settings(self, plugin_settings, instance_settings):

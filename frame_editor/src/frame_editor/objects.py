@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-
-## TODO: DISCLAIMER, LICENSE, STUFF,...
-
 import time
 
 import rospy

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 from python_qt_binding.QtCore import QObject
-## TODO: DISCLAIMER, LICENSE, STUFF,...
-
 
 class Interface(QObject):
 

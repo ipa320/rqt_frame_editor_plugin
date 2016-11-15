@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-
-## TODO: DISCLAIMER, LICENSE, STUFF,...
-
 from python_qt_binding import QtWidgets, QtCore
 from python_qt_binding.QtWidgets import QWidget, QPushButton
 from python_qt_binding.QtCore import Slot

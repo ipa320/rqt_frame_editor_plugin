@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-
-## TODO: DISCLAIMER, LICENSE, STUFF,...
-
 import rospy
 
 from frame_editor.constructors_geometry import ToTransformStamped
