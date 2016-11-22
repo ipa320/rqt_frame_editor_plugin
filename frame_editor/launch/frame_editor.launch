@@ -2,6 +2,8 @@
 
 <launch>
     <node pkg="rqt_gui" type="rqt_gui" name="frame_editor" 
-        args="--standalone frame_editor --args --load '$(find frame_editor)/launch/frames.yaml'"
+        args="--standalone frame_editor --args --load '$(find frame_editor)/etc/frames.yaml'"
         output="screen"/>
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find frame_editor)/etc/frame_editor.rviz"/>
 </launch>
