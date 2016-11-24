@@ -21,7 +21,7 @@ frame editor rqt-plugin
 #### Clone this repository into your catkin workspace.
 
 ``` 
-git clone https://github.com/ipa-lth/rqt_frame_editor_plugin.git
+git clone https://github.com/ipa320/rqt_frame_editor_plugin.git
 ```
 
 #### Update your catkin workspace, e.g.
