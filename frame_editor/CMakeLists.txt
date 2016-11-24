@@ -100,7 +100,17 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES frame_editor
-  CATKIN_DEPENDS interactive_markers rospy std_msgs tf message_runtime
+  CATKIN_DEPENDS   
+  rospy
+  std_msgs
+  geometry_msgs
+  visualization_msgs
+  interactive_markers
+  tf
+  message_runtime
+  dynamic_reconfigure
+  rqt_gui
+  rqt_gui_py
 #  DEPENDS system_lib
 )
 

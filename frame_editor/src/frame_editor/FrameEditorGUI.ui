@@ -75,8 +75,7 @@
                  </property>
                  <property name="icon">
                   <iconset theme="list-remove">
-                   <normaloff/>
-                  </iconset>
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -87,8 +86,7 @@
                  </property>
                  <property name="icon">
                   <iconset theme="list-add">
-                   <normaloff/>
-                  </iconset>
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -281,8 +279,7 @@
                </property>
                <property name="icon">
                 <iconset theme="edit-undo">
-                 <normaloff/>
-                </iconset>
+                 <normaloff>.</normaloff>.</iconset>
                </property>
               </widget>
              </item>
@@ -293,8 +290,7 @@
                </property>
                <property name="icon">
                 <iconset theme="edit-undo">
-                 <normaloff/>
-                </iconset>
+                 <normaloff>.</normaloff>.</iconset>
                </property>
               </widget>
              </item>
@@ -461,8 +457,7 @@
                </property>
                <property name="icon">
                 <iconset theme="edit-undo">
-                 <normaloff/>
-                </iconset>
+                 <normaloff>.</normaloff>.</iconset>
                </property>
               </widget>
              </item>
@@ -473,8 +468,7 @@
                </property>
                <property name="icon">
                 <iconset theme="edit-undo">
-                 <normaloff/>
-                </iconset>
+                 <normaloff>.</normaloff>.</iconset>
                </property>
               </widget>
              </item>
@@ -840,58 +834,6 @@
             </property>
            </spacer>
           </item>
-          <item>
-           <widget class="QFrame" name="frame_3">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_10">
-             <item>
-              <widget class="QPushButton" name="btn_call_service">
-               <property name="text">
-                <string>Call service</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="txt_call_service">
-               <property name="text">
-                <string>/toolbox/getPoseService</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="frame_4">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_11">
-             <item>
-              <widget class="QPushButton" name="btn_call_action">
-               <property name="text">
-                <string>Call action</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="txt_call_action">
-               <property name="text">
-                <string>/toolbox/getPose</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
@@ -929,8 +871,7 @@
               </property>
               <property name="icon">
                <iconset theme="view-refresh">
-                <normaloff/>
-               </iconset>
+                <normaloff>.</normaloff>.</iconset>
               </property>
              </widget>
             </item>
@@ -985,10 +926,6 @@
   <tabstop>btn_set_a</tabstop>
   <tabstop>btn_set_b</tabstop>
   <tabstop>btn_set_c</tabstop>
-  <tabstop>btn_call_service</tabstop>
-  <tabstop>txt_call_service</tabstop>
-  <tabstop>btn_call_action</tabstop>
-  <tabstop>txt_call_action</tabstop>
   <tabstop>scrollArea_2</tabstop>
   <tabstop>list_tf</tabstop>
   <tabstop>btn_refresh</tabstop>

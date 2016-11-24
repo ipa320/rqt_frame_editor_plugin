@@ -1,9 +1,0 @@
-string proxy_type        # "service" or "action"
-string proxy_type_module # e.g. "std_srvs"
-string proxy_type_name   # e.g. "Empty"
-string proxy_name        # e.g. "my_new_service"
-string name              # human readable name
-string description       # human readable description
-string icon_path
----
-int32 error_code

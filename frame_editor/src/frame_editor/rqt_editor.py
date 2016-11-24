@@ -19,10 +19,7 @@ from frame_editor.editor import Frame, FrameEditor
 from frame_editor.commands import *
 from frame_editor.constructors_geometry import *
 
-from toolbox.project_plugin import ProjectPlugin
-
-from toolbox.msg import *
-from toolbox.srv import *
+from project_plugin import ProjectPlugin
 
 from frame_editor.interface import Interface
 
@@ -157,9 +154,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_reset_position_abs.clicked.connect(self.btn_reset_position_abs_clicked)
         widget.btn_reset_orientation_rel.clicked.connect(self.btn_reset_orientation_rel_clicked)
         widget.btn_reset_orientation_abs.clicked.connect(self.btn_reset_orientation_abs_clicked)
-
-        widget.btn_call_service.clicked.connect(self.btn_call_service_clicked)
-        widget.btn_call_action.clicked.connect(self.btn_call_action_clicked)
 
         widget.txt_x.editingFinished.connect(self.x_valueChanged)
         widget.txt_y.editingFinished.connect(self.y_valueChanged)
@@ -441,90 +435,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             self.editor.active_frame.listener.lookupTransform(
                 self.editor.active_frame.parent, "world", rospy.Time(0)))
         self.editor.command(Command_SetOrientation(self.editor, self.editor.active_frame, orientation))
-
-
-    ## CALL BUTTONS ##
-    ##
-    @Slot(bool)
-    def btn_call_service_clicked(self, checked):
-        '''Calls a service to request pose data'''
-
-        service_name = self.widget.txt_call_service.text()
-
-        if service_name == "":
-            print "Error: No service name has been set!"
-            return
-
-        frame = self.editor.active_frame
-
-        ## Service request
-        request = GetPoseServiceRequest()
-        request.frame_name = frame.name
-        request.parent_name = frame.parent
-        request.default_pose = frame.pose
-
-        service = rospy.ServiceProxy(service_name, GetPoseService)
-        result = service(request)
-        print result
-
-        ## Check result
-        if request.frame_name != result.frame_name:
-            print "Names don't match: ", request.frame_name, result.frame_name
-            return
-
-        ## Set result
-        if frame.parent != result.parent_name:
-            self.editor.command(Command_SetParent(self.editor, frame, result.parent_name, False))
-
-        self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
-
-
-    @Slot(bool)
-    def btn_call_action_clicked(self, checked):
-        '''Starts an action to request pose data'''
-
-        action_name = self.widget.txt_call_action.text()
-        if action_name == "":
-            print "Error: No action name has been set!"
-            return
-
-        frame = self.editor.active_frame
-
-        ## Create client
-        print "> Waiting for action server"
-        client = actionlib.SimpleActionClient(action_name, GetPoseAction)
-        client.wait_for_server()
-
-        ## Action request
-        goal = GetPoseGoal()
-        goal.frame_name = frame.name
-        goal.parent_name = frame.parent
-        goal.default_pose = frame.pose
-
-        print "> Calling action and waiting for result"
-        client.send_goal(goal, feedback_cb=self.action_feedback_callback)
-        ok = client.wait_for_result()
-        print "> Action completed, result", ok
-
-        if not ok:
-            return
-
-        ## Set result
-        result = client.get_result()
-
-        if frame.parent != result.parent_name:
-            self.editor.command(Command_SetParent(self.editor, frame, result.parent_name, False))
-
-        self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
-
-
-    def action_feedback_callback(self, feedback):
-        frame = self.editor.active_frame
-
-        if frame.parent != result.parent_name:
-            self.editor.command(Command_SetParent(self.editor, frame, result.parent_name, False))
-
-        self.editor.command(Command_SetPose(self.editor, frame, FromPoint(result.pose.position, FromQuaternion(result.pose.orientation))))
 
 
     ## Spin Boxes ##

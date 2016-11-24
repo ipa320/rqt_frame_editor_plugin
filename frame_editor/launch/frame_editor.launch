@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-    <node name="frame_editor" pkg="frame_editor" type="editor.py">
-        <rosparam command="load" file="$(find frame_editor)/launch/frames.yaml"/>
-    </node>
-
+    <node pkg="rqt_gui" type="rqt_gui" name="frame_editor" 
+        args="--standalone frame_editor --args --load '$(find frame_editor)/launch/frames.yaml'"
+        output="screen"/>
 </launch>
