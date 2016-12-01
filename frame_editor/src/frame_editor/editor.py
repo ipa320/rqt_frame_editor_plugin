@@ -141,6 +141,8 @@ class FrameEditor(QtCore.QObject):
                     color = dat["color"]
                 else:
                     color = (0.0, 0.5, 0.5, 0.75)
+                if "package" not in dat:
+                    dat["package"] = ""
 
             position = (t["x"], t["y"], t["z"])
             orientation = (o["x"], o["y"], o["z"], o["w"])
