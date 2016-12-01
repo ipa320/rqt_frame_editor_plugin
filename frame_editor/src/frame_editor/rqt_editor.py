@@ -129,7 +129,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         widget.style_frame.layout().addWidget(self.interface_style.get_widget())
 
-
         ## Connections ##
         ##
         widget.btn_add.clicked.connect(self.btn_add_clicked)
