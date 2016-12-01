@@ -8,7 +8,8 @@ from python_qt_binding.QtGui import QColor
 from frame_editor.commands import *
 
 from frame_editor.interface import Interface
-
+import rospkg
+import os
 
 class FrameEditor_StyleWidget(Interface):
 
@@ -163,8 +164,22 @@ class FrameEditor_StyleWidget(Interface):
 
     @Slot(bool)
     def btn_open_mesh_clicked(self):
-        path = QtWidgets.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl *.dae)')[0]
-        self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
+        path = QtWidgets.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl)')[0]
+        try:
+            rospackage = rospkg.get_package_name(path)
+            if rospackage is None:
+                print "WARNING cannot find rospackage with mesh in it, saving absolute path"
+                self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", ""))
+                self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
+            else:
+                rel_path = os.path.relpath(path , rospkg.RosPack().get_path(rospackage))
+                print "Saving: package:", rospackage, "+ relative path:", rel_path
+                self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", rospackage))
+                self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", rel_path))
+        except:
+            print "The package found is not sourced withing the current workspace, saving absolute path instead!"
+            self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", ""))
+            self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
 
     @Slot(bool)
     def btn_color_clicked(self):

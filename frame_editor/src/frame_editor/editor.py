@@ -158,7 +158,7 @@ class FrameEditor(QtCore.QObject):
                 f = Object_Axis(name, position, orientation, frame["parent"], dat["length"], dat["width"])
                 f.set_color(color)
             elif style == "mesh":
-                f = Object_Mesh(name, position, orientation, frame["parent"], dat["path"], dat["scale"])
+                f = Object_Mesh(name, position, orientation, frame["parent"], dat["package"], dat["path"], dat["scale"])
                 f.set_color(color)
             else:
                 f = Frame(name, position, orientation, frame["parent"])
@@ -207,7 +207,7 @@ class FrameEditor(QtCore.QObject):
                 f["data"] = { "length": frame.length, "width": frame.width, "color": frame.color }
 
             elif frame.style == "mesh":
-                f["data"] = { "path" : frame.path, "scale" : frame.scale, "color": frame.color }
+                f["data"] = { "package" : frame.package, "path" : frame.path, "scale" : frame.scale, "color": frame.color }
 
             frames[frame.name] = f
 

@@ -132,9 +132,11 @@ class ProjectPlugin(Plugin):
         if self.widget.isWindowModified():
             reply = QtWidgets.QMessageBox.warning(self.widget, "frame editor",
                 "The file has been modified.\nDo you want to save your changes?",
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default,
-                QtWidgets.QMessageBox.No,
-                QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape)
+                QtWidgets.QMessageBox.Yes |
+                QtWidgets.QMessageBox.No |
+                QtWidgets.QMessageBox.Cancel |
+                QtWidgets.QMessageBox.Escape,
+                QtWidgets.QMessageBox.Yes)
 
             if reply == QtWidgets.QMessageBox.Yes:
                 return self.save()
@@ -156,6 +158,8 @@ class ProjectPlugin(Plugin):
         if file_name == "":
             return False
         else:
+            if not file_name.endswith(".yaml"):
+                file_name += ".yaml"
             return self.save_file(file_name)
 
     def save_file(self, file_name):

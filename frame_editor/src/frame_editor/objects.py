@@ -16,6 +16,7 @@ import utils_tf
 from geometry_msgs.msg import Pose
 
 from visualization_msgs.msg import InteractiveMarkerControl, Marker
+import rospkg
 
 
 class Frame(object):
@@ -194,10 +195,11 @@ class Object_Axis(Object_Geometry):
 
 class Object_Mesh(Object_Geometry):
 
-    def __init__(self, name, position, orientation, parent, mesh_path="", scale=1.0):
+    def __init__(self, name, position, orientation, parent, package=None, mesh_path="", scale=1.0):
 
         self.scale = scale
         self.path = mesh_path
+        self.package = package
 
         super(Object_Mesh, self).__init__(name, position, orientation, parent, "mesh")
 
@@ -205,7 +207,11 @@ class Object_Mesh(Object_Geometry):
         super(Object_Mesh, self).update_marker()
 
         self.marker.type = Marker.MESH_RESOURCE
-        self.marker.mesh_resource = "file:"+self.path
+        if self.package == "" or self.package is None:
+            self.marker.mesh_resource = "file:"+self.path
+        else:
+            self.marker.mesh_resource = "file:"+rospkg.RosPack().get_path(self.package)+"/"+self.path
+
         self.marker.scale = NewVector3(self.scale, self.scale, self.scale)
 
 # eof
