@@ -209,6 +209,7 @@ class FrameEditor(QtCore.QObject):
                 f["data"] = { "length": frame.length, "width": frame.width, "color": frame.color }
 
             elif frame.style == "mesh":
+                self.update_file_format(frame)
                 f["data"] = { "package" : frame.package, "path" : frame.path, "scale" : frame.scale, "color": frame.color }
 
             frames[frame.name] = f
@@ -226,6 +227,36 @@ class FrameEditor(QtCore.QObject):
 
         return True
 
+    def update_file_format(self, frame):
+        if frame.package == "" and frame.path != "":
+            try:
+                import rospkg
+                import os
+                from python_qt_binding import QtWidgets
+                rospackage = rospkg.get_package_name(frame.path)
+                if rospackage is not None:
+                    rel_path = os.path.relpath(frame.path , rospkg.RosPack().get_path(rospackage))
+                    reply = QtWidgets.QMessageBox.question(None, "Convert absolute path to rospack+relative path?",
+                    "The absolute path to your selected mesh can be converted to rospack+relative path."+
+                    "This gives you more reliabilaty to reuse your saved configuration"+
+                    "if your meshes are stored in rospackages\n\n"+
+                    "Do you want to convert your configuration?\n"+
+                    "Convert:\n'{}'\nto:\n'{}' and\n '{}'\n".format(frame.path, rospackage, rel_path),
+                    QtWidgets.QMessageBox.Yes |
+                    QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.Yes)
+
+                    if reply == QtWidgets.QMessageBox.Yes:
+                        print "Saving: package:", rospackage, "+ relative path:", rel_path
+                        frame.package = rospackage
+                        frame.path = rel_path
+                        return
+            except:
+                # Do nothing if conversion fails
+                pass
+        else:
+            # Do nothing if conversion not needed
+            pass
 
 if __name__ == "__main__":
 
