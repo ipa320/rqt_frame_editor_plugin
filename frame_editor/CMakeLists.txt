@@ -100,7 +100,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES frame_editor
-  CATKIN_DEPENDS   
+  CATKIN_DEPENDS
   rospy
   std_msgs
   geometry_msgs
@@ -132,13 +132,13 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-#add_executable(frame_editor_node 
+#add_executable(frame_editor_node
 #  src/frame_editor_node.cpp
 #)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-#add_dependencies(frame_editor_node 
+#add_dependencies(frame_editor_node
 #  ${PROJECT_NAME}_generate_messages_cpp
 #  ${PROJECT_NAME}_gencfg
 #)
@@ -161,6 +161,34 @@ catkin_package(
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+catkin_install_python(PROGRAMS
+                      src/frame_editor/commands.py
+                      src/frame_editor/constructors_std.py
+                      src/frame_editor/interface_gui.py
+                      src/frame_editor/interface_markers.py
+                      src/frame_editor/interface_services.py
+                      src/frame_editor/objects.py
+                      src/frame_editor/rqt_editor.py
+                      src/frame_editor/constructors_geometry.py
+                      src/frame_editor/editor.py
+                      src/frame_editor/interface_interactive_marker.py
+                      src/frame_editor/interface.py
+                      src/frame_editor/interface_tf.py
+                      src/frame_editor/project_plugin.py
+                      src/frame_editor/utils_tf.py
+                      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(FILES
+        src/frame_editor/FrameEditorGUI.ui
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/src/frame_editor)
+
+install(DIRECTORY launch etc
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+install(FILES
+        plugin.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS frame_editor frame_editor_node
