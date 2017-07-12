@@ -54,8 +54,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>310</width>
-              <height>564</height>
+              <width>321</width>
+              <height>548</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -76,6 +76,16 @@
                  <property name="icon">
                   <iconset theme="list-remove">
                    <normaloff>.</normaloff>.</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btn_duplicate">
+                 <property name="text">
+                  <string>Duplicate</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="edit-copy"/>
                  </property>
                 </widget>
                </item>

@@ -133,6 +133,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         ##
         widget.btn_add.clicked.connect(self.btn_add_clicked)
         widget.btn_delete.clicked.connect(self.btn_delete_clicked)
+        widget.btn_duplicate.clicked.connect(self.btn_duplicate_clicked)
         widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
         widget.btn_refresh.clicked.connect(self.update_tf_list)
 
@@ -345,12 +346,34 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
 
     @Slot(bool)
+    def btn_duplicate_clicked(self, checked):
+        item = self.widget.list_frames.currentItem()
+        if not item:
+            return
+        source_name = item.text()
+        parent_name = self.editor.frames[source_name].parent
+
+        # Get a unique frame name
+        existing_frames = set(self.editor.all_frame_ids())
+
+        name, ok = QtWidgets.QInputDialog.getText(self.widget, "Duplicate Frame", "Name:", QtWidgets.QLineEdit.Normal, source_name);
+
+        while ok and name in existing_frames:
+            name, ok = QtWidgets.QInputDialog.getText(self.widget, "Duplicate Frame", "Name (must be unique):", QtWidgets.QLineEdit.Normal, source_name)
+        if not ok:
+            return
+
+        self.editor.command(Command_CopyElement(self.editor, name, source_name, parent_name))
+
+
+
+    @Slot(bool)
     def btn_delete_clicked(self, checked):
         item = self.widget.list_frames.currentItem()
         if not item:
             return
         self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text()]))
-        
+
 
     ## PARENTING ##
     ##
