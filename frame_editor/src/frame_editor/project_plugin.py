@@ -154,7 +154,9 @@ class ProjectPlugin(Plugin):
             return self.save_file(self.file_name)
 
     def save_as(self):
-        file_name, stuff = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", ".", self.file_type)
+        #file_path = QtCore.QFileInfo(self.file_name).canonicalPath()
+        #file_name, stuff = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", file_path, self.file_type)
+        file_name, stuff = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", self.file_name, self.file_type)
         if file_name == "":
             return False
         else:
