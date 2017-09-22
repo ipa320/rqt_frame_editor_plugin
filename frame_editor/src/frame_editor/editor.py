@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import os
+import sys
+
 import time
 import threading
 import yaml
@@ -16,6 +19,12 @@ from frame_editor.constructors_std import *
 from python_qt_binding import QtCore
 from python_qt_binding.QtWidgets import QUndoStack
 
+## Views
+from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
+from frame_editor.interface_services import FrameEditor_Services
+from frame_editor.interface_markers import FrameEditor_Markers
+from frame_editor.interface_tf import FrameEditor_TF
+
 
 class FrameEditor(QtCore.QObject):
 
@@ -24,7 +33,7 @@ class FrameEditor(QtCore.QObject):
 
         self.frames = {}
         self.active_frame = None
-        
+
         ## Undo/Redo
         self.observers = []
         self.undo_level = 0
@@ -164,7 +173,7 @@ class FrameEditor(QtCore.QObject):
                 f.set_color(color)
             else:
                 f = Frame(name, position, orientation, frame["parent"])
-            
+
             self.command(Command_AddElement(self, f))
 
         self.undo_stack.endMacro()
@@ -198,13 +207,13 @@ class FrameEditor(QtCore.QObject):
 
             if frame.style == "plane":
                 f["data"] = { "length": frame.length, "width":frame.width, "color": frame.color }
-            
+
             elif frame.style == "cube":
                 f["data"] = { "length": frame.length, "width": frame.width, "height": frame.height , "color": frame.color}
-            
+
             elif frame.style == "sphere":
                 f["data"] = { "diameter": frame.diameter, "color": frame.color }
-            
+
             elif frame.style == "axis":
                 f["data"] = { "length": frame.length, "width": frame.width, "color": frame.color }
 
@@ -258,17 +267,77 @@ class FrameEditor(QtCore.QObject):
             # Do nothing if conversion not needed
             pass
 
+    def run(self):
+        print "> Going for some spins"
+        rate = rospy.Rate(200) # hz
+        while not rospy.is_shutdown():
+            self.broadcast()
+            rate.sleep()
+
+    def parse_args(self, argv):
+        ## Args ##
+        ##
+        # Process standalone plugin command-line arguments
+        from argparse import ArgumentParser
+        parser = ArgumentParser()
+        # Add argument(s) to the parser.
+        parser.add_argument("-q", "--quiet", action="store_true",
+                      dest="quiet",
+                      help="Put plugin in silent mode")
+        parser.add_argument("-l", "--load", action="append",
+                      dest="file",
+                      help="Load a file at startup. [rospack filepath/file]")
+
+        args, unknowns = parser.parse_known_args(argv)
+        if not args.quiet:
+            print 'arguments: ', args
+            print 'unknowns: ', unknowns
+
+        ## Load file ##
+        ##
+        if args.file:
+            arg_path = args.file[0].split()
+            if len(arg_path) == 1:
+                #load file
+                filename = arg_path[0]
+                print "Loading", filename
+                success = self.load_file(str(filename))
+            elif len(arg_path) == 2:
+                #load rospack
+                rospack = rospkg.RosPack()
+                filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
+                print "Loading", filename
+                success = self.load_file(str(filename))
+            else:
+                print "Load argument not understood! --load", arg_path
+                print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
+                print "or use --load 'fullPathToMyYaml.yaml'"
+                success = None
+
+            if success:
+                return filename
+            elif success == False:
+                print "ERROR LOADING FILE"
+            return ''
+
+    def init_views(self):
+        ## Views
+        self.interface_tf = FrameEditor_TF(self)
+        self.interactive = FrameEditor_InteractiveMarker(self)
+        self.services = FrameEditor_Services(self)
+        self.interface_markers = FrameEditor_Markers(self)
+
 if __name__ == "__main__":
 
     rospy.init_node('frame_editor')
 
     editor = FrameEditor()
-    editor.load_params(rospy.get_name())
+    # editor.load_params(rospy.get_name())
+
+    editor.parse_args(sys.argv[1:])
+    editor.init_views()
 
     print "Frame editor ready!"
-    rate = rospy.Rate(100) # hz
-    while not rospy.is_shutdown():
-        editor.broadcast()
-        rate.sleep()
+    editor.run()
 
 # eof

@@ -58,6 +58,12 @@ rqt
 roslaunch frame_editor frame_editor.launch
 ```
 
+#### A headless version is available through this launch file:
+
+```
+roslaunch frame_editor frame_editor_headless.launch
+```
+
 ### Known issues: 
 #### Starting the plugin twice 
 When starting the rqt plugin twice, you will receive a long error message with these last lines: 
