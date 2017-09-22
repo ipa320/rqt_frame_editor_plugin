@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+    <node pkg="frame_editor" type="editor.py" name="frame_editor" 
+        args="--load '$(find frame_editor)/etc/frames.yaml'"
+        output="screen"/>
+</launch>

@@ -24,11 +24,7 @@ from project_plugin import ProjectPlugin
 from frame_editor.interface import Interface
 
 ## Views
-from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
-from frame_editor.interface_services import FrameEditor_Services
-from frame_editor.interface_markers import FrameEditor_Markers
 from frame_editor.interface_gui import FrameEditor_StyleWidget
-from frame_editor.interface_tf import FrameEditor_TF
 
 
 class FrameEditorGUI(ProjectPlugin, Interface):
@@ -43,45 +39,11 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         self.file_type = "YAML files(*.yaml)"
 
 
-        ## Args ##
-        ##
-        # Process standalone plugin command-line arguments
-        from argparse import ArgumentParser
-        parser = ArgumentParser()
-        # Add argument(s) to the parser.
-        parser.add_argument("-q", "--quiet", action="store_true",
-                      dest="quiet",
-                      help="Put plugin in silent mode")
-        parser.add_argument("-l", "--load", action="append",
-                      dest="file",
-                      help="Load a file at startup. [rospack filepath/file]")
-
-        args, unknowns = parser.parse_known_args(context.argv())
-        if not args.quiet:
-            print 'arguments: ', args
-            print 'unknowns: ', unknowns
-
-
-        ## Load file ##
-        ##
         self.filename = ""
-        if args.file:
-            arg_path = args.file[0].split()
-            if len(arg_path) == 1:
-                #load file
-                filename = arg_path[0]
-                print "Loading", filename
-                self.load_file(str(filename))
-            elif len(arg_path) == 2:
-                #load rospack
-                rospack = rospkg.RosPack()
-                filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
-                print "Loading", filename
-                self.load_file(str(filename))
-            else:
-                print "Load argument not understood! --load", arg_path
-                print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
-                print "or use --load 'fullPathToMyYaml.yaml'"
+
+        filename = self.editor.parse_args(context.argv())
+        if filename:
+            self.set_current_file(filename)
 
 
         ## Update thread ##
@@ -122,10 +84,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
 
         ## Views
-        self.interface_tf = FrameEditor_TF(self.editor)
-        self.interactive = FrameEditor_InteractiveMarker(self.editor)
-        self.services = FrameEditor_Services(self.editor)
-        self.interface_markers = FrameEditor_Markers(self.editor)
+        self.editor.init_views()
         self.interface_style = FrameEditor_StyleWidget(self.editor)
 
         widget.style_frame.layout().addWidget(self.interface_style.get_widget())
@@ -170,11 +129,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
 
     def _update_thread_run(self):
-        print "> Going for some spins"
-        rate = rospy.Rate(200) # hz
-        while not rospy.is_shutdown():
-            self.editor.broadcast()
-            rate.sleep()
+        self.editor.run()
 
     @Slot()
     def _update_finished(self):
