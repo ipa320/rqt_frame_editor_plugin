@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
-    <node pkg="frame_editor" type="editor.py" name="frame_editor" 
+    <node pkg="frame_editor" type="editor.py" name="frame_editor"
         args="--load '$(find frame_editor)/etc/frames.yaml'"
         output="screen"/>
+
+        <node pkg="rviz" type="rviz" name="rviz" args="-d $(find frame_editor)/etc/frame_editor.rviz"/>
 </launch>
