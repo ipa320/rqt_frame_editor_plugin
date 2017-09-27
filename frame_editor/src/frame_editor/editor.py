@@ -9,6 +9,7 @@ import yaml
 
 import rospy
 import rosparam
+import rospkg
 
 import tf
 
