@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>frame_editor</name>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
   <description>The frame_editor package</description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <maintainer email="frank.naegele@ipa.fraunhofer.de">ipa-frn</maintainer>
-  
+
 
   <!-- One license tag required, multiple allowed, one license per tag -->
   <license>MIT</license>
@@ -24,7 +24,7 @@
   <!-- The *_depend tags are used to specify dependencies -->
   <!-- Dependencies can be catkin packages or system dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
-  
+
   <depend>interactive_markers</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
