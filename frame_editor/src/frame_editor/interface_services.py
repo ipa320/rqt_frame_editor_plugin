@@ -213,13 +213,13 @@ class FrameEditor_Services(Interface):
                 else:
                     frame = self.editor.frames[request.name]
 
+                    Frame.wait_for_transform(request.source_name, request.parent, rospy.Duration(1.0))
                     if (request.parent != "") and (frame.parent != request.parent):
                         print ">> rebase"
                         self.editor.command(Command_RebaseElement(self.editor, frame, request.source_name, request.parent))
                     else:
                         print ">> align"
                         self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
-
                     Frame.wait_for_transform(frame.parent, frame.name, rospy.Duration(1.0))
 
             except Exception, e:
