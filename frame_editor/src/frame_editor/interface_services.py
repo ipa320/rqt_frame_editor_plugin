@@ -21,13 +21,13 @@ class FrameEditor_Services(Interface):
 
         self.editor = frame_editor
 
-        rospy.Service("align_frame", AlignFrame, self.callback_align_frame)
-        rospy.Service("edit_frame", EditFrame, self.callback_edit_frame)
-        rospy.Service("get_frame", GetFrame, self.callback_get_frame)
-        rospy.Service("remove_frame", RemoveFrame, self.callback_remove_frame)
-        rospy.Service("set_frame", SetFrame, self.callback_set_frame)
-        rospy.Service("set_parent", SetParentFrame, self.callback_set_parent_frame)
-        rospy.Service("copy_frame", CopyFrame, self.callback_copy_frame)
+        rospy.Service("~align_frame", AlignFrame, self.callback_align_frame)
+        rospy.Service("~edit_frame", EditFrame, self.callback_edit_frame)
+        rospy.Service("~get_frame", GetFrame, self.callback_get_frame)
+        rospy.Service("~remove_frame", RemoveFrame, self.callback_remove_frame)
+        rospy.Service("~set_frame", SetFrame, self.callback_set_frame)
+        rospy.Service("~set_parent", SetParentFrame, self.callback_set_parent_frame)
+        rospy.Service("~copy_frame", CopyFrame, self.callback_copy_frame)
 
 
     def callback_align_frame(self, request):
