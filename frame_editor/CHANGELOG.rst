@@ -2,8 +2,11 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
+1.0.3 (2018.05.15)
 -----------
+* namespacing ROS services
+* wait for transform for 1 sec
+* Contributors: Witalij Siebert, ipa-frn
 
 1.0.2 (2017-09-27)
 ------------------

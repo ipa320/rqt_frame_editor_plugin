@@ -5,7 +5,7 @@
   <description>The frame_editor package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <maintainer email="frank.naegele@ipa.fraunhofer.de">ipa-frn</maintainer>
+  <maintainer email="lorenz.halt@ipa.fraunhofer.de">ipa-lth</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -18,6 +18,7 @@
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
+  <author email="lorenz.halt@ipa.fraunhofer.de">ipa-lth</author>
   <author email="frank.naegele@ipa.fraunhofer.de">ipa-frn</author>
 
 
