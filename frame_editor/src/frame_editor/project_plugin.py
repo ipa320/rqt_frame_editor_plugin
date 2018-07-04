@@ -3,7 +3,7 @@
 from qt_gui.plugin import Plugin
 
 from python_qt_binding import QtWidgets, QtCore, QtGui
-
+import os
 
 class ProjectPlugin(Plugin):
 
@@ -20,6 +20,9 @@ class ProjectPlugin(Plugin):
 
         ## Menus
         self.create_menus()
+
+        ## Settings
+        self.settings = QtCore.QSettings('rqt_frame_editor', 'frame_editor')
 
         ## File
         self.file_name = ""
@@ -110,8 +113,9 @@ class ProjectPlugin(Plugin):
 
     def open(self):
         if self.ok_to_continue():
+
             file_name, stuff = QtWidgets.QFileDialog.getOpenFileName(self.widget,
-                "Select a file to open", ".", self.file_type)
+                "Select a file to open", self.settings.value('last_folder', ''), self.file_type)
 
             if not file_name == "":
                 self.load_file(file_name)
@@ -122,6 +126,10 @@ class ProjectPlugin(Plugin):
             return False
         else:
             self.set_current_file(file_name)
+
+            if file_name:
+                self.settings.setValue('last_folder', os.path.dirname(file_name))
+                self.settings.sync()
             return True
 
     def ok_to_continue(self):
