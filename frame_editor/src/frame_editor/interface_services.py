@@ -29,6 +29,8 @@ class FrameEditor_Services(Interface):
         rospy.Service("~set_parent", SetParentFrame, self.callback_set_parent_frame)
         rospy.Service("~copy_frame", CopyFrame, self.callback_copy_frame)
 
+        rospy.Service("~load_yaml", LoadYaml, self.callback_load_yaml)
+
 
     def callback_align_frame(self, request):
         print "> Request to align frame", request.name, "with frame", request.source_name, "mode", request.mode
@@ -173,6 +175,19 @@ class FrameEditor_Services(Interface):
 
         return response
 
+    def callback_load_yaml(self, request):
+        print "> Request to load yaml file:'{}'".format(request.filename)
+
+        response = LoadYamlResponse()
+        try:
+            self.editor.load_file(request.filename)
+            response.success = True
+            response.message = "file loaded"
+        except:
+            response.success = False
+            response.message = "Exception"
+
+        return response
 
     def callback_copy_frame(self, request):
         print "> Request to copy frame '" + request.source_name + "' with new name '" + request.name + "' and new parent name '" + request.parent + "'"
