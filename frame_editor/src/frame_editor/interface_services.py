@@ -4,6 +4,7 @@ import copy
 import time
 
 import rospy
+import os
 
 from frame_editor.objects import *
 from frame_editor.commands import *
@@ -180,12 +181,12 @@ class FrameEditor_Services(Interface):
 
         response = LoadYamlResponse()
         try:
-            self.editor.load_file(request.filename)
+            self.editor.load_file(os.path.expanduser(request.filename))
             response.success = True
             response.message = "file loaded"
-        except:
+        except Exception, e:
             response.success = False
-            response.message = "Exception"
+            response.message = "Exception: {}".format(str(e))
 
         return response
 
