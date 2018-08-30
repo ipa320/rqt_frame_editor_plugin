@@ -73,16 +73,16 @@ class ProjectPlugin(Plugin):
 
 
         ## Menu
-        file_menu = self.widget.menuBar.addMenu("&File")
-        file_menu.addAction(newAction)
-        file_menu.addAction(openAction)
-        file_menu.addAction(saveAction)
-        file_menu.addAction(saveAsAction)
-
-        edit_menu = self.widget.menuBar.addMenu("&Edit")
-
-        edit_menu.addAction(undoAction)
-        edit_menu.addAction(redoAction)
+        # file_menu = self.widget.menuBar.addMenu("&File")
+        # file_menu.addAction(newAction)
+        # file_menu.addAction(openAction)
+        # file_menu.addAction(saveAction)
+        # file_menu.addAction(saveAsAction)
+        #
+        # edit_menu = self.widget.menuBar.addMenu("&Edit")
+        #
+        # edit_menu.addAction(undoAction)
+        # edit_menu.addAction(redoAction)
 
         ## Tool bar
         tool_bar = self.widget.mainToolBar
