@@ -15,9 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QMenuBar" name="menuBar"/>
-   </item>
-   <item>
     <widget class="QToolBar" name="mainToolBar"/>
    </item>
    <item>
