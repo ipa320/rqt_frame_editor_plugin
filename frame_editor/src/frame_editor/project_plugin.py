@@ -25,10 +25,8 @@ class ProjectPlugin(Plugin):
         self.settings = QtCore.QSettings('rqt_frame_editor', 'frame_editor')
 
         ## File
-        self.file_name = ""
-        self.set_current_file("")
         self.load_file("") # loads empty.xml
-
+        self.update_current_filename()
 
     def create_editor(self):
         raise NotImplementedError
@@ -109,7 +107,7 @@ class ProjectPlugin(Plugin):
             self.load_file("")
 
             ## Set file name to undefined
-            self.set_current_file("")
+            self.update_current_filename()
 
     def open(self):
         if self.ok_to_continue():
@@ -125,7 +123,7 @@ class ProjectPlugin(Plugin):
             print "ERROR LOADING FILE"
             return False
         else:
-            self.set_current_file(file_name)
+            self.update_current_filename()
 
             if file_name:
                 self.settings.setValue('last_folder', os.path.dirname(file_name))
@@ -156,15 +154,15 @@ class ProjectPlugin(Plugin):
     def save(self):
         """Calls save_as or save_file
         """
-        if self.file_name == "":
+        if self.editor.get_file_name() == "":
             return self.save_as()
         else:
-            return self.save_file(self.file_name)
+            return self.save_file(self.editor.get_file_name())
 
     def save_as(self):
-        #file_path = QtCore.QFileInfo(self.file_name).canonicalPath()
+        #file_path = QtCore.QFileInfo(self.editor.get_file_name()).canonicalPath()
         #file_name, stuff = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", file_path, self.file_type)
-        file_name, stuff = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", self.file_name, self.file_type)
+        file_name, stuff = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", self.editor.get_full_file_path(), self.file_type)
         if file_name == "":
             return False
         else:
@@ -177,26 +175,26 @@ class ProjectPlugin(Plugin):
             print "Saving canceled"
             return False
         else:
-            self.set_current_file(file_name)
+            self.update_current_filename()
             print "File saved"
             return True
 
     def write_file(self, file_name):
         raise NotImplementedError
 
-    def set_current_file(self, file_name):
+    def update_current_filename(self):
         ## Set clean
         self.editor.undo_stack.setClean()
         self.widget.setWindowModified(False)
 
-        ## File name
-        self.file_name = file_name
+        file_name = self.editor.get_file_name()
 
         ## Window title
         shown_name = "Untitled"
-        if not self.file_name == "":
-            shown_name = self.stripped_name(file_name)
+        if not file_name == "":
+            shown_name = file_name
             # recent files...
+
         self.widget.setWindowTitle(self.tr('{} [*] - {}'.format(shown_name, "frame editor")))
 
     def stripped_name(self, full_name):

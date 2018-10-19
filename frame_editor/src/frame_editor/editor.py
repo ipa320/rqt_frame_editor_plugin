@@ -44,6 +44,20 @@ class FrameEditor(QtCore.QObject):
         self.__command_lock = threading.Lock()
 
         self.namespace = "frame_editor"
+        self.full_file_path = None
+
+
+    def get_file_name(self):
+        if self.full_file_path is None:
+            return ""
+        else:
+            return os.path.basename(self.full_file_path)
+
+    def get_full_file_path(self):
+        if self.full_file_path is None:
+            return ""
+        else:
+            return self.full_file_path
 
     ## Undo/Redo ##
     ##
@@ -122,6 +136,7 @@ class FrameEditor(QtCore.QObject):
 
         self.undo_stack.clear()
 
+        self.full_file_path = file_name
         return True
 
     def load_params(self, namespace):
@@ -235,6 +250,7 @@ class FrameEditor(QtCore.QObject):
         rosparam.dump_params(filename, self.namespace)
         print "Saving done"
 
+        self.full_file_path = filename
         return True
 
     def update_file_format(self, frame):
@@ -282,17 +298,17 @@ class FrameEditor(QtCore.QObject):
         from argparse import ArgumentParser
         parser = ArgumentParser()
         # Add argument(s) to the parser.
-        parser.add_argument("-q", "--quiet", action="store_true",
-                      dest="quiet",
-                      help="Put plugin in silent mode")
+        #parser.add_argument("-q", "--quiet", action="store_true",
+        #              dest="quiet",
+        #              help="Put plugin in silent mode")
         parser.add_argument("-l", "--load", action="append",
                       dest="file",
                       help="Load a file at startup. [rospack filepath/file]")
 
         args, unknowns = parser.parse_known_args(argv)
-        if not args.quiet:
-            print 'arguments: ', args
-            print 'unknowns: ', unknowns
+        print 'arguments: ', args
+        if unknowns:
+            print 'unknown parameters found: ', unknowns
 
         ## Load file ##
         ##
