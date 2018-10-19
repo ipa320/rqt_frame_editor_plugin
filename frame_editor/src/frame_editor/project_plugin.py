@@ -157,7 +157,7 @@ class ProjectPlugin(Plugin):
         if self.editor.get_file_name() == "":
             return self.save_as()
         else:
-            return self.save_file(self.editor.get_file_name())
+            return self.save_file(self.editor.get_full_file_path())
 
     def save_as(self):
         #file_path = QtCore.QFileInfo(self.editor.get_file_name()).canonicalPath()
