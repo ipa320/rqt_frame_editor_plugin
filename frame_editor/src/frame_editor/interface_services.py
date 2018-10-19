@@ -31,6 +31,7 @@ class FrameEditor_Services(Interface):
         rospy.Service("~copy_frame", CopyFrame, self.callback_copy_frame)
 
         rospy.Service("~load_yaml", LoadYaml, self.callback_load_yaml)
+        rospy.Service("~save_yaml", SaveYaml, self.callback_save_yaml)
 
 
     def callback_align_frame(self, request):
@@ -184,7 +185,21 @@ class FrameEditor_Services(Interface):
             self.editor.load_file(os.path.expanduser(request.filename))
             response.success = True
             response.message = "file loaded"
-        except Exception, e:
+        except Exception as e:
+            response.success = False
+            response.message = "Exception: {}".format(str(e))
+
+        return response
+
+    def callback_save_yaml(self, request):
+        print "> Request to save yaml file to:'{}'".format(request.filename)
+
+        response = SaveYamlResponse()
+        try:
+            self.editor.save_file(os.path.expanduser(request.filename))
+            response.success = True
+            response.message = "file saved"
+        except Exception as e:
             response.success = False
             response.message = "Exception: {}".format(str(e))
 
@@ -238,7 +253,7 @@ class FrameEditor_Services(Interface):
                         self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
                     Frame.wait_for_transform(frame.parent, frame.name, rospy.Duration(1.0))
 
-            except Exception, e:
+            except Exception as e:
                 print "Error: unhandled exception", e
                 response.error_code = 9
 
