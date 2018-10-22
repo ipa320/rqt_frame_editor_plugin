@@ -116,7 +116,22 @@ class ProjectPlugin(Plugin):
                 "Select a file to open", self.settings.value('last_folder', ''), self.file_type)
 
             if not file_name == "":
-                self.load_file(file_name)
+                if self.editor.get_file_name() == "":
+                    self.load_file(file_name)
+                else:
+                    # Already some file loaded
+                    # Ask to add or replace
+                    print "current filename '{}'".format(self.editor.get_file_name())
+                    choice = QtWidgets.QMessageBox.question(self.widget,
+                                                           "Keep current frames?",
+                                                           "Do you want to keep frames in your list, which are not in the currently loaded file?",
+                                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.Yes)
+                    if choice == QtWidgets.QMessageBox.Yes:
+                        self.load_file(file_name)
+                    else:
+                        self.load_file("")
+                        self.load_file(file_name)
+
 
     def load_file(self, file_name):
         if not self.editor.load_file(file_name):
