@@ -15,6 +15,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QLabel" name="lab_file_name">
+     <property name="text">
+      <string>New file - frame editor</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QToolBar" name="mainToolBar"/>
    </item>
    <item>
@@ -51,8 +58,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>321</width>
-              <height>548</height>
+              <width>312</width>
+              <height>562</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -82,7 +89,8 @@
                   <string>Duplicate</string>
                  </property>
                  <property name="icon">
-                  <iconset theme="edit-copy"/>
+                  <iconset theme="edit-copy">
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -859,8 +867,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>137</width>
-             <height>590</height>
+             <width>159</width>
+             <height>586</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">

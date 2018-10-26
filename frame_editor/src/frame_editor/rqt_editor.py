@@ -74,6 +74,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         #if context.serial_number() > 1:
         #    widget.setWindowTitle(widget.windowTitle() + (' (%d)' % context.serial_number()))
+        widget.setWindowTitle("frame editor")
 
 
         ## Undo View
