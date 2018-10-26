@@ -195,7 +195,7 @@ class ProjectPlugin(Plugin):
             shown_name = file_name
             # recent files...
 
-        self.widget.setWindowTitle(self.tr('{} [*] - {}'.format(shown_name, "frame editor")))
+        self.widget.lab_file_name.setText(self.tr('{} [*] - {}'.format(shown_name, "frame editor")))
 
     def stripped_name(self, full_name):
         return QtCore.QFileInfo(full_name).fileName()
