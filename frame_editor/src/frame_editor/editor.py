@@ -347,7 +347,8 @@ class FrameEditor(QtCore.QObject):
 if __name__ == "__main__":
 
     rospy.init_node('frame_editor')
-
+    Frame.init_tf()
+    
     editor = FrameEditor()
     # editor.load_params(rospy.get_name())
 

@@ -21,9 +21,9 @@ import rospkg
 
 class Frame(object):
 
-    tf_broadcaster = tf2_ros.TransformBroadcaster()
-    tf_buffer = tf2_ros.Buffer()
-    tf_listener = tf2_ros.TransformListener(tf_buffer)
+    tf_broadcaster = None
+    tf_buffer = None
+    tf_listener = None
 
     __id_counter = -1
 
@@ -37,6 +37,13 @@ class Frame(object):
 
         self.hidden = False
         self.marker = None
+
+    @staticmethod
+    def init_tf():
+        if Frame.tf_buffer is None:
+            Frame.tf_broadcaster = tf2_ros.TransformBroadcaster()
+            Frame.tf_buffer = tf2_ros.Buffer()
+            Frame.tf_listener = tf2_ros.TransformListener(Frame.tf_buffer)
 
     @classmethod
     def create_new_id(cls):
