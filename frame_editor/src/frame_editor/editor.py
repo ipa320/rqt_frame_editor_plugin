@@ -30,6 +30,7 @@ from frame_editor.interface_tf import FrameEditor_TF
 class FrameEditor(QtCore.QObject):
 
     def __init__(self):
+        Frame.init_tf()
         super(FrameEditor, self).__init__()
 
         self.frames = {}
@@ -347,8 +348,7 @@ class FrameEditor(QtCore.QObject):
 if __name__ == "__main__":
 
     rospy.init_node('frame_editor')
-    Frame.init_tf()
-    
+
     editor = FrameEditor()
     # editor.load_params(rospy.get_name())
 
