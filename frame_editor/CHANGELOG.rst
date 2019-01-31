@@ -2,8 +2,8 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.4 (2019-01-31)
+------------------
 * Query if to add frames or update the whole list
 * Fixed static initialisation of tf broadcaster
 * Show current file name in label instead of window title
