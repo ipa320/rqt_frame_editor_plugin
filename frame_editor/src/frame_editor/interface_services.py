@@ -138,22 +138,27 @@ class FrameEditor_Services(Interface):
         print "> Request to set (or add) frame", request.name, request.parent
 
         response = SetFrameResponse()
-        response.error_code = 0
 
         if request.name == "":
             print " Error: No name given"
             response.error_code = 1
+            return response
 
-        else:
-            if request.parent == "":
-                request.parent = "world"
+        if request.parent == "":
+            if request.name in self.editor.frames:
+                request.parent = self.editor.frames[request.name].parent
+            else:
+                print "Error: No parent given and frame previously not existing"
+                response.error_code = 2
+                return response
 
-            f = Frame(request.name,
-                      FromPoint(request.pose.position),
-                      FromQuaternion(request.pose.orientation),
-                      request.parent)
-            self.editor.command(Command_AddElement(self.editor, f))
-
+        f = Frame(request.name,
+                  FromPoint(request.pose.position),
+                  FromQuaternion(request.pose.orientation),
+                  request.parent)
+        self.editor.command(Command_AddElement(self.editor, f))
+        
+        response.error_code = 0
         return response
 
 
