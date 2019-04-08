@@ -247,6 +247,8 @@ class FrameEditor(QtCore.QObject):
         print rospy.get_param(self.namespace)
 
         ## Dump param to file
+        if filename == '':
+            filename = self.full_file_path
         print "Saving to file", filename
         rosparam.dump_params(filename, self.namespace)
         print "Saving done"
