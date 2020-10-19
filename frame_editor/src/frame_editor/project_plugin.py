@@ -121,7 +121,7 @@ class ProjectPlugin(Plugin):
                 else:
                     # Already some file loaded
                     # Ask to add or replace
-                    print "current filename '{}'".format(self.editor.get_file_name())
+                    print("current filename '{}'".format(self.editor.get_file_name()))
                     choice = QtWidgets.QMessageBox.question(self.widget,
                                                            "Keep current frames?",
                                                            "Do you want to keep frames in your list, which are not in the currently loaded file?",
@@ -135,7 +135,7 @@ class ProjectPlugin(Plugin):
 
     def load_file(self, file_name):
         if not self.editor.load_file(file_name):
-            print "ERROR LOADING FILE"
+            print("ERROR LOADING FILE")
             return False
         else:
             self.update_current_filename()
@@ -187,11 +187,11 @@ class ProjectPlugin(Plugin):
 
     def save_file(self, file_name):
         if not self.write_file(file_name):
-            print "Saving canceled"
+            print("Saving canceled")
             return False
         else:
             self.update_current_filename()
-            print "File saved"
+            print("File saved")
             return True
 
     def write_file(self, file_name):

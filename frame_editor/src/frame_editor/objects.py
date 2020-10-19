@@ -55,7 +55,7 @@ class Frame(object):
         return ToPose(self.position, self.orientation)
 
     def print_all(self):
-        print "  {} (parent: {}) {} {}".format(self.name, self.parent, self.position, self.orientation)
+        print("  {} (parent: {}) {} {}".format(self.name, self.parent, self.position, self.orientation))
 
     def value(self, symbol):
         if symbol == 'x':
