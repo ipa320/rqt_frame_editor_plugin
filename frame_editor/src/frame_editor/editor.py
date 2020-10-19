@@ -118,7 +118,7 @@ class FrameEditor(QtCore.QObject):
     ## PRINT ##
     ##
     def print_all(self):
-        print "> Printing all frames"
+        print("> Printing all frames")
 
         for frame in self.frames:
             frame.print_all()
@@ -128,7 +128,7 @@ class FrameEditor(QtCore.QObject):
     ##
     def load_file(self, file_name):
         if file_name:
-            print "> Loading file"
+            print("> Loading file")
             data = rosparam.load_file(file_name, self.namespace)[0][0]
             self.load_data(data)
         else:
@@ -142,7 +142,7 @@ class FrameEditor(QtCore.QObject):
 
     def load_params(self, namespace):
         if not rosparam.list_params(namespace):
-            print "> No data to load"
+            print("> No data to load")
         else:
             data = rosparam.get_param(namespace)
             self.load_data(data)
@@ -195,7 +195,7 @@ class FrameEditor(QtCore.QObject):
 
         self.undo_stack.endMacro()
 
-        print "> Loading done"
+        print("> Loading done")
 
     def save_file(self, filename):
 
@@ -244,14 +244,14 @@ class FrameEditor(QtCore.QObject):
 
         ## To parameter server
         rospy.set_param(self.namespace, data)
-        print rospy.get_param(self.namespace)
+        print(rospy.get_param(self.namespace))
 
         ## Dump param to file
         if filename == '':
             filename = self.full_file_path
-        print "Saving to file", filename
+        print("Saving to file {}".format(filename))
         rosparam.dump_params(filename, self.namespace)
-        print "Saving done"
+        print("Saving done")
 
         self.full_file_path = filename
         return True
@@ -276,7 +276,7 @@ class FrameEditor(QtCore.QObject):
                     QtWidgets.QMessageBox.Yes)
 
                     if reply == QtWidgets.QMessageBox.Yes:
-                        print "Saving: package:", rospackage, "+ relative path:", rel_path
+                        print("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
                         frame.package = rospackage
                         frame.path = rel_path
                         return
@@ -288,7 +288,7 @@ class FrameEditor(QtCore.QObject):
             pass
 
     def run(self):
-        print "> Going for some spins"
+        print("> Going for some spins")
         rate = rospy.Rate(200) # hz
         while not rospy.is_shutdown():
             self.broadcast()
@@ -309,9 +309,9 @@ class FrameEditor(QtCore.QObject):
                       help="Load a file at startup. [rospack filepath/file]")
 
         args, unknowns = parser.parse_known_args(argv)
-        print 'arguments: ', args
+        print('arguments: {}'.format(args))
         if unknowns:
-            print 'unknown parameters found: ', unknowns
+            print('unknown parameters found: {}'.format(unknowns))
 
         ## Load file ##
         ##
@@ -320,24 +320,24 @@ class FrameEditor(QtCore.QObject):
             if len(arg_path) == 1:
                 #load file
                 filename = arg_path[0]
-                print "Loading", filename
+                print("Loading {}".format(filename))
                 success = self.load_file(str(filename))
             elif len(arg_path) == 2:
                 #load rospack
                 rospack = rospkg.RosPack()
                 filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
-                print "Loading", filename
+                print("Loading {}".format(filename))
                 success = self.load_file(str(filename))
             else:
-                print "Load argument not understood! --load", arg_path
-                print "Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'"
-                print "or use --load 'fullPathToMyYaml.yaml'"
+                print("Load argument not understood! --load {}".format(arg_path))
+                print("Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'")
+                print("or use --load 'fullPathToMyYaml.yaml'")
                 success = None
 
             if success:
                 return filename
             elif success == False:
-                print "ERROR LOADING FILE"
+                print("ERROR LOADING FILE")
             return ''
 
     def init_views(self):
@@ -357,7 +357,7 @@ if __name__ == "__main__":
     editor.parse_args(sys.argv[1:])
     editor.init_views()
 
-    print "Frame editor ready!"
+    print("Frame editor ready!")
     editor.run()
 
 # eof
