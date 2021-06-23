@@ -8,7 +8,7 @@ import tf
 
 from python_qt_binding.QtWidgets import QUndoCommand
 
-from constructors_geometry import FromTransformStamped
+from frame_editor.constructors_geometry import FromTransformStamped
 from frame_editor.objects import *
 
 

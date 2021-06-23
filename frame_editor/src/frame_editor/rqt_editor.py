@@ -18,7 +18,7 @@ from frame_editor.editor import Frame, FrameEditor
 from frame_editor.commands import *
 from frame_editor.constructors_geometry import *
 
-from project_plugin import ProjectPlugin
+from frame_editor.project_plugin import ProjectPlugin
 
 from frame_editor.interface import Interface
 
