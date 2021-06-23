@@ -36,6 +36,8 @@
   <depend>rqt_gui</depend>
   <depend>rqt_gui_py</depend>
 
+  <exec_depend>qt_gui_py_common</exec_depend>
+
   <build_depend>message_generation</build_depend>
   <build_export_depend>message_runtime</build_export_depend>
   <exec_depend>message_runtime</exec_depend>
