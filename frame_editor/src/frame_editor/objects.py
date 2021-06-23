@@ -11,7 +11,7 @@ import tf2_ros
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 from frame_editor.srv import *
-import utils_tf
+from frame_editor import utils_tf
 
 from geometry_msgs.msg import Pose
 
