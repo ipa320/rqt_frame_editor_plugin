@@ -94,7 +94,7 @@ class FrameEditor(QtCore.QObject):
     @staticmethod
     def tf_dict():
         y = Frame.tf_buffer.all_frames_as_yaml()
-        d = yaml.load(y)
+        d = yaml.safe_load(y)
         if isinstance(d, dict):
             return d
         else:
@@ -111,7 +111,7 @@ class FrameEditor(QtCore.QObject):
                 not FrameEditor.frame_is_temporary(f) or include_temp]
 
     def iter_frames(self, include_temp=True):
-        for f in self.frames.itervalues():
+        for f in self.frames.values():
             if not self.frame_is_temporary(f.name) or include_temp:
                 yield f
 
