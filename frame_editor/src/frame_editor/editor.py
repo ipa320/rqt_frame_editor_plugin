@@ -46,6 +46,7 @@ class FrameEditor(QtCore.QObject):
 
         self.namespace = "frame_editor"
         self.full_file_path = None
+        self.hz = 200
 
 
     def get_file_name(self):
@@ -289,7 +290,7 @@ class FrameEditor(QtCore.QObject):
 
     def run(self):
         print("> Going for some spins")
-        rate = rospy.Rate(200) # hz
+        rate = rospy.Rate(self.hz) # hz
         while not rospy.is_shutdown():
             self.broadcast()
             rate.sleep()
@@ -307,14 +308,17 @@ class FrameEditor(QtCore.QObject):
         parser.add_argument("-l", "--load", action="append",
                       dest="file",
                       help="Load a file at startup. [rospack filepath/file]")
+        parser.add_argument("-r", "--rate", type=int)
 
         args, unknowns = parser.parse_known_args(argv)
         print('arguments: {}'.format(args))
         if unknowns:
             print('unknown parameters found: {}'.format(unknowns))
 
+        if args.rate:
+            self.hz = args.rate
+
         ## Load file ##
-        ##
         if args.file:
             arg_path = args.file[0].split()
             if len(arg_path) == 1:
