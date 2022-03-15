@@ -2,8 +2,8 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2022-03-15)
+------------------
 * Added argparse option to change publishing rate
 * frame_editor is now compatible to Python 3 (ROS Noetic)
 * Use the previous file name and parent frame as defaults for save_yaml and the set_frame service
