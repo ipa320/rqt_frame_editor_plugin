@@ -58,7 +58,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         self._update_thread = WorkerThread(self._update_thread_run, self._update_finished)
 
-        self.old_frame_list = []
         self.old_selected = ""
 
         return editor
@@ -162,26 +161,10 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             sorted(self.editor.all_frame_ids(include_temp=False)))
 
     def update_frame_list(self):
-        new_list = self.editor.frames.keys()
-
-        ## Add missing
-        items = []
-        for item in new_list:
-            if item not in self.old_frame_list:
-                items.append(item)
+        items = self.editor.frames.keys()
+        self.widget.list_frames.clear()
         self.widget.list_frames.addItems(items)
-
-        ## Delete removed
-        for item in self.old_frame_list:
-            if item not in new_list:
-                if self.widget.list_frames.currentItem() and item == self.widget.list_frames.currentItem().text():
-                    self.widget.list_frames.setCurrentItem(None)
-                found = self.widget.list_frames.findItems(item, QtCore.Qt.MatchExactly)
-                self.widget.list_frames.takeItem(self.widget.list_frames.row(found[0]))
-
         self.widget.list_frames.sortItems()
-
-        self.old_frame_list = new_list
 
 
     def update_active_frame(self):
