@@ -2,6 +2,12 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bug fix: Empty frame list on noetic now gets displayed
+* Add some more Python -> Python3 conversions
+* Contributors: Martin Günther, Philipp Tenbrock
+
 1.1.0 (2022-03-15)
 ------------------
 * Added argparse option to change publishing rate
