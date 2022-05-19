@@ -2,8 +2,8 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.1 (2022-05-19)
+------------------
 * Bug fix: Empty frame list on noetic now gets displayed
 * Add some more Python -> Python3 conversions
 * Contributors: Martin Günther, Philipp Tenbrock
