@@ -25,6 +25,7 @@ class FrameEditor_Services(Interface):
         rospy.Service("~align_frame", AlignFrame, self.callback_align_frame)
         rospy.Service("~edit_frame", EditFrame, self.callback_edit_frame)
         rospy.Service("~get_frame", GetFrame, self.callback_get_frame)
+        rospy.Service("~get_frame_names", GetFrameNames, self.callback_get_frame_names)
         rospy.Service("~remove_frame", RemoveFrame, self.callback_remove_frame)
         rospy.Service("~set_frame", SetFrame, self.callback_set_frame)
         rospy.Service("~set_parent", SetParentFrame, self.callback_set_parent_frame)
@@ -110,6 +111,18 @@ class FrameEditor_Services(Interface):
             response.name = f.name
             response.parent = f.parent
             response.pose = ToPose(f.position, f.orientation)
+
+        return response
+    
+
+    def callback_get_frame_names(self, request):
+        print("> Request to get frame names")
+
+        response = GetFrameNamesResponse()
+        response.error_code = 0
+
+        for frame in self.editor.frames.values():
+            response.names.append(frame.name)
 
         return response
 
