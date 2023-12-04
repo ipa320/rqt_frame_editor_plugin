@@ -63,6 +63,7 @@ add_service_files(
   AlignFrame.srv
   EditFrame.srv
   GetFrame.srv
+  GetFrameNames.srv
   RemoveFrame.srv
   SetFrame.srv
   SetParentFrame.srv
