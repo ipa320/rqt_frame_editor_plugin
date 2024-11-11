@@ -41,7 +41,7 @@ class Frame(object):
     @staticmethod
     def init_tf():
         if Frame.tf_buffer is None:
-            Frame.tf_broadcaster = tf2_ros.TransformBroadcaster()
+            Frame.tf_broadcaster = tf2_ros.StaticTransformBroadcaster()
             Frame.tf_buffer = tf2_ros.Buffer()
             Frame.tf_listener = tf2_ros.TransformListener(Frame.tf_buffer)
 

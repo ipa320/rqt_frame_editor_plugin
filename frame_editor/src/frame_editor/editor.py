@@ -308,7 +308,7 @@ class FrameEditor(QtCore.QObject):
         parser.add_argument("-l", "--load", action="append",
                       dest="file",
                       help="Load a file at startup. [rospack filepath/file]")
-        parser.add_argument("-r", "--rate", type=int)
+        parser.add_argument("-r", "--rate", type=int, help="Rate for broadcasting. Does not involve tf frames.")
 
         args, unknowns = parser.parse_known_args(argv)
         print('arguments: {}'.format(args))
