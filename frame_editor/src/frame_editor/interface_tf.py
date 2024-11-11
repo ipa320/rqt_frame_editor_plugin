@@ -13,13 +13,13 @@ class FrameEditor_TF(Interface):
         self.editor = frame_editor
         self.editor.observers.append(self)
 
-    def broadcast(self, editor):
-        #print "> Broadcasting"
+    def update(self, editor, level, elements):
         now = rospy.Time.now()
-        transforms = [
-            ToTransformStamped(
-                f.position, f.orientation, now, f.name, f.parent)
-            for f in editor.frames.values()]
-        Frame.tf_broadcaster.sendTransform(transforms)
-
+        transforms = []
+        for element in elements:
+            if element is not None and (level & 1 == 1 or level & 4 == 4):
+                transforms.append(ToTransformStamped(
+                element.position, element.orientation, now, element.name, element.parent))
+        if len(transforms) > 0:
+            Frame.tf_broadcaster.sendTransform(transforms)
 # eof
