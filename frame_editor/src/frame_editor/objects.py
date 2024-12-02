@@ -29,13 +29,14 @@ class Frame(object):
 
     __id_counter = -1
 
-    def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world", style="none"):
+    def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world", style="none", group=""):
         self.name = name
         self.position = position
         self.orientation = orientation
         self.parent = parent
         self.style = style
         self.color = (0.0, 0.5, 0.5, 0.75)
+        self.group = group
 
         self.hidden = False
         self.marker = None
@@ -70,7 +71,7 @@ class Frame(object):
         return ToPose(self.position, self.orientation)
 
     def print_all(self):
-        print("  {} (parent: {}) {} {}".format(self.name, self.parent, self.position, self.orientation))
+        print("  {} (parent: {}) {} {} {}".format(self.name, self.parent, self.position, self.orientation, self.group))
 
     def value(self, symbol):
         if symbol == 'x':
@@ -121,9 +122,9 @@ class Frame(object):
 
 class Object_Geometry(Frame):
 
-    def __init__(self, name, position, orientation, parent, style):
+    def __init__(self, name, position, orientation, parent, style, group):
 
-        super(Object_Geometry, self).__init__(name, position, orientation, parent, style)
+        super(Object_Geometry, self).__init__(name, position, orientation, parent, style, group)
 
         ## TODO: put this into interface_marker.py
         self.marker = Marker()
@@ -147,12 +148,12 @@ class Object_Geometry(Frame):
 
 class Object_Plane(Object_Geometry):
 
-    def __init__(self, name, position, orientation, parent, length=1.0, width=1.0):
+    def __init__(self, name, position, orientation, parent, length=1.0, width=1.0, group=""):
 
         self.length = length
         self.width = width
 
-        super(Object_Plane, self).__init__(name, position, orientation, parent, "plane")
+        super(Object_Plane, self).__init__(name, position, orientation, parent, "plane", group)
 
     def update_marker(self):
         super(Object_Plane, self).update_marker()
@@ -169,13 +170,13 @@ class Object_Plane(Object_Geometry):
 
 class Object_Cube(Object_Geometry):
 
-    def __init__(self, name, position, orientation, parent, length=1.0, width=1.0, height=1.0):
+    def __init__(self, name, position, orientation, parent, length=1.0, width=1.0, height=1.0, group=""):
 
         self.length = length
         self.width = width
         self.height = height
 
-        super(Object_Cube, self).__init__(name, position, orientation, parent, "cube")
+        super(Object_Cube, self).__init__(name, position, orientation, parent, "cube", group)
 
     def update_marker(self):
         super(Object_Cube, self).update_marker()
@@ -186,11 +187,11 @@ class Object_Cube(Object_Geometry):
 
 class Object_Sphere(Object_Geometry):
 
-    def __init__(self, name, position, orientation, parent, diameter=1.0):
+    def __init__(self, name, position, orientation, parent, diameter=1.0, group=""):
 
         self.diameter = diameter
 
-        super(Object_Sphere, self).__init__(name, position, orientation, parent, "sphere")
+        super(Object_Sphere, self).__init__(name, position, orientation, parent, "sphere", group)
 
     def update_marker(self):
         super(Object_Sphere, self).update_marker()
@@ -201,12 +202,12 @@ class Object_Sphere(Object_Geometry):
 
 class Object_Axis(Object_Geometry):
 
-    def __init__(self, name, position, orientation, parent, length=1.0, width=0.05):
+    def __init__(self, name, position, orientation, parent, length=1.0, width=0.05, group=""):
 
         self.length = length
         self.width = width
 
-        super(Object_Axis, self).__init__(name, position, orientation, parent, "axis")
+        super(Object_Axis, self).__init__(name, position, orientation, parent, "axis", group)
 
     def update_marker(self):
         super(Object_Axis, self).update_marker()
@@ -217,13 +218,13 @@ class Object_Axis(Object_Geometry):
 
 class Object_Mesh(Object_Geometry):
 
-    def __init__(self, name, position, orientation, parent, package=None, mesh_path="", scale=1.0):
+    def __init__(self, name, position, orientation, parent, package=None, mesh_path="", scale=1.0, group=""):
 
         self.scale = scale
         self.path = mesh_path
         self.package = package
 
-        super(Object_Mesh, self).__init__(name, position, orientation, parent, "mesh")
+        super(Object_Mesh, self).__init__(name, position, orientation, parent, "mesh", group)
 
     def update_marker(self):
         super(Object_Mesh, self).update_marker()
