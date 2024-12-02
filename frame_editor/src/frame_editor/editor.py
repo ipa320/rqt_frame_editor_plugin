@@ -46,6 +46,7 @@ class FrameEditor(QtCore.QObject):
         self.namespace = "frame_editor"
         self.full_file_path = None
         self.hz = 200
+        self.filter_style = "hide"
 
 
     def get_file_name(self):
@@ -311,6 +312,14 @@ class FrameEditor(QtCore.QObject):
         parser.add_argument("-l", "--load", action="append",
                       dest="file",
                       help="Load a file at startup. [rospack filepath/file]")
+        parser.add_argument(
+            "--filter_style",  
+            type=str,  
+            choices=["grey", "hide"],  
+            help="Choose the filter style: 'grey' or 'hide' (default: 'hide')",
+            default="hide",  
+        )        
+        
         parser.add_argument("-r", "--rate", type=int, help="Rate for broadcasting. Does not involve tf frames. Only effective for non-static broadcaster.")
         parser.add_argument("-s", "--static", action="store_false", help="Use static tf broadcaster") 
 
@@ -324,6 +333,9 @@ class FrameEditor(QtCore.QObject):
 
         if args.rate:
             self.hz = args.rate
+            
+        if args.filter_style:
+            self.filter_style = args.filter_style
 
         ## Load file ##
         if args.file:
