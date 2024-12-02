@@ -13,6 +13,7 @@ from qt_gui_py_common.worker_thread import WorkerThread
 from python_qt_binding import loadUi, QtCore, QtWidgets
 from python_qt_binding.QtWidgets import QWidget, QTreeWidgetItem, QTreeWidget
 from python_qt_binding.QtCore import Slot, Qt
+from python_qt_binding.QtGui import QColor
 
 from frame_editor.editor import Frame, FrameEditor
 from frame_editor.commands import *
@@ -71,14 +72,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         loadUi(ui_file, widget)
         widget.setObjectName('FrameEditorGUIUi')
 
-        #if context.serial_number() > 1:
-        #    widget.setWindowTitle(widget.windowTitle() + (' (%d)' % context.serial_number()))
         widget.setWindowTitle("frame editor")
-
-
-        ## Undo View
-        #widget.undo_frame.layout().addWidget(QtWidgets.QUndoView(self.editor.undo_stack))
-
 
         ## Views
         self.editor.init_views()
@@ -91,7 +85,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_add.clicked.connect(self.btn_add_clicked)
         widget.btn_delete.clicked.connect(self.btn_delete_clicked)
         widget.btn_duplicate.clicked.connect(self.btn_duplicate_clicked)
-        # widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
         widget.list_frames.currentItemChanged.connect(self.selected_frame_changed)
 
         widget.btn_refresh.clicked.connect(self.update_tf_list)
@@ -107,6 +100,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_set_a.clicked.connect(self.btn_set_a_clicked)
         widget.btn_set_b.clicked.connect(self.btn_set_b_clicked)
         widget.btn_set_c.clicked.connect(self.btn_set_c_clicked)
+        
+        widget.searchLine.textChanged.connect(self.update_search_suggestions)   
+        widget.search_tf.textChanged.connect(self.update_search_suggestions_tf)   
 
         widget.btn_reset_position_rel.clicked.connect(self.btn_reset_position_rel_clicked)
         widget.btn_reset_position_abs.clicked.connect(self.btn_reset_position_abs_clicked)
@@ -159,31 +155,73 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
 
     @Slot()
-    def update_tf_list(self):
+    def update_tf_list(self, search_query=""):
+        """
+        Updates the tree with items that match the search query.
+        """
+        # Clear the existing items in the tree
         self.widget.list_tf.clear()
-        self.widget.list_tf.addItems(
-            sorted(self.editor.all_frame_ids(include_temp=False)))
-
-    # def update_frame_list(self):
-    #     items = self.editor.frames.keys()
-    #     self.widget.list_frames.clear()
-    #     self.widget.list_frames.addItems(items)
-    #     self.widget.list_frames.sortItems()
-
-
-    def update_frame_list(self):
-        items = self.editor.frames.keys()  # Get the frame names (or keys)
-        self.widget.list_frames.clear()  # Clear the tree widget
-
-        # Loop through the frames and add them as root items (or child items if hierarchical)
+        
+        items = sorted(self.editor.all_frame_ids(include_temp=False))
+        # Loop through the frames and add them to the tree
         for item in items:
-            # Create a new QTreeWidgetItem for each frame
-            tree_item = QTreeWidgetItem(self.widget.list_frames)  # Add as root item
-            tree_item.setText(0, item)  # Set the text for the item (first column)
-            
+            if search_query.lower() in item.lower() or self.editor.filter_style == "grey":  # Case-insensitive search
+                tree_item = QTreeWidgetItem(self.widget.list_tf)  # Add as root item
+                tree_item.setText(0, item)  # Set the text for the item (first column)
+                
+                if self.editor.filter_style == "grey":
+                    if search_query.lower() in item.lower():  
+                        tree_item.setForeground(0, Qt.black)  # Set normal color for matching items
+                    else:
+                        tree_item.setForeground(0, QColor(169, 169, 169))  # Grey out non-matching items
+
+
+        # Sort the items after adding them
         self.widget.list_frames.sortItems(0, Qt.AscendingOrder)
 
+    def update_search_suggestions_tf(self):
+        """
+        Updates the displayed tree items based on the search query entered in searchLine.
+        """
+        search_query = self.widget.search_tf.text()
+        self.update_tf_list(search_query)
 
+
+    #############################
+    # ## SEARCH FUNCTIONALITY
+    def update_frame_list(self, search_query=""):
+        """
+        Updates the tree with items that match the search query.
+        """
+        # Clear the existing items in the tree
+        self.widget.list_frames.clear()
+
+        # Get the frame names (or keys) from self.editor_frames
+        items = self.editor.frames.keys()
+
+        # Loop through the frames and add them to the tree
+        for item in items:
+            if search_query.lower() in item.lower() or self.editor.filter_style == "grey":  # Case-insensitive search
+                tree_item = QTreeWidgetItem(self.widget.list_frames)  # Add as root item
+                tree_item.setText(0, item)  # Set the text for the item (first column)
+                
+                if self.editor.filter_style == "grey":
+                    if search_query.lower() in item.lower():  # Case-insensitive search
+                        tree_item.setForeground(0, Qt.black)  # Set normal color for matching items
+                    else:
+                        tree_item.setForeground(0, QColor(169, 169, 169))  # Grey out non-matching items
+
+
+        # Sort the items after adding them
+        self.widget.list_frames.sortItems(0, Qt.AscendingOrder)
+
+    def update_search_suggestions(self):
+        """
+        Updates the displayed tree items based on the search query entered in searchLine.
+        """
+        search_query = self.widget.searchLine.text()
+        self.update_frame_list(search_query)
+    #############################
 
     def update_active_frame(self):
         if not self.editor.active_frame:
@@ -256,15 +294,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         self.widget.combo_style.setCurrentIndex(self.widget.combo_style.findText(f.style))
 
 
-    # @Slot(str)
-    # def selected_frame_changed(self, name):
-    #     if name == "":
-    #         return
-
-    #     if not self.editor.active_frame or (self.editor.active_frame.name != name):
-    #         self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
-
-
     @Slot(QTreeWidgetItem, QTreeWidgetItem)
     def selected_frame_changed(self, item, previous):
         # 'item' is the currently selected item (QTreeWidgetItem)
@@ -330,7 +359,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         item = self.widget.list_frames.currentItem()
         if not item:
             return
-        source_name = item.text()
+        source_name = item.text(0)
         parent_name = self.editor.frames[source_name].parent
 
         name = self.get_valid_frame_name("Duplicate Frame", default_name=source_name)
@@ -346,7 +375,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         item = self.widget.list_frames.currentItem()
         if not item:
             return
-        self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text()]))
+        self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text(0)]))
         Frame.tf_buffer.clear()
         self.update_tf_list()
 
@@ -365,10 +394,10 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         if not parent:
             return # none selected
 
-        if parent.text() == self.editor.active_frame.name:
+        if parent.text(0) == self.editor.active_frame.name:
             return # you can't be your own parent
 
-        self.editor.command(Command_SetParent(self.editor, self.editor.active_frame, parent.text(), keep_absolute))
+        self.editor.command(Command_SetParent(self.editor, self.editor.active_frame, parent.text(0), keep_absolute))
 
 
     ## SET BUTTONS ##
@@ -410,7 +439,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             return # none selected
 
         frame = self.editor.active_frame
-        self.editor.command(Command_AlignElement(self.editor, frame, source.text(), mode))
+        self.editor.command(Command_AlignElement(self.editor, frame, source.text(0), mode))
 
 
     ## RESET BUTTONS ##
