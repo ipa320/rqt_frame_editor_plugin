@@ -68,6 +68,7 @@ class Command_RemoveElement(QUndoCommand):
             self.editor.add_undo_level(2)
 
         del self.editor.frames[self.element.name]
+        Frame.tf_buffer.clear()
         self.element.hidden = True
         self.editor.add_undo_level(1, [self.element])
 

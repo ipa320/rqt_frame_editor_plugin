@@ -11,8 +11,8 @@ import actionlib
 from qt_gui_py_common.worker_thread import WorkerThread
 
 from python_qt_binding import loadUi, QtCore, QtWidgets
-from python_qt_binding.QtWidgets import QWidget
-from python_qt_binding.QtCore import Slot
+from python_qt_binding.QtWidgets import QWidget, QTreeWidgetItem, QTreeWidget
+from python_qt_binding.QtCore import Slot, Qt
 
 from frame_editor.editor import Frame, FrameEditor
 from frame_editor.commands import *
@@ -91,7 +91,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_add.clicked.connect(self.btn_add_clicked)
         widget.btn_delete.clicked.connect(self.btn_delete_clicked)
         widget.btn_duplicate.clicked.connect(self.btn_duplicate_clicked)
-        widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
+        # widget.list_frames.currentTextChanged.connect(self.selected_frame_changed)
+        widget.list_frames.currentItemChanged.connect(self.selected_frame_changed)
+
         widget.btn_refresh.clicked.connect(self.update_tf_list)
 
         widget.btn_set_parent_rel.clicked.connect(self.btn_set_parent_rel_clicked)
@@ -162,11 +164,25 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         self.widget.list_tf.addItems(
             sorted(self.editor.all_frame_ids(include_temp=False)))
 
+    # def update_frame_list(self):
+    #     items = self.editor.frames.keys()
+    #     self.widget.list_frames.clear()
+    #     self.widget.list_frames.addItems(items)
+    #     self.widget.list_frames.sortItems()
+
+
     def update_frame_list(self):
-        items = self.editor.frames.keys()
-        self.widget.list_frames.clear()
-        self.widget.list_frames.addItems(items)
-        self.widget.list_frames.sortItems()
+        items = self.editor.frames.keys()  # Get the frame names (or keys)
+        self.widget.list_frames.clear()  # Clear the tree widget
+
+        # Loop through the frames and add them as root items (or child items if hierarchical)
+        for item in items:
+            # Create a new QTreeWidgetItem for each frame
+            tree_item = QTreeWidgetItem(self.widget.list_frames)  # Add as root item
+            tree_item.setText(0, item)  # Set the text for the item (first column)
+            
+        self.widget.list_frames.sortItems(0, Qt.AscendingOrder)
+
 
 
     def update_active_frame(self):
@@ -240,14 +256,29 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         self.widget.combo_style.setCurrentIndex(self.widget.combo_style.findText(f.style))
 
 
-    @Slot(str)
-    def selected_frame_changed(self, name):
+    # @Slot(str)
+    # def selected_frame_changed(self, name):
+    #     if name == "":
+    #         return
+
+    #     if not self.editor.active_frame or (self.editor.active_frame.name != name):
+    #         self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
+
+
+    @Slot(QTreeWidgetItem, QTreeWidgetItem)
+    def selected_frame_changed(self, item, previous):
+        # 'item' is the currently selected item (QTreeWidgetItem)
+        if item is None:
+            return
+
+        name = item.text(0)  # Get the text of the selected item
+        
         if name == "":
             return
 
+        # Perform the selection logic as before
         if not self.editor.active_frame or (self.editor.active_frame.name != name):
             self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
-
 
     ## BUTTONS ##
     ##
@@ -316,7 +347,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         if not item:
             return
         self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text()]))
-
+        Frame.tf_buffer.clear()
+        self.update_tf_list()
 
     ## PARENTING ##
     ##
