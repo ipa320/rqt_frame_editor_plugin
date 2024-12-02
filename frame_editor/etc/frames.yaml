@@ -4,11 +4,13 @@ frames:
     parent: world
     position: {x: 0.5, y: 0.5, z: 0.5}
     style: none
+    group: frames_1
   frame_axis:
     orientation: {w: 0.0, x: 0.0, y: 0.0, z: 1.0}
     parent: frame1
     position: {x: -0.47346997261047363, y: 0.20000000298023224, z: 0.30000001192092896}
     style: none
+    group: frames_1
   frame_cube:
     orientation: {w: 0.0, x: 0.0, y: 0.0, z: 1.0}
     parent: frame1

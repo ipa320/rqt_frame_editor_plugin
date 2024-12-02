@@ -380,17 +380,17 @@ class Command_SetStyle(QUndoCommand):
         self.old_element = element
 
         if style == "plane":
-            self.new_element = Object_Plane(element.name, element.position, element.orientation, element.parent)
+            self.new_element = Object_Plane(element.name, element.position, element.orientation, element.parent, group=element.group)
         elif style == "cube":
-            self.new_element = Object_Cube(element.name, element.position, element.orientation, element.parent)
+            self.new_element = Object_Cube(element.name, element.position, element.orientation, element.parent, group=element.group)
         elif style == "sphere":
-            self.new_element = Object_Sphere(element.name, element.position, element.orientation, element.parent)
+            self.new_element = Object_Sphere(element.name, element.position, element.orientation, element.parent, group=element.group)
         elif style == "axis":
-            self.new_element = Object_Axis(element.name, element.position, element.orientation, element.parent)
+            self.new_element = Object_Axis(element.name, element.position, element.orientation, element.parent, group=element.group)
         elif style == "mesh":
-            self.new_element = Object_Mesh(element.name, element.position, element.orientation, element.parent)
+            self.new_element = Object_Mesh(element.name, element.position, element.orientation, element.parent, group=element.group)
         else:
-            self.new_element = Frame(element.name, element.position, element.orientation, element.parent)
+            self.new_element = Frame(element.name, element.position, element.orientation, element.parent, group=element.group)
 
         if editor.active_frame is element:
             self.was_active = True

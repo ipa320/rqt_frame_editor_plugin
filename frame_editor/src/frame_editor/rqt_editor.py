@@ -153,31 +153,48 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         if level & 4:
             self.update_fields()
 
-
     @Slot()
     def update_tf_list(self, search_query=""):
         """
-        Updates the tree with items that match the search query.
+        Updates the tree with items that match the search query and groups them
+        under two collapsible categories.
         """
         # Clear the existing items in the tree
         self.widget.list_tf.clear()
         
+        # Create root items for grouping
+        frame_group = QTreeWidgetItem(self.widget.list_tf)
+        frame_group.setText(0, "Frames") 
+        frame_group.setExpanded(True)  
+        
+        other_group = QTreeWidgetItem(self.widget.list_tf)
+        other_group.setText(0, "Others") 
+        other_group.setExpanded(True)  
+        
         items = sorted(self.editor.all_frame_ids(include_temp=False))
-        # Loop through the frames and add them to the tree
+        
+        # Loop through the frames and add them to the appropriate group
         for item in items:
-            if search_query.lower() in item.lower() or self.editor.filter_style == "grey":  # Case-insensitive search
-                tree_item = QTreeWidgetItem(self.widget.list_tf)  # Add as root item
-                tree_item.setText(0, item)  # Set the text for the item (first column)
-                
+            tree_item = QTreeWidgetItem()  # Create a new tree item
+            tree_item.setText(0, item)  # Set the text for the item (first column)
+            
+            # Check if the item is part of self.editor.frames.keys()
+            if item in self.editor.frames.keys():
+                group = frame_group  # Add to the 'Frames' group
+            else:
+                group = other_group  # Add to the 'Others' group
+            
+            # Apply grey styling based on the search query and filter style
+            if search_query.lower() in item.lower() or self.editor.filter_style == "grey":
                 if self.editor.filter_style == "grey":
-                    if search_query.lower() in item.lower():  
+                    if search_query.lower() in item.lower():
                         tree_item.setForeground(0, Qt.black)  # Set normal color for matching items
                     else:
                         tree_item.setForeground(0, QColor(169, 169, 169))  # Grey out non-matching items
-
+                group.addChild(tree_item)  # Add the item to the corresponding group
 
         # Sort the items after adding them
-        self.widget.list_frames.sortItems(0, Qt.AscendingOrder)
+        self.widget.list_tf.sortItems(0, Qt.AscendingOrder)
 
     def update_search_suggestions_tf(self):
         """
@@ -192,29 +209,61 @@ class FrameEditorGUI(ProjectPlugin, Interface):
     def update_frame_list(self, search_query=""):
         """
         Updates the tree with items that match the search query.
+        Group frames based on their `group` attribute, with collapsible groups.
+        Non-group frames are added without grouping or collapsibility.
         """
         # Clear the existing items in the tree
         self.widget.list_frames.clear()
 
-        # Get the frame names (or keys) from self.editor_frames
-        items = self.editor.frames.keys()
+        # Get the frame names (or keys) from self.editor.frames
+        items = sorted(self.editor.frames.keys())  # Sorting the items
+        
+        # Dictionary to hold the group items, to ensure only one root per group
+        group_list = {}
 
-        # Loop through the frames and add them to the tree
+        # Loop through the frames to create group root items
+        for element in items:
+            group = self.editor.frames[element].group
+            if group != "":  # If the frame has a group
+                if group not in group_list:  # Only create the group root item once
+                    frame_group = QTreeWidgetItem(self.widget.list_frames)
+                    frame_group.setText(0, group)  # Set the group name
+                    frame_group.setExpanded(True)  # Make the group expanded by default
+                    frame_group.setFlags(frame_group.flags() & ~Qt.ItemIsSelectable)
+                    group_list[group] = frame_group
+
+        # Loop through the frames and add them to the appropriate group or main list
         for item in items:
-            if search_query.lower() in item.lower() or self.editor.filter_style == "grey":  # Case-insensitive search
-                tree_item = QTreeWidgetItem(self.widget.list_frames)  # Add as root item
-                tree_item.setText(0, item)  # Set the text for the item (first column)
-                
+            tree_item = QTreeWidgetItem()  # Create a new tree item for the frame
+            tree_item.setText(0, item)  # Set the text for the item (first column)
+
+            # Check if the frame has a group
+            group = self.editor.frames[item].group
+            if group != "":  # If the frame belongs to a group
+                # Add the frame as a child item of the respective group
+                group_item = group_list[group]
+            else:  # If it doesn't belong to any group
+                # Just add the frame as a root item without grouping
+                group_item = self.widget.list_frames
+
+            # Apply grey styling based on the search query and filter style
+            if search_query.lower() in item.lower() or self.editor.filter_style == "grey":
                 if self.editor.filter_style == "grey":
-                    if search_query.lower() in item.lower():  # Case-insensitive search
+                    if search_query.lower() in item.lower():
                         tree_item.setForeground(0, Qt.black)  # Set normal color for matching items
                     else:
                         tree_item.setForeground(0, QColor(169, 169, 169))  # Grey out non-matching items
 
+            # Add the tree item to the appropriate group or directly to the list
+            if isinstance(group_item, QTreeWidgetItem):  # Ensure group_item is a QTreeWidgetItem
+                group_item.addChild(tree_item)  # Add to group
+            else:
+                self.widget.list_frames.addTopLevelItem(tree_item)  # Add to main list directly
 
         # Sort the items after adding them
         self.widget.list_frames.sortItems(0, Qt.AscendingOrder)
-
+    
+    
     def update_search_suggestions(self):
         """
         Updates the displayed tree items based on the search query entered in searchLine.
@@ -228,22 +277,47 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             self.old_selected = ""
             self.widget.list_frames.setCurrentItem(None)
             self.widget.box_edit.setEnabled(False)
-            return # deselect and quit
+            return  # Deselect and quit
 
         self.widget.box_edit.setEnabled(True)
 
         name = self.editor.active_frame.name
         if name == self.old_selected:
-            return # no change
+            return  # No change
 
-        ## Select item in list
-        items = self.widget.list_frames.findItems(name, QtCore.Qt.MatchExactly)
-        self.widget.list_frames.setCurrentItem(items[0])
+        # Search for the item by name in both top-level and child items
+        found_item = None
 
-        self.update_fields()
+        # First, search in top-level items
+        top_level_items = self.widget.list_frames.findItems(name, Qt.MatchExactly)
+        
+        # If not found at the top level, search recursively in child items
+        if not top_level_items:
+            for i in range(self.widget.list_frames.topLevelItemCount()):
+                top_item = self.widget.list_frames.topLevelItem(i)
+                found_item = self.find_item_in_children(top_item, name)
+                if found_item:
+                    break
+
+        if found_item:
+            # Set the found item as the current item
+            self.widget.list_frames.setCurrentItem(found_item)
+            self.update_fields()
 
         self.old_selected = name
 
+
+    def find_item_in_children(self, parent_item, name):
+        """
+        Recursively search for the item in the children of a given parent item.
+        """
+        # Loop through all child items of the parent item
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+            if child_item.text(0) == name:
+                return child_item  # Return the item if it matches
+
+        return None  # Return None if no match is found in this branch
 
     @Slot()
     def update_fields(self):
@@ -301,6 +375,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             return
 
         name = item.text(0)  # Get the text of the selected item
+        
+        if name not in self.editor.frames: 
+            return
         
         if name == "":
             return
