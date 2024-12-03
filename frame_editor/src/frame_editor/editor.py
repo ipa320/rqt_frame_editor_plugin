@@ -339,6 +339,8 @@ class FrameEditor(QtCore.QObject):
 
         if args.rate:
             self.hz = args.rate
+        else:
+            self.hz = 100
             
         if args.filter_style:
             self.filter_style = args.filter_style
