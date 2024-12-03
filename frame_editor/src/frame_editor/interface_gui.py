@@ -63,7 +63,6 @@ class FrameEditor_StyleWidget(Interface):
         self.layout.addWidget(self.color_label, 5, 0)
         self.layout.addWidget(self.color_button, 5, 1)
 
-        print("init")
         self.update_widget(None)
 
     def get_widget(self):
@@ -170,19 +169,17 @@ class FrameEditor_StyleWidget(Interface):
             if rospackage is None:
                 QtWidgets.QMessageBox.warning(self.widget, "Saving absolute path to mesh",
                 "Cannot find rospackage with selected mesh in it!\nSaving absolute path to mesh instead!")
-                #print("WARNING cannot find rospackage with mesh in it, saving absolute path")
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", ""))
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
             else:
                 rel_path = os.path.relpath(path , rospkg.RosPack().get_path(rospackage))
-                print("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
+                rospy.loginfo("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", rospackage))
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", rel_path))
         except:
             QtWidgets.QMessageBox.warning(self.widget, "Saving absolute path to mesh",
             "The found rospackage with selected mesh in it is not sourced in your ROS workspace!\n"+
             "Cannot resolve the packagepath\nSaving absolute path to mesh instead!")
-            #print("The package found is not sourced withing the current workspace, saving absolute path instead!")
             self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", ""))
             self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
 

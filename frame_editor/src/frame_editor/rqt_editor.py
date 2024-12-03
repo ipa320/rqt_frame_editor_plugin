@@ -128,7 +128,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
     @Slot()
     def _update_finished(self):
-        print("> Shutting down")
+        rospy.loginfo("> Shutting down")
 
 
     def update(self, editor, level, elements):

@@ -98,7 +98,7 @@ class FrameEditor(QtCore.QObject):
         if isinstance(d, dict):
             return d
         else:
-            rospy.logwarn('Got invalid yaml from tf2: '+y)
+            rospy.logwarn('Got invalid yaml from tf2: {}'.format(y))
             return {}
 
     @staticmethod
@@ -123,7 +123,7 @@ class FrameEditor(QtCore.QObject):
     ## PRINT ##
     ##
     def print_all(self):
-        print("> Printing all frames")
+        rospy.loginfo("> Printing all frames")
 
         for frame in self.frames:
             frame.print_all()
@@ -133,7 +133,7 @@ class FrameEditor(QtCore.QObject):
     ##
     def load_file(self, file_name):
         if file_name:
-            print("> Loading file")
+            rospy.loginfo("> Loading file")
             data = rosparam.load_file(file_name, self.namespace)[0][0]
             self.load_data(data)
         else:
@@ -147,7 +147,7 @@ class FrameEditor(QtCore.QObject):
 
     def load_params(self, namespace):
         if not rosparam.list_params(namespace):
-            print("> No data to load")
+            rospy.logwarn("> No data to load")
         else:
             data = rosparam.get_param(namespace)
             self.load_data(data)
@@ -205,7 +205,7 @@ class FrameEditor(QtCore.QObject):
 
         self.undo_stack.endMacro()
 
-        print("> Loading done")
+        rospy.loginfo("> Loading done")
 
     def save_file(self, filename):
 
@@ -231,6 +231,7 @@ class FrameEditor(QtCore.QObject):
             f["orientation"] = o
 
             f["style"] = frame.style
+            f["group"] = frame.group
 
             if frame.style == "plane":
                 f["data"] = { "length": frame.length, "width":frame.width, "color": frame.color }
@@ -254,14 +255,14 @@ class FrameEditor(QtCore.QObject):
 
         ## To parameter server
         rospy.set_param(self.namespace, data)
-        print(rospy.get_param(self.namespace))
+        rospy.loginfo(rospy.get_param(self.namespace))
 
         ## Dump param to file
         if filename == '':
             filename = self.full_file_path
-        print("Saving to file {}".format(filename))
+        rospy.loginfo("Saving to file {}".format(filename))
         rosparam.dump_params(filename, self.namespace)
-        print("Saving done")
+        rospy.loginfo("Saving done")
 
         self.full_file_path = filename
         return True
@@ -286,7 +287,7 @@ class FrameEditor(QtCore.QObject):
                     QtWidgets.QMessageBox.Yes)
 
                     if reply == QtWidgets.QMessageBox.Yes:
-                        print("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
+                        rospy.loginfo("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
                         frame.package = rospackage
                         frame.path = rel_path
                         return
@@ -298,7 +299,7 @@ class FrameEditor(QtCore.QObject):
             pass
 
     def run(self):
-        print("> Going for some spins")
+        rospy.loginfo("> Going for some spins")
         rate = rospy.Rate(self.hz) # hz
         while not rospy.is_shutdown():
             self.broadcast()
@@ -329,9 +330,9 @@ class FrameEditor(QtCore.QObject):
         parser.add_argument("-s", "--static", action="store_false", help="Use static tf broadcaster") 
 
         args, unknowns = parser.parse_known_args(argv)
-        print('arguments: {}'.format(args))
+        rospy.loginfo('arguments: {}'.format(args))
         if unknowns:
-            print('unknown parameters found: {}'.format(unknowns))
+            rospy.logwarn('unknown parameters found: {}'.format(unknowns))
 
         self.static = args.static
         Frame.init_tf(self.static)
@@ -348,24 +349,24 @@ class FrameEditor(QtCore.QObject):
             if len(arg_path) == 1:
                 #load file
                 filename = arg_path[0]
-                print("Loading {}".format(filename))
+                rospy.loginfo("Loading {}".format(filename))
                 success = self.load_file(str(filename))
             elif len(arg_path) == 2:
                 #load rospack
                 rospack = rospkg.RosPack()
                 filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
-                print("Loading {}".format(filename))
+                rospy.loginfo("Loading {}".format(filename))
                 success = self.load_file(str(filename))
             else:
-                print("Load argument not understood! --load {}".format(arg_path))
-                print("Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'")
-                print("or use --load 'fullPathToMyYaml.yaml'")
+                rospy.logwarn("Load argument not understood! --load {}".format(arg_path))
+                rospy.logwarn("Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'")
+                rospy.logwarn("or use --load 'fullPathToMyYaml.yaml'")
                 success = None
 
             if success:
                 return filename
             elif success == False:
-                print("ERROR LOADING FILE")
+                rospy.logerr("ERROR LOADING FILE")
             return ''
 
     def init_views(self):
@@ -385,7 +386,7 @@ if __name__ == "__main__":
     editor.parse_args(sys.argv[1:])
     editor.init_views()
 
-    print("Frame editor ready!")
+    rospy.loginfo("Frame editor ready!")
     editor.run()
 
 # eof
