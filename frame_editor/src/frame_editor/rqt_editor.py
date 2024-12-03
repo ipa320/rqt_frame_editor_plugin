@@ -7,12 +7,13 @@ import rospy
 import rospkg
 import tf
 import actionlib
+import threading
 
 from qt_gui_py_common.worker_thread import WorkerThread
 
 from python_qt_binding import loadUi, QtCore, QtWidgets
-from python_qt_binding.QtWidgets import QWidget, QTreeWidgetItem, QTreeWidget
-from python_qt_binding.QtCore import Slot, Qt
+from python_qt_binding.QtWidgets import QWidget, QTreeWidgetItem, QTreeWidget, QProgressBar
+from python_qt_binding.QtCore import Slot, Qt, QTimer
 from python_qt_binding.QtGui import QColor
 
 from frame_editor.editor import Frame, FrameEditor
@@ -26,10 +27,41 @@ from frame_editor.interface import Interface
 ## Views
 from frame_editor.interface_gui import FrameEditor_StyleWidget
 
+class LoadingTreeWidgetItem(QTreeWidgetItem):
+    def __init__(self, parent, load_time=0.5):
+        super().__init__(parent)
+        self.parent = parent
+        
+        # Create a QProgressBar to simulate loading
+        self.progress_bar = QProgressBar()
+        self.load_increments = load_time / (100/1000)
+        self.progress_bar.setRange(0, self.load_increments)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setTextVisible(False)  # Hide the text inside the progress bar
+        
+        # Set the progress bar widget to the tree item
+        self.parent.setItemWidget(self, 0, self.progress_bar)
+
+        # Add a timer to simulate progress increment
+        self.timer = QTimer(self.parent)
+        self.timer.timeout.connect(self.update_progress)
+        self.timer.start(100)  # Update every 100 ms
+
+    def update_progress(self):
+        """Update progress bar value to simulate loading."""
+        current_value = self.progress_bar.value()
+        
+        if current_value < self.progress_bar.maximum():
+            self.progress_bar.setValue(current_value + 1)
+        else:
+            self.timer.stop()  # Stop the timer when loading completes
+            self.progress_bar.setValue(0)  # Reset the progress bar or hide it
 
 class FrameEditorGUI(ProjectPlugin, Interface):
 
     signal_update = QtCore.Signal(int)
+    signal_update_tf = QtCore.Signal(bool, bool)
+    signal_load_animation = QtCore.Signal()
 
     def __init__(self, context):
         super(FrameEditorGUI, self).__init__(context)
@@ -56,6 +88,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         editor.observers.append(self)
 
         self.signal_update.connect(self.update_all)
+        self.signal_update_tf.connect(self.update_frame_buffer)
+        self.signal_load_animation.connect(self.set_tf_loading_animation)
 
         self._update_thread = WorkerThread(self._update_thread_run, self._update_finished)
 
@@ -87,8 +121,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_duplicate.clicked.connect(self.btn_duplicate_clicked)
         widget.list_frames.currentItemChanged.connect(self.selected_frame_changed)
 
-        widget.btn_refresh.clicked.connect(self.update_tf_list)
-
+        widget.btn_refresh.clicked.connect(lambda: self.signal_update_tf.emit(True, True))
+        
         widget.btn_set_parent_rel.clicked.connect(self.btn_set_parent_rel_clicked)
         widget.btn_set_parent_abs.clicked.connect(self.btn_set_parent_abs_clicked)
         widget.btn_set_pose.clicked.connect(self.btn_set_pose_clicked)
@@ -102,7 +136,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_set_c.clicked.connect(self.btn_set_c_clicked)
         
         widget.searchLine.textChanged.connect(self.update_search_suggestions)   
-        widget.search_tf.textChanged.connect(self.update_search_suggestions_tf)   
+        widget.search_tf.textChanged.connect(self.update_tf_list)   
 
         widget.btn_reset_position_rel.clicked.connect(self.btn_reset_position_rel_clicked)
         widget.btn_reset_position_abs.clicked.connect(self.btn_reset_position_abs_clicked)
@@ -153,8 +187,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         if level & 4:
             self.update_fields()
 
-    @Slot()
-    def update_tf_list(self, search_query=""):
+    def update_tf_list_search(self, search_query=""):
         """
         Updates the tree with items that match the search query and groups them
         under two collapsible categories.
@@ -172,7 +205,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         other_group.setExpanded(True)  
         
         items = sorted(self.editor.all_frame_ids(include_temp=False))
-        
         # Loop through the frames and add them to the appropriate group
         for item in items:
             tree_item = QTreeWidgetItem()  # Create a new tree item
@@ -196,14 +228,27 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         # Sort the items after adding them
         self.widget.list_tf.sortItems(0, Qt.AscendingOrder)
 
-    def update_search_suggestions_tf(self):
+    def set_tf_loading_animation(self):
+        # Clear the existing items in the tree
+        self.widget.list_tf.clear()
+
+        # Create root items for grouping (this is just an example)
+
+        # Add the loading animation item to the root
+        LoadingTreeWidgetItem(self.widget.list_tf, load_time=self.get_sleep_time()*0.99)  # This creates the loading item with a progress bar
+
+        self.widget.list_tf.expandAll()
+        
+    @Slot()
+    def update_tf_list(self):
         """
         Updates the displayed tree items based on the search query entered in searchLine.
         """
         search_query = self.widget.search_tf.text()
-        self.update_tf_list(search_query)
-
-
+        self.update_tf_list_search(search_query)
+        
+    
+    
     #############################
     # ## SEARCH FUNCTIONALITY
     def update_frame_list(self, search_query=""):
@@ -234,8 +279,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         # Loop through the frames and add them to the appropriate group or main list
         for item in items:
-            tree_item = QTreeWidgetItem()  # Create a new tree item for the frame
-            tree_item.setText(0, item)  # Set the text for the item (first column)
+            tree_item = QTreeWidgetItem() 
+            tree_item.setText(0, item)
+            tree_item.setFlags(tree_item.flags() | Qt.ItemIsSelectable)
 
             # Check if the frame has a group
             group = self.editor.frames[item].group
@@ -262,8 +308,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         # Sort the items after adding them
         self.widget.list_frames.sortItems(0, Qt.AscendingOrder)
-    
-    
+      
     def update_search_suggestions(self):
         """
         Updates the displayed tree items based on the search query entered in searchLine.
@@ -298,6 +343,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
                 found_item = self.find_item_in_children(top_item, name)
                 if found_item:
                     break
+        else:
+            found_item = top_level_items[0]
 
         if found_item:
             # Set the found item as the current item
@@ -428,8 +475,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             return
 
         self.editor.command(Command_AddElement(self.editor, Frame(name, parent=parent)))
-
-
+        self.signal_update_tf.emit(False, False)
 
     @Slot(bool)
     def btn_duplicate_clicked(self, checked):
@@ -444,7 +490,26 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             return
 
         self.editor.command(Command_CopyElement(self.editor, name, source_name, parent_name))
+        self.signal_update_tf.emit(False, False)
 
+    def get_sleep_time(self):
+        return 4.0 / self.editor.hz
+
+    @Slot(bool, bool)
+    def update_frame_buffer(self, animation=False, reset_buffer=True):
+        if animation:
+            self.signal_load_animation.emit()
+        sleep_time = self.get_sleep_time()*1000/2  # Time takes time in ms
+        if reset_buffer:
+            self.timer_clear_buffer = QTimer(self)
+            self.timer_clear_buffer.setSingleShot(True)  # Run only once
+            self.timer_clear_buffer.timeout.connect(Frame.tf_buffer.clear)
+            self.timer_clear_buffer.start(sleep_time)
+        
+        self.timer_update_list = QTimer(self)
+        self.timer_update_list.setSingleShot(True)  # Run only once
+        self.timer_update_list.timeout.connect(self.update_tf_list)
+        self.timer_update_list.start(sleep_time*2)  
 
 
     @Slot(bool)
@@ -453,9 +518,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         if not item:
             return
         self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text(0)]))
-        Frame.tf_buffer.clear()
-        self.update_tf_list()
-
+        self.signal_update_tf.emit(True, True)
+        
     ## PARENTING ##
     ##
     @Slot(bool)
