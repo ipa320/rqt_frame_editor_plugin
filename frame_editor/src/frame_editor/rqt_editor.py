@@ -256,6 +256,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         Updates the tree with items that match the search query.
         Group frames based on their `group` attribute, with collapsible groups.
         Non-group frames are added without grouping or collapsibility.
+        If filter_style is 'hide', top-level items are hidden only if they do not match the search query.
         """
         # Clear the existing items in the tree
         self.widget.list_frames.clear()
@@ -292,22 +293,32 @@ class FrameEditorGUI(ProjectPlugin, Interface):
                 # Just add the frame as a root item without grouping
                 group_item = self.widget.list_frames
 
+            
             # Apply grey styling based on the search query and filter style
-            if search_query.lower() in item.lower() or self.editor.filter_style == "grey":
+            match_found = search_query.lower() in item.lower()  # Check if the item matches the search query
+            
+
+            if match_found or self.editor.filter_style == "grey":
                 if self.editor.filter_style == "grey":
-                    if search_query.lower() in item.lower():
+                    if match_found:
                         tree_item.setForeground(0, Qt.black)  # Set normal color for matching items
                     else:
                         tree_item.setForeground(0, QColor(169, 169, 169))  # Grey out non-matching items
 
-            # Add the tree item to the appropriate group or directly to the list
-            if isinstance(group_item, QTreeWidgetItem):  # Ensure group_item is a QTreeWidgetItem
-                group_item.addChild(tree_item)  # Add to group
-            else:
-                self.widget.list_frames.addTopLevelItem(tree_item)  # Add to main list directly
+                # If filter_style is 'hide', skip adding top-level items that don't match the search query
+                if self.editor.filter_style == "hide" and group_item == self.widget.list_frames and not match_found:
+                    continue  # Skip adding the top-level item if it doesn't match the search query
+
+                # Add the tree item to the appropriate group or directly to the list
+                if isinstance(group_item, QTreeWidgetItem):  # Ensure group_item is a QTreeWidgetItem
+                    group_item.addChild(tree_item)  # Add to group
+                else:
+                    self.widget.list_frames.addTopLevelItem(tree_item)  # Add to main list directly
 
         # Sort the items after adding them
         self.widget.list_frames.sortItems(0, Qt.AscendingOrder)
+
+
       
     def update_search_suggestions(self):
         """
@@ -493,7 +504,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         self.signal_update_tf.emit(False, False)
 
     def get_sleep_time(self):
-        return 4.0 / self.editor.hz
+        return max(5.0 / self.editor.hz, 0.1)
 
     @Slot(bool, bool)
     def update_frame_buffer(self, animation=False, reset_buffer=True):
