@@ -6,8 +6,6 @@ import math
 import rospy
 import rospkg
 import tf
-import actionlib
-import threading
 
 from qt_gui_py_common.worker_thread import WorkerThread
 
@@ -232,8 +230,6 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         # Clear the existing items in the tree
         self.widget.list_tf.clear()
 
-        # Create root items for grouping (this is just an example)
-
         # Add the loading animation item to the root
         LoadingTreeWidgetItem(self.widget.list_tf, load_time=self.get_sleep_time()*0.99)  # This creates the loading item with a progress bar
 
@@ -347,7 +343,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         # First, search in top-level items
         top_level_items = self.widget.list_frames.findItems(name, Qt.MatchExactly)
         
-        # If not found at the top level, search recursively in child items
+        # If not found at the top level, search lower
         if not top_level_items:
             for i in range(self.widget.list_frames.topLevelItemCount()):
                 top_item = self.widget.list_frames.topLevelItem(i)
