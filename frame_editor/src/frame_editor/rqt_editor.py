@@ -259,24 +259,33 @@ class FrameEditorGUI(ProjectPlugin, Interface):
     def clear_all(self):
         self.editor.command(Command_ClearAll(self.editor))
 
+    def get_valid_frame_name(self, window_title, default_name="my_frame"):
+
+        existing_tf_frames = set(self.editor.all_frame_ids())
+        existing_editor_frames = set(self.editor.all_editor_frame_ids())
+
+        name, ok = QtWidgets.QInputDialog.getText(self.widget, window_title, "Name:", QtWidgets.QLineEdit.Normal, default_name);
+
+        # allow recreating if frame was published by frameditor node originally
+        while ok and name in existing_editor_frames or (name in existing_tf_frames and not Frame.was_published_by_frameeditor(name)):
+            name, ok = QtWidgets.QInputDialog.getText(self.widget, window_title, "Name (must be unique):", QtWidgets.QLineEdit.Normal, default_name)
+        if not ok:
+            return None
+        return name
+
+        
     @Slot(bool)
     def btn_add_clicked(self, checked):
-        # Get a unique frame name
-        existing_frames = set(self.editor.all_frame_ids())
-
-        name, ok = QtWidgets.QInputDialog.getText(self.widget, "Add New Frame", "Name:", QtWidgets.QLineEdit.Normal, "my_frame");
-
-        while ok and name in existing_frames:
-            name, ok = QtWidgets.QInputDialog.getText(self.widget, "Add New Frame", "Name (must be unique):", QtWidgets.QLineEdit.Normal, "my_frame")
-        if not ok:
+        
+        name = self.get_valid_frame_name("Add New Frame")
+        if not name:
             return
 
-        if not existing_frames:
+        available_parents = self.editor.all_frame_ids(include_temp=False)
+        if not available_parents:
             available_parents = ["world"]
-        else:
-            available_parents = self.editor.all_frame_ids(include_temp=False)
-        parent, ok = QtWidgets.QInputDialog.getItem(self.widget, "Add New Frame", "Parent Name:", sorted(available_parents))
 
+        parent, ok = QtWidgets.QInputDialog.getItem(self.widget, "Add New Frame", "Parent Name:", sorted(available_parents))
 
         if not ok or parent == "":
             return
@@ -293,14 +302,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         source_name = item.text()
         parent_name = self.editor.frames[source_name].parent
 
-        # Get a unique frame name
-        existing_frames = set(self.editor.all_frame_ids())
-
-        name, ok = QtWidgets.QInputDialog.getText(self.widget, "Duplicate Frame", "Name:", QtWidgets.QLineEdit.Normal, source_name);
-
-        while ok and name in existing_frames:
-            name, ok = QtWidgets.QInputDialog.getText(self.widget, "Duplicate Frame", "Name (must be unique):", QtWidgets.QLineEdit.Normal, source_name)
-        if not ok:
+        name = self.get_valid_frame_name("Duplicate Frame", default_name=source_name)
+        if not name:
             return
 
         self.editor.command(Command_CopyElement(self.editor, name, source_name, parent_name))

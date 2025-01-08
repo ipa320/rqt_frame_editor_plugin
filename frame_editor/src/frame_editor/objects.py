@@ -8,6 +8,8 @@ import rosparam
 import tf.transformations as tft
 import tf2_ros
 
+import yaml
+
 from frame_editor.constructors_geometry import *
 from frame_editor.constructors_std import *
 from frame_editor.srv import *
@@ -44,6 +46,16 @@ class Frame(object):
             Frame.tf_broadcaster = tf2_ros.StaticTransformBroadcaster()
             Frame.tf_buffer = tf2_ros.Buffer()
             Frame.tf_listener = tf2_ros.TransformListener(Frame.tf_buffer)
+
+    @staticmethod
+    def was_published_by_frameeditor(name):
+        tf2_structure_in_yaml = Frame.tf_buffer.all_frames_as_yaml()
+        tf2_structure = yaml.load(tf2_structure_in_yaml, Loader=yaml.Loader)
+        try:
+            bc = tf2_structure[name]["broadcaster"]
+            return bc == rospy.get_name()
+        except KeyError:
+            return False
 
     @classmethod
     def create_new_id(cls):
