@@ -15,11 +15,19 @@ class FrameEditor_TF(Interface):
 
     def update(self, editor, level, elements):
         now = rospy.Time.now()
-        transforms = []
+
+        # change if there is a pose change
+        change = False
         for element in elements:
             if element is not None and (level & 1 == 1 or level & 4 == 4):
-                transforms.append(ToTransformStamped(
-                element.position, element.orientation, now, element.name, element.parent))
-        if len(transforms) > 0:
+                change = True
+
+        # publish all transforms if any changed (required for tf2 static)
+        if change:
+            transforms = [
+                ToTransformStamped(
+                    f.position, f.orientation, now, f.name, f.parent)
+                for f in editor.frames.values()]
             Frame.tf_broadcaster.sendTransform(transforms)
+
 # eof
