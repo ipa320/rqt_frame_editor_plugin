@@ -1,6 +1,11 @@
 frame editor rqt-plugin
 =========================================
 
+TODOS:
+* Update Readme for ROS 2
+
+
+
 * This repository contains the **frame editor rqt-plugin.**
 
 * Frame-editor helps you **creating and arranging tf-frames.** 
@@ -88,6 +93,10 @@ Rviz is not giving your mouse event to the interactive marker. Disable the marke
 ### Acknowledgements:
 This project is a result of the LIAA project.
 http://www.project-leanautomation.eu/
+
+Updates from 2024 on (including ROS2 port) are part of RIG (Robotics Institute Germany) project.
+
+![RIG](https://robotics-institute-germany.de/ "RIG")
 
 ![LIAA](http://www.project-leanautomation.eu/fileadmin/img/LIAALogo/Logo_LIAA.png "LIAA")
 
