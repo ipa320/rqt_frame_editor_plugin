@@ -1,0 +1,22 @@
+string name
+string source_name
+
+int32 mode
+
+## modes ##
+##
+int32 MODE_NONE = 0
+int32 MODE_X = 1
+int32 MODE_Y = 2
+int32 MODE_Z = 4
+int32 MODE_A = 8
+int32 MODE_B = 16
+int32 MODE_C = 32
+
+## common binary combinations
+int32 MODE_POSITION = 7
+int32 MODE_ORIENTATION = 56
+int32 MODE_POSE = 63
+
+---
+int32 error_code

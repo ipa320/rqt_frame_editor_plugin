@@ -2,16 +2,17 @@
 
 import time
 
-import rospy
-import rosparam
+import rclpy
+from rclpy.node import Node
 
-import tf.transformations as tft
+
+import tf_transformations as tft
 import tf2_ros
 
-from frame_editor.constructors_geometry import *
-from frame_editor.constructors_std import *
+from frame_editor_py.constructors_geometry import *
+from frame_editor_py.constructors_std import *
 from frame_editor.srv import *
-from frame_editor import utils_tf
+from frame_editor_py import utils_tf
 
 from geometry_msgs.msg import Pose
 
@@ -24,6 +25,7 @@ class Frame(object):
     tf_broadcaster = None
     tf_buffer = None
     tf_listener = None
+    node = None
 
     __id_counter = -1
 
@@ -39,11 +41,12 @@ class Frame(object):
         self.marker = None
 
     @staticmethod
-    def init_tf():
+    def init_tf(node):
         if Frame.tf_buffer is None:
-            Frame.tf_broadcaster = tf2_ros.TransformBroadcaster()
+            Frame.node = node
+            Frame.tf_broadcaster = tf2_ros.TransformBroadcaster(node)
             Frame.tf_buffer = tf2_ros.Buffer()
-            Frame.tf_listener = tf2_ros.TransformListener(Frame.tf_buffer)
+            Frame.tf_listener = tf2_ros.TransformListener(Frame.tf_buffer, node, spin_thread=True)
 
     @classmethod
     def create_new_id(cls):
@@ -121,7 +124,8 @@ class Object_Geometry(Frame):
 
     def update_marker(self):
         self.marker.header.frame_id = self.name
-        self.marker.header.stamp = rospy.Time.now()
+        now = self.node.get_clock().now()
+        self.marker.header.stamp = now.to_msg()
 
     def set_color(self, color):
         self.color = color

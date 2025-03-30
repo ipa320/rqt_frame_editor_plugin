@@ -2,6 +2,11 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2025-03-30)
+------------------
+* First Port to ROS 2
+* Contributors: Daniel Bargmann
+
 1.1.1 (2022-05-19)
 ------------------
 * Bug fix: Empty frame list on noetic now gets displayed
