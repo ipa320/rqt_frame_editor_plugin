@@ -3,15 +3,16 @@
 import copy
 import time
 
-import rospy
+import rclpy
+from rclpy.node import Node
 import os
 
-from frame_editor.objects import *
-from frame_editor.commands import *
-from frame_editor.interface import Interface
+from frame_editor_py.objects import *
+from frame_editor_py.commands import *
+from frame_editor_py.interface import Interface
 
-from frame_editor.constructors_geometry import *
-from frame_editor.constructors_std import *
+from frame_editor_py.constructors_geometry import *
+from frame_editor_py.constructors_std import *
 
 from frame_editor.srv import *
 
@@ -21,24 +22,23 @@ class FrameEditor_Services(Interface):
     def __init__(self, frame_editor):
 
         self.editor = frame_editor
+        
 
-        rospy.Service("~align_frame", AlignFrame, self.callback_align_frame)
-        rospy.Service("~edit_frame", EditFrame, self.callback_edit_frame)
-        rospy.Service("~get_frame", GetFrame, self.callback_get_frame)
-        rospy.Service("~get_frame_names", GetFrameNames, self.callback_get_frame_names)
-        rospy.Service("~remove_frame", RemoveFrame, self.callback_remove_frame)
-        rospy.Service("~set_frame", SetFrame, self.callback_set_frame)
-        rospy.Service("~set_parent", SetParentFrame, self.callback_set_parent_frame)
-        rospy.Service("~copy_frame", CopyFrame, self.callback_copy_frame)
+        self.editor.node.create_service(AlignFrame, f'{self.editor.node.get_name()}/align_frame', self.callback_align_frame)
+        self.editor.node.create_service(EditFrame, f'{self.editor.node.get_name()}/edit_frame', self.callback_edit_frame)
+        self.editor.node.create_service(GetFrame, f'{self.editor.node.get_name()}/get_frame', self.callback_get_frame)
+        self.editor.node.create_service(GetFrameNames, f'{self.editor.node.get_name()}/get_frame_names', self.callback_get_frame_names)
+        self.editor.node.create_service(RemoveFrame, f'{self.editor.node.get_name()}/remove_frame', self.callback_remove_frame)
+        self.editor.node.create_service(SetFrame, f'{self.editor.node.get_name()}/set_frame', self.callback_set_frame)
+        self.editor.node.create_service(SetParentFrame, f'{self.editor.node.get_name()}/set_parent', self.callback_set_parent_frame)
+        self.editor.node.create_service(CopyFrame, f'{self.editor.node.get_name()}/copy_frame', self.callback_copy_frame)
 
-        rospy.Service("~load_yaml", LoadYaml, self.callback_load_yaml)
-        rospy.Service("~save_yaml", SaveYaml, self.callback_save_yaml)
+        self.editor.node.create_service(LoadYaml, f'{self.editor.node.get_name()}/load_yaml', self.callback_load_yaml)
+        self.editor.node.create_service(SaveYaml, f'{self.editor.node.get_name()}/save_yaml', self.callback_save_yaml)
 
+    def callback_align_frame(self, request, response):
+        print("> Request to align frame {} with frame {} mode {}".format(request.name, request.source_name, request.mode))
 
-    def callback_align_frame(self, request):
-        rospy.loginfo("> Request to align frame {} with frame {} mode {}".format(request.name, request.source_name, request.mode))
-
-        response = AlignFrameResponse()
         response.error_code = 0
 
         if request.name == "":
@@ -70,10 +70,9 @@ class FrameEditor_Services(Interface):
         return response
 
 
-    def callback_edit_frame(self, request):
-        rospy.loginfo("> Request to edit frame {}".format(request.name))
+    def callback_edit_frame(self, request, response):
+        print("> Request to edit frame {}".format(request.name))
 
-        response = EditFrameResponse()
         response.error_code = 0
 
         if request.name == "":
@@ -91,10 +90,9 @@ class FrameEditor_Services(Interface):
         return response
 
 
-    def callback_get_frame(self, request):
-        rospy.loginfo("> Request to get frame {}".format(request.name))
+    def callback_get_frame(self, request, response):
+        print("> Request to get frame {}".format(request.name))
 
-        response = GetFrameResponse()
         response.error_code = 0
 
         if request.name == "":
@@ -115,10 +113,9 @@ class FrameEditor_Services(Interface):
         return response
     
 
-    def callback_get_frame_names(self, request):
-        rospy.loginfo("> Request to get frame names")
+    def callback_get_frame_names(self, request, response):
+        print("> Request to get frame names")
 
-        response = GetFrameNamesResponse()
         response.error_code = 0
 
         for frame in self.editor.frames.values():
@@ -127,10 +124,9 @@ class FrameEditor_Services(Interface):
         return response
 
 
-    def callback_remove_frame(self, request):
-        rospy.loginfo("> Request to remove frame {}".format(request.name))
+    def callback_remove_frame(self, request, response):
+        print("> Request to remove frame {}".format(request.name))
 
-        response = RemoveFrameResponse()
         response.error_code = 0
 
         if request.name == "":
@@ -147,10 +143,8 @@ class FrameEditor_Services(Interface):
         return response
 
 
-    def callback_set_frame(self, request):
-        rospy.loginfo("> Request to set (or add) frame {} {}".format(request.name, request.parent))
-
-        response = SetFrameResponse()
+    def callback_set_frame(self, request, response):
+        print("> Request to set (or add) frame {} {}".format(request.name, request.parent))
 
         if request.name == "":
             rospy.logerr(" Error: No name given")
@@ -175,10 +169,9 @@ class FrameEditor_Services(Interface):
         return response
 
 
-    def callback_set_parent_frame(self, request):
-        rospy.loginfo("> Request to set parent_frame {} {}".format(request.name, request.parent))
+    def callback_set_parent_frame(self, request, response):
+        print("> Request to set parent_frame {} {}".format(request.name, request.parent))
 
-        response = SetParentFrameResponse()
         response.error_code = 0
 
         if request.name == "":
@@ -195,10 +188,9 @@ class FrameEditor_Services(Interface):
 
         return response
 
-    def callback_load_yaml(self, request):
-        rospy.loginfo("> Request to load yaml file:'{}'".format(request.filename))
+    def callback_load_yaml(self, request, response):
+        print("> Request to load yaml file:'{}'".format(request.filename))
 
-        response = LoadYamlResponse()
         try:
             self.editor.load_file(os.path.expanduser(request.filename))
             response.success = True
@@ -209,10 +201,9 @@ class FrameEditor_Services(Interface):
 
         return response
 
-    def callback_save_yaml(self, request):
-        rospy.loginfo("> Request to save yaml file to:'{}'".format(request.filename))
+    def callback_save_yaml(self, request, response):
+        print("> Request to save yaml file to:'{}'".format(request.filename))
 
-        response = SaveYamlResponse()
         try:
             self.editor.save_file(os.path.expanduser(request.filename))
             response.success = True
@@ -223,10 +214,9 @@ class FrameEditor_Services(Interface):
 
         return response
 
-    def callback_copy_frame(self, request):
-        rospy.loginfo("> Request to copy frame '{}' with new name '{}' and new parent name '{}'".format(request.source_name, request.name, request.parent))
+    def callback_copy_frame(self, request, response):
+        print("> Request to copy frame '{}' with new name '{}' and new parent name '{}'".format(request.source_name, request.name, request.parent))
 
-        response = CopyFrameResponse()
         response.error_code = 0
 
         if request.name == "":
@@ -254,22 +244,22 @@ class FrameEditor_Services(Interface):
                             response.error_code = 3
                             return response
 
-                    Frame.wait_for_transform(request.source_name, request.parent, rospy.Duration(1.0))
+                    Frame.wait_for_transform(request.source_name, request.parent, rclpy.Duration(1.0))
                     self.editor.command(Command_CopyElement(self.editor, request.name, request.source_name, request.parent))
-                    Frame.wait_for_transform(request.parent, request.name, rospy.Duration(1.0))
+                    Frame.wait_for_transform(request.parent, request.name, rclpy.Duration(1.0))
 
 
                 else:
                     frame = self.editor.frames[request.name]
 
-                    Frame.wait_for_transform(request.source_name, request.parent, rospy.Duration(1.0))
+                    Frame.wait_for_transform(request.source_name, request.parent, rclpy.Duration(1.0))
                     if (request.parent != "") and (frame.parent != request.parent):
                         rospy.loginfo(">> rebase")
                         self.editor.command(Command_RebaseElement(self.editor, frame, request.source_name, request.parent))
                     else:
                         rospy.loginfo(">> align")
                         self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
-                    Frame.wait_for_transform(frame.parent, frame.name, rospy.Duration(1.0))
+                    Frame.wait_for_transform(frame.parent, frame.name, rclpy.Duration(1.0))
 
             except Exception as e:
                 rospy.logerr("Error: unhandled exception {}".format(e))

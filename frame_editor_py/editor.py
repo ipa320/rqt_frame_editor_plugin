@@ -7,33 +7,37 @@ import time
 import threading
 import yaml
 
-import rospy
-import rosparam
-import rospkg
+import rclpy
+from rclpy.node import Node
+from rclpy.parameter import Parameter
+from ament_index_python import get_package_share_directory
 
-from frame_editor.objects import *
-from frame_editor.commands import *
+from frame_editor_py.objects import *
+from frame_editor_py.commands import *
 
-from frame_editor.constructors_geometry import *
-from frame_editor.constructors_std import *
+from frame_editor_py.constructors_geometry import *
+from frame_editor_py.constructors_std import *
 
 from python_qt_binding import QtCore
 from python_qt_binding.QtWidgets import QUndoStack
 
 ## Views
-from frame_editor.interface_interactive_marker import FrameEditor_InteractiveMarker
-from frame_editor.interface_services import FrameEditor_Services
-from frame_editor.interface_markers import FrameEditor_Markers
-from frame_editor.interface_tf import FrameEditor_TF
-
+from frame_editor_py.interface_interactive_marker import FrameEditor_InteractiveMarker
+from frame_editor_py.interface_services import FrameEditor_Services
+from frame_editor_py.interface_markers import FrameEditor_Markers
+from frame_editor_py.interface_tf import FrameEditor_TF
+import rclpy.logging as logging
+import random
 
 class FrameEditor(QtCore.QObject):
 
-    def __init__(self, context):
-        self.static = FrameEditor.parse_args_static(context.argv())
-        Frame.init_tf(self.static)
-        super(FrameEditor, self).__init__()
-
+    def __init__(self):
+        super(FrameEditor, self).__init__()  #
+        # super(FrameEditor, self).__init__('frame_editor')  # Initialize ROS 2 Node
+        random_suffix = str(random.random()).replace('.', '')  # Convert to string and remove the decimal point
+        self.node = Node(f"frame_editor_{random_suffix}")
+        Frame.init_tf(self.node)
+        
         self.frames = {}
         self.active_frame = None
 
@@ -97,10 +101,11 @@ class FrameEditor(QtCore.QObject):
     def tf_dict():
         y = Frame.tf_buffer.all_frames_as_yaml()
         d = yaml.safe_load(y)
+        # logging.get_logger("frame_editor").warn(f'{Frame.tf_buffer.frame_id}')
         if isinstance(d, dict):
             return d
         else:
-            rospy.logwarn('Got invalid yaml from tf2: {}'.format(y))
+            logging.get_logger("frame_editor").warn('Got invalid yaml from tf2: '+y)
             return {}
 
     @staticmethod
@@ -109,6 +114,7 @@ class FrameEditor(QtCore.QObject):
 
     @staticmethod
     def all_frame_ids(include_temp=True):
+        print(FrameEditor.tf_dict())
         return [f for f in FrameEditor.tf_dict() if
                 not FrameEditor.frame_is_temporary(f) or include_temp]
 
@@ -135,8 +141,9 @@ class FrameEditor(QtCore.QObject):
     ##
     def load_file(self, file_name):
         if file_name:
-            rospy.loginfo("> Loading file")
-            data = rosparam.load_file(file_name, self.namespace)[0][0]
+            print("> Loading file")
+            data = yaml.safe_load(open(file_name, 'r'))
+            # data = self.node.get_parameter([Parameter(self.namespace, value=data)])  # ROS 2 - To set parameter
             self.load_data(data)
         else:
             ## Clear everything
@@ -148,10 +155,11 @@ class FrameEditor(QtCore.QObject):
         return True
 
     def load_params(self, namespace):
-        if not rosparam.list_params(namespace):
-            rospy.logwarn("> No data to load")
+        params = self.node.get_parameters_by_prefix(self.namespace)
+        if not params:
+            print("> No data to load")
         else:
-            data = rosparam.get_param(namespace)
+            data = params[0].value
             self.load_data(data)
 
     def load_data(self, data):
@@ -256,15 +264,29 @@ class FrameEditor(QtCore.QObject):
         data["frames"] = frames
 
         ## To parameter server
-        rospy.set_param(self.namespace, data)
-        rospy.loginfo(rospy.get_param(self.namespace))
+        self.node.set_parameters([Parameter(self.namespace, value=data)])
 
+        # Getting the parameter and printing its value
+        param = self.get_parameter(self.namespace)
+        print(param.value)
+        
         ## Dump param to file
         if filename == '':
             filename = self.full_file_path
-        rospy.loginfo("Saving to file {}".format(filename))
-        rosparam.dump_params(filename, self.namespace)
-        rospy.loginfo("Saving done")
+        print("Saving to file {}".format(filename))
+        
+        parameters = self.node.get_parameters_by_prefix(self.namespace)
+        for param in parameters:
+            if isinstance(param, Parameter):
+                data[param.name] = param.value
+            else:
+                print(f"Unknown parameter type: {type(param)}")
+                
+        with open(filename, 'w') as file:
+            yaml.dump(data, file)
+            
+        
+        print("Saving done")
 
         self.full_file_path = filename
         return True
@@ -272,12 +294,13 @@ class FrameEditor(QtCore.QObject):
     def update_file_format(self, frame):
         if frame.package == "" and frame.path != "":
             try:
-                import rospkg
+                from ament_index_python import get_package_share_directory
                 import os
                 from python_qt_binding import QtWidgets
-                rospackage = rospkg.get_package_name(frame.path)
+                # Example use: get the path of the package
+                rospackage = get_package_share_directory(frame.package)  # Getting package share directory in ROS 2
                 if rospackage is not None:
-                    rel_path = os.path.relpath(frame.path , rospkg.RosPack().get_path(rospackage))
+                    rel_path = os.path.relpath(frame.path, rospackage)
                     reply = QtWidgets.QMessageBox.question(None, "Convert absolute path to rospack+relative path?",
                     "The absolute path to your selected mesh can be converted to rospack+relative path."+
                     "This gives you more reliabilaty to reuse your saved configuration"+
@@ -301,11 +324,15 @@ class FrameEditor(QtCore.QObject):
             pass
 
     def run(self):
-        rospy.loginfo("> Going for some spins")
-        rate = rospy.Rate(self.hz) # hz
-        while not rospy.is_shutdown():
+        print("> Going for some spins")
+        rate = self.node.create_rate(self.hz) # hz
+        while rclpy.ok():
             self.broadcast()
             rate.sleep()
+        
+        print("> Shutting down Frameeditor")
+        rclpy.shutdown()
+            
 
     @staticmethod
     def parse_args_static(argv):
@@ -366,9 +393,13 @@ class FrameEditor(QtCore.QObject):
                 success = self.load_file(str(filename))
             elif len(arg_path) == 2:
                 #load rospack
-                rospack = rospkg.RosPack()
-                filename = os.path.join(rospack.get_path(arg_path[0]), arg_path[1])
-                rospy.loginfo("Loading {}".format(filename))
+                
+                package_name = arg_path[0]
+                file_path_in_package = arg_path[1]
+                package_share_directory = get_package_share_directory(package_name)
+                filename = os.path.join(package_share_directory, file_path_in_package)
+
+                print("Loading {}".format(filename))
                 success = self.load_file(str(filename))
             else:
                 rospy.logwarn("Load argument not understood! --load {}".format(arg_path))
@@ -388,10 +419,16 @@ class FrameEditor(QtCore.QObject):
         self.interactive = FrameEditor_InteractiveMarker(self)
         self.services = FrameEditor_Services(self)
         self.interface_markers = FrameEditor_Markers(self)
+    
+    def shutdown(self):
+        """Clean up and shut down the ROS 2 system."""
+        print("Shutting down FrameNode node")
+        rclpy.shutdown()
+
 
 if __name__ == "__main__":
 
-    rospy.init_node('frame_editor')
+    rclpy.init()
     editor = FrameEditor(sys.argv[1:])
 
     editor.parse_args(sys.argv[1:])

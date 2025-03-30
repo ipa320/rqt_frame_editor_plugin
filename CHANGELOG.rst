@@ -2,6 +2,11 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2025-03-30)
+------------------
+* First Port to ROS 2
+* Contributors: Daniel Bargmann
+
 Forthcoming
 -----------
 * Feature: Grouping Option is now available from the GUI

@@ -5,11 +5,35 @@ from python_qt_binding.QtWidgets import QWidget, QPushButton, QColorDialog
 from python_qt_binding.QtCore import Slot
 from python_qt_binding.QtGui import QColor
 
-from frame_editor.commands import *
+from frame_editor_py.commands import *
 
-from frame_editor.interface import Interface
-import rospkg
+from frame_editor_py.interface import Interface
+from ament_index_python import get_package_share_directory
 import os
+
+
+
+def get_package_name_from_path(file_path):
+    # Walk upwards from the file path to find the package
+    current_dir = os.path.abspath(file_path)
+    
+    while current_dir != os.path.dirname(current_dir):  # Until reaching the root
+        package_xml = os.path.join(current_dir, 'package.xml')
+        if os.path.exists(package_xml):
+            # If package.xml exists, return the package directory
+            # The parent directory of package.xml is the package directory
+            return os.path.basename(current_dir)
+        current_dir = os.path.dirname(current_dir)
+    
+    return None  # No package found
+
+def get_rel_path_in_ros2(file_path, package_name):
+    # Get the package share directory path
+    rospackage_path = get_package_share_directory(package_name)
+    
+    # Calculate the relative path
+    rel_path = os.path.relpath(file_path, rospackage_path)
+    return rel_path
 
 class FrameEditor_StyleWidget(Interface):
 
@@ -186,15 +210,15 @@ class FrameEditor_StyleWidget(Interface):
     def btn_open_mesh_clicked(self):
         path = QtWidgets.QFileDialog.getOpenFileName(None, 'Open Mesh', '/home', 'Mesh Files (*.stl)')[0]
         try:
-            rospackage = rospkg.get_package_name(path)
+            rospackage = get_package_name_from_path(path)
             if rospackage is None:
                 QtWidgets.QMessageBox.warning(self.widget, "Saving absolute path to mesh",
                 "Cannot find rospackage with selected mesh in it!\nSaving absolute path to mesh instead!")
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", ""))
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", path))
             else:
-                rel_path = os.path.relpath(path , rospkg.RosPack().get_path(rospackage))
-                rospy.loginfo("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
+                rel_path = get_rel_path_in_ros2(path, rospackage)
+                print("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "package", rospackage))
                 self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "path", rel_path))
         except:
