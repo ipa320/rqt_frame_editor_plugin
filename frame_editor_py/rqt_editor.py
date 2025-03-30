@@ -3,10 +3,8 @@
 import os
 import math
 
-import rospy
-import rospkg
-import tf
-import actionlib
+import rclpy
+import tf_transformations
 
 from qt_gui_py_common.worker_thread import WorkerThread
 
@@ -14,16 +12,17 @@ from python_qt_binding import loadUi, QtCore, QtWidgets
 from python_qt_binding.QtWidgets import QWidget
 from python_qt_binding.QtCore import Slot
 
-from frame_editor.editor import Frame, FrameEditor
-from frame_editor.commands import *
-from frame_editor.constructors_geometry import *
+from frame_editor_py.editor import Frame, FrameEditor
+from frame_editor_py.commands import *
+from frame_editor_py.constructors_geometry import *
 
-from frame_editor.project_plugin import ProjectPlugin
+from frame_editor_py.project_plugin import ProjectPlugin
 
-from frame_editor.interface import Interface
+from frame_editor_py.interface import Interface
 
 ## Views
-from frame_editor.interface_gui import FrameEditor_StyleWidget
+from frame_editor_py.interface_gui import FrameEditor_StyleWidget, get_package_name_from_path, get_rel_path_in_ros2
+from ament_index_python.packages import get_package_share_directory
 
 
 class FrameEditorGUI(ProjectPlugin, Interface):
@@ -67,7 +66,11 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         ## Main widget
         widget = QWidget()
-        ui_file = os.path.join(rospkg.RosPack().get_path('frame_editor'), 'src/frame_editor', 'FrameEditorGUI.ui')
+        package_name = "frame_editor"
+        file_path_in_package = "ui/FrameEditorGUI.ui"
+        package_path = get_package_share_directory(package_name)
+        ui_file = os.path.join(package_path, file_path_in_package)
+        # ui_file = os.path.join(rospkg.RosPack().get_path('frame_editor'), 'src/frame_editor', 'FrameEditorGUI.ui')
         loadUi(ui_file, widget)
         widget.setObjectName('FrameEditorGUIUi')
 
@@ -206,7 +209,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         w.txt_y.setValue(f.position[1])
         w.txt_z.setValue(f.position[2])
 
-        rot = tf.transformations.euler_from_quaternion(f.orientation)
+        rot = tf_transformations.euler_from_quaternion(f.orientation)
         if self.widget.btn_deg.isChecked():
             rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
 
@@ -220,11 +223,11 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         ## Absolute
         try:
             position, orientation = FromTransformStamped(
-                f.tf_buffer.lookup_transform('world', f.name, rospy.Time(0)))
+                f.tf_buffer.lookup_transform('world', f.name, rclpy.Time(0)))
             for txt, p in zip(txt_abs_pos, position):
                 txt.setEnabled(True)
                 txt.setValue(p)
-            rot = tf.transformations.euler_from_quaternion(orientation)
+            rot = tf_transformations.euler_from_quaternion(orientation)
             if self.widget.btn_deg.isChecked():
                 rot = map(math.degrees, rot)
             for txt, r in zip(txt_abs_rot, rot):
@@ -386,7 +389,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
     def btn_reset_position_abs_clicked(self, checked):
         position, orientation = FromTransformStamped(
             self.editor.active_frame.tf_buffer.lookup_transform(
-                self.editor.active_frame.parent, "world", rospy.Time(0)))
+                self.editor.active_frame.parent, "world", rclpy.Time(0)))
         self.editor.command(Command_SetPosition(self.editor, self.editor.active_frame, position))
 
     @Slot(bool)
@@ -397,7 +400,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
     def btn_reset_orientation_abs_clicked(self, checked):
         position, orientation = FromTransformStamped(
             self.editor.active_frame.listener.lookupTransform(
-                self.editor.active_frame.parent, "world", rospy.Time(0)))
+                self.editor.active_frame.parent, "world", rclpy.Time(0)))
         self.editor.command(Command_SetOrientation(self.editor, self.editor.active_frame, orientation))
 
 

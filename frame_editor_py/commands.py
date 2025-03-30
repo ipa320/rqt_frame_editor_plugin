@@ -3,13 +3,13 @@
 import copy
 import time
 
-import rospy
-import tf
+from rclpy.time import Time
+import tf_transformations
 
 from python_qt_binding.QtWidgets import QUndoCommand
 
-from frame_editor.constructors_geometry import FromTransformStamped
-from frame_editor.objects import *
+from frame_editor_py.constructors_geometry import FromTransformStamped
+from frame_editor_py.objects import *
 
 
 class Command_SelectElement(QUndoCommand):
@@ -116,7 +116,7 @@ class Command_AlignElement(QUndoCommand):
         ##
         position, orientation = FromTransformStamped(
             element.tf_buffer.lookup_transform(
-                element.parent, source_name, rospy.Time(0)))
+                element.parent, source_name, Time()))
 
         ## Position
         pos = list(element.position)
@@ -129,8 +129,8 @@ class Command_AlignElement(QUndoCommand):
         self.new_position = tuple(pos)
 
         ## Orientation
-        rpy = list(tf.transformations.euler_from_quaternion(element.orientation))
-        rpy_new = tf.transformations.euler_from_quaternion(orientation)
+        rpy = list(tf_transformations.euler_from_quaternion(element.orientation))
+        rpy_new = tf_transformations.euler_from_quaternion(orientation)
         if "a" in mode:
             rpy[0] = rpy_new[0]
         if "b" in mode:
@@ -139,7 +139,7 @@ class Command_AlignElement(QUndoCommand):
             rpy[2] = rpy_new[2]
 
         if "a" in mode or "b" in mode or "c" in mode:
-            self.new_orientation = tf.transformations.quaternion_from_euler(*rpy)
+            self.new_orientation = tf_transformations.quaternion_from_euler(*rpy)
         else:
             self.new_orientation = self.old_orientation
 
@@ -172,7 +172,7 @@ class Command_CopyElement(QUndoCommand):
         # Pose
         position, orientation = FromTransformStamped(
             element.tf_buffer.lookup_transform(
-                parent_name, source_name, rospy.Time(0)))
+                parent_name, source_name, Time()))
         element.position = position
         element.orientation = orientation
 
@@ -209,7 +209,7 @@ class Command_RebaseElement(QUndoCommand):
         # New Pose
         self.new_position, self.new_orientation = FromTransformStamped(
             element.tf_buffer.lookup_transform(
-                new_parent, source_name, rospy.Time(0)))
+                new_parent, source_name, Time()))
 
 
     def redo(self):
@@ -344,7 +344,7 @@ class Command_SetParent(QUndoCommand):
         if self.keep_absolute:
             position, orientation = FromTransformStamped(
                 element.tf_buffer.lookup_transform(
-                    parent_name, element.name, rospy.Time(0)))
+                    parent_name, element.name, Time()))
             self.new_position = position
             self.new_orientation = orientation
 

@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>frame_editor</name>
+  <version>2.1.1</version>
+  <description>The frame_editor package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <maintainer email="daniel.bargmann@ipa.fraunhofer.de">ipa-danb</maintainer>
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <license>MIT</license>
+
+  <!-- Url tags are optional, but multiple are allowed, one per tag -->
+  <url type="website">http://www.ipa.fraunhofer.de/</url>
+
+  <!-- Author tags are optional, multiple are allowed, one per tag -->
+  <author email="lorenz.halt@ipa.fraunhofer.de">ipa-lth</author>
+  <author email="frank.naegele@ipa.fraunhofer.de">ipa-frn</author>
+
+  <!-- The *_depend tags are used to specify dependencies -->
+  <!-- Dependencies can be ROS2 packages or system dependencies -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  <depend>interactive_markers</depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>python3-transforms3d</depend>
+  <depend>tf_transformations</depend>
+  <depend>visualization_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rqt_gui</depend>
+  <depend>rqt_gui_py</depend>
+
+
+  <build_depend>builtin_interfaces</build_depend>
+  <build_depend>rosidl_default_generators</build_depend>
+
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>qt_gui_py_common</exec_depend>
+  
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <build_type>ament_cmake</build_type>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

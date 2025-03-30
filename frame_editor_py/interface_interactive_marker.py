@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-import rospy
+import rclpy
 
-from frame_editor.objects import *
-from frame_editor.commands import *
-from frame_editor.interface import Interface
+from frame_editor_py.objects import *
+from frame_editor_py.commands import *
+from frame_editor_py.interface import Interface
 
-from frame_editor.constructors_geometry import *
-from frame_editor.constructors_std import *
+from frame_editor_py.constructors_geometry import *
+from frame_editor_py.constructors_std import *
 
 from geometry_msgs.msg import Pose
 
@@ -21,7 +21,7 @@ class FrameEditor_InteractiveMarker(Interface):
         self.editor = frame_editor
         self.editor.observers.append(self)
 
-        self.server = InteractiveMarkerServer("frame_editor_interactive")
+        self.server = InteractiveMarkerServer(frame_editor.node,"frame_editor_interactive")
 
         self.set_marker_settings(["x", "y", "z", "a", "b", "c"])
 
@@ -40,7 +40,7 @@ class FrameEditor_InteractiveMarker(Interface):
                 self.int_marker.name = self.editor.active_frame.name
                 self.int_marker.header.frame_id = self.editor.active_frame.parent
                 self.int_marker.pose = self.editor.active_frame.pose
-                self.server.insert(self.int_marker, self.callback_marker)
+                self.server.insert(self.int_marker, feedback_callback=self.callback_marker)
                 self.server.applyChanges()
 
 
@@ -59,12 +59,12 @@ class FrameEditor_InteractiveMarker(Interface):
             self.int_marker.name = frame.name
             self.int_marker.header.frame_id = frame.parent
             self.int_marker.pose = frame.pose
-
-            self.server.insert(self.int_marker, self.callback_marker)
+            self.server.insert(self.int_marker, feedback_callback=self.callback_marker)
             self.server.applyChanges()
 
 
     def callback_marker(self, feedback):
+        print(feedback)
         self.editor.command(Command_SetPose(self.editor, self.editor.active_frame, FromPoint(feedback.pose.position), FromQuaternion(feedback.pose.orientation)))
 
 
@@ -87,14 +87,14 @@ class FrameEditor_InteractiveMarker(Interface):
         if "x" in arrows:
             control = InteractiveMarkerControl()
             control.name = "move_x"
-            control.orientation = NewQuaternion(1, 0, 0, 1)
+            control.orientation = NewQuaternion(1.0, 0.0, 0.0, 1.0)
             control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
             int_marker.controls.append(control);
 
         if "y" in arrows:
             control = InteractiveMarkerControl()
             control.name = "move_y"
-            control.orientation = NewQuaternion(0, 1, 0, 1)
+            control.orientation = NewQuaternion(0.0, 1, 0, 1)
             control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
             int_marker.controls.append(control);
 
