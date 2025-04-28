@@ -31,6 +31,8 @@ class FrameEditor_TF(Interface):
             Frame.tf_broadcaster.sendTransform(transforms)
 
     def broadcast(self, editor):
+        if editor.static:
+            return
         now = rospy.Time.now()
         transforms = [
             ToTransformStamped(

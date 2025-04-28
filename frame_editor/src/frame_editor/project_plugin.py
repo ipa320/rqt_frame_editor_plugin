@@ -12,7 +12,7 @@ class ProjectPlugin(Plugin):
         super(ProjectPlugin, self).__init__(context)
 
         ## Editor
-        self.editor = self.create_editor()
+        self.editor = self.create_editor(context)
         self.editor.undo_stack.cleanChanged.connect(self.clean_changed)
 
         ## Main widget
@@ -29,7 +29,7 @@ class ProjectPlugin(Plugin):
         self.load_file("") # loads empty.xml
         self.update_current_filename()
 
-    def create_editor(self):
+    def create_editor(self, context):
         raise NotImplementedError
 
     def create_main_widget(self):

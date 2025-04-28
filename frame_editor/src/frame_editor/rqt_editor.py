@@ -80,8 +80,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         self.update_all(3)
 
 
-    def create_editor(self):
-        editor = FrameEditor()
+    def create_editor(self, context):
+        editor = FrameEditor(context)
 
         editor.observers.append(self)
 

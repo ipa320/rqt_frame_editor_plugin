@@ -2,7 +2,7 @@
 
 <launch>
     <node pkg="rqt_gui" type="rqt_gui" name="frame_editor"
-        args="--standalone frame_editor --args --load '$(find frame_editor)/etc/frames.yaml' --rate 200 --filter_style grey -s"
+        args="--standalone frame_editor --args -s --load '$(find frame_editor)/etc/frames.yaml' --rate 200 --filter_style grey"
         output="screen"/>
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find frame_editor)/etc/frame_editor.rviz"/>
