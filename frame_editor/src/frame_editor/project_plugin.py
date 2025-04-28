@@ -128,6 +128,8 @@ class ProjectPlugin(Plugin):
                                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.Yes)
                     if choice == QtWidgets.QMessageBox.Yes:
                         self.load_file(file_name)
+                        # trigger asterisk (content actually changed)
+                        self.clean_changed(False)
                     else:
                         self.load_file("")
                         self.load_file(file_name)
@@ -197,26 +199,36 @@ class ProjectPlugin(Plugin):
     def write_file(self, file_name):
         raise NotImplementedError
 
-    def update_current_filename(self):
-        ## Set clean
-        self.editor.undo_stack.setClean()
-        self.widget.setWindowModified(False)
-
+    def get_shown_name(self):
         file_name = self.editor.get_file_name()
 
         ## Window title
         shown_name = "Untitled"
         if not file_name == "":
             shown_name = file_name
-            # recent files...
+        
+        return shown_name
 
-        self.widget.lab_file_name.setText(self.tr('{} [*] - {}'.format(shown_name, "frame editor")))
+    def update_current_filename(self):
+        ## Set clean
+        self.editor.undo_stack.setClean()
+        self.widget.setWindowModified(False)
+
+        ## Window title
+        shown_name = self.get_shown_name()
+
+        self.widget.lab_file_name.setText(self.tr('{} - {}'.format(shown_name, "frame editor")))
 
     def stripped_name(self, full_name):
         return QtCore.QFileInfo(full_name).fileName()
 
     def clean_changed(self, is_clean):
         self.widget.setWindowModified(not is_clean)
+
+        # set file name label
+        modified_identifier = "*" if self.widget.isWindowModified else ""
+        shown_name = self.get_shown_name()
+        self.widget.lab_file_name.setText(self.tr('{}{} - {}'.format(shown_name, modified_identifier, "frame editor")))
 
 
 

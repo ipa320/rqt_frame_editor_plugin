@@ -139,11 +139,13 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
     @Slot(int)
     def update_all(self, level):
+        if level & 0:
+            self.update_current_filename()
+
         ## Update list widgets
         if level & 1:
             self.update_frame_list()
             self.update_tf_list()
-            self.update_current_filename()
 
         ## Update the currently selected frame
         if level & 2:
