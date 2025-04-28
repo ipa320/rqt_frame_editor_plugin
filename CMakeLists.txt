@@ -47,9 +47,12 @@ install(DIRECTORY etc
   DESTINATION share/${PROJECT_NAME}
 )
 
-
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
+)
+
+install(PROGRAMS frame_editor_py/editor.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(FILES

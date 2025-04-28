@@ -1,11 +1,6 @@
 frame editor rqt-plugin
 =========================================
 
-TODOS:
-* Update Readme for ROS 2
-
-
-
 * This repository contains the **frame editor rqt-plugin.**
 
 * Frame-editor helps you **creating and arranging tf-frames.** 
@@ -50,7 +45,7 @@ git clone https://github.com/ipa320/rqt_frame_editor_plugin.git
 #### Update your catkin workspace, e.g.
 
 ``` 
-catkin_make
+colcon build --symlink-install
 ```
 
 #### Refresh rqt
@@ -78,13 +73,7 @@ rqt
 #### You can also run it standalone, look into the given launch file. 
 
 ``` 
-roslaunch frame_editor frame_editor.launch
-```
-
-#### A headless version is available through this launch file:
-
-```
-roslaunch frame_editor frame_editor_headless.launch
+ros2 launch frame_editor frame_editor_launch.py
 ```
 
 ### Known issues: 
@@ -119,6 +108,9 @@ Updates from 2024 on (including ROS2 port) are part of RIG (Robotics Institute G
 ![LIAA](http://www.project-leanautomation.eu/fileadmin/img/LIAALogo/Logo_LIAA.png "LIAA")
 
 ![EC](http://www.project-leanautomation.eu/typo3temp/pics/b3ba71db31.jpg "EC")
+
+
+RIG received funding from the Federal Ministry of Education and Research (BMBF)
 
 LIAA received funding from the European Union’s Seventh Framework Programme for research, technological development and demonstration under grant agreement no. 608604.
 

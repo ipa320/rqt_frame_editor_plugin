@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
 from python_qt_binding import QtWidgets, QtCore
 from python_qt_binding.QtWidgets import QWidget, QPushButton, QColorDialog
 from python_qt_binding.QtCore import Slot

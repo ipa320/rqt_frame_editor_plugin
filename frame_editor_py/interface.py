@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
 from python_qt_binding.QtCore import QObject
 
 class Interface(QObject):

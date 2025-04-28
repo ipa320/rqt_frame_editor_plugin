@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
 from qt_gui.plugin import Plugin
 
 from python_qt_binding import QtWidgets, QtCore, QtGui

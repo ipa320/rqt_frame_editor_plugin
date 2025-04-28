@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
 from std_msgs.msg import ColorRGBA, Header
 
 

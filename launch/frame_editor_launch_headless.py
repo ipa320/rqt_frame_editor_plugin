@@ -19,19 +19,17 @@ def generate_launch_description():
         'etc',
         'frame_editor.rviz'
     ])
-
+        
     return LaunchDescription([
         DeclareLaunchArgument('frame_editor_config', default_value=frame_editor_config, description='Path to frames.yaml'),
-
+        DeclareLaunchArgument('rate', default_value='200', description='Rate of processing'),
         Node(
-            package='rqt_gui',
-            executable='rqt_gui',
+            package='frame_editor',
+            executable='editor.py',
             name='frame_editor_py',
             output='screen',
             arguments=[
-                '--standalone', 'frame_editor',  
-                '--args', '--load', frame_editor_config,  
-                '--rate', '200'
+                '--load', frame_editor_config,
             ]
         ),
 

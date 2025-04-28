@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -101,9 +101,10 @@ class FrameEditor(QtCore.QObject):
     def tf_dict():
         y = Frame.tf_buffer.all_frames_as_yaml()
         d = yaml.safe_load(y)
-        # logging.get_logger("frame_editor").warn(f'{Frame.tf_buffer.frame_id}')
         if isinstance(d, dict):
             return d
+        if isinstance(d, list) and len(d) == 0:
+            return {}
         else:
             logging.get_logger("frame_editor").warn('Got invalid yaml from tf2: '+y)
             return {}
@@ -141,7 +142,7 @@ class FrameEditor(QtCore.QObject):
     ##
     def load_file(self, file_name):
         if file_name:
-            print("> Loading file")
+            print(f"> Loading file {file_name}")
             data = yaml.safe_load(open(file_name, 'r'))
             # data = self.node.get_parameter([Parameter(self.namespace, value=data)])  # ROS 2 - To set parameter
             self.load_data(data)
@@ -324,7 +325,7 @@ class FrameEditor(QtCore.QObject):
             pass
 
     def run(self):
-        print("> Going for some spins")
+        print("> Going for some spins with rate {}".format(self.hz))
         rate = self.node.create_rate(self.hz) # hz
         while rclpy.ok():
             self.broadcast()
@@ -368,6 +369,9 @@ class FrameEditor(QtCore.QObject):
         parser.add_argument("-r", "--rate", type=int, help="Rate for broadcasting. Does not involve tf frames. Only effective for non-static broadcaster.")
         parser.add_argument("-s", "--static", action="store_true", help="Use static tf broadcaster") 
 
+        
+        if '--ros-args' in argv:
+            argv = argv[:argv.index('--ros-args')]
         args, unknowns = parser.parse_known_args(argv)
         rospy.loginfo('arguments: {}'.format(args))
         if unknowns:
