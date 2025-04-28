@@ -30,7 +30,6 @@ from frame_editor.interface_tf import FrameEditor_TF
 class FrameEditor(QtCore.QObject):
 
     def __init__(self):
-        Frame.init_tf()
         super(FrameEditor, self).__init__()
 
         self.frames = {}
@@ -312,12 +311,16 @@ class FrameEditor(QtCore.QObject):
         parser.add_argument("-l", "--load", action="append",
                       dest="file",
                       help="Load a file at startup. [rospack filepath/file]")
-        parser.add_argument("-r", "--rate", type=int, help="Rate for broadcasting. Does not involve tf frames.")
+        parser.add_argument("-r", "--rate", type=int, help="Rate for broadcasting. Does not involve tf frames. Only effective for non-static broadcaster.")
+        parser.add_argument("-s", "--static", action="store_false", help="Use static tf broadcaster") 
 
         args, unknowns = parser.parse_known_args(argv)
         print('arguments: {}'.format(args))
         if unknowns:
             print('unknown parameters found: {}'.format(unknowns))
+
+        self.static = args.static
+        Frame.init_tf(self.static)
 
         if args.rate:
             self.hz = args.rate
