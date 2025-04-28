@@ -29,7 +29,9 @@ from frame_editor.interface_tf import FrameEditor_TF
 
 class FrameEditor(QtCore.QObject):
 
-    def __init__(self):
+    def __init__(self, context):
+        self.static = FrameEditor.parse_args_static(context.argv())
+        Frame.init_tf(self.static)
         super(FrameEditor, self).__init__()
 
         self.frames = {}
@@ -305,6 +307,16 @@ class FrameEditor(QtCore.QObject):
             self.broadcast()
             rate.sleep()
 
+    @staticmethod
+    def parse_args_static(argv):
+        from argparse import ArgumentParser
+        parser = ArgumentParser()
+        static = False
+        parser.add_argument("-s", "--static", action="store_true", help="Use static tf broadcaster") 
+        args, unknowns = parser.parse_known_args(argv)
+        static = args.static
+        return static
+
     def parse_args(self, argv):
         ## Args ##
         ##
@@ -327,7 +339,7 @@ class FrameEditor(QtCore.QObject):
         )        
         
         parser.add_argument("-r", "--rate", type=int, help="Rate for broadcasting. Does not involve tf frames. Only effective for non-static broadcaster.")
-        parser.add_argument("-s", "--static", action="store_false", help="Use static tf broadcaster") 
+        parser.add_argument("-s", "--static", action="store_true", help="Use static tf broadcaster") 
 
         args, unknowns = parser.parse_known_args(argv)
         rospy.loginfo('arguments: {}'.format(args))
@@ -335,7 +347,6 @@ class FrameEditor(QtCore.QObject):
             rospy.logwarn('unknown parameters found: {}'.format(unknowns))
 
         self.static = args.static
-        Frame.init_tf(self.static)
 
         if args.rate:
             self.hz = args.rate
@@ -381,9 +392,7 @@ class FrameEditor(QtCore.QObject):
 if __name__ == "__main__":
 
     rospy.init_node('frame_editor')
-
-    editor = FrameEditor()
-    # editor.load_params(rospy.get_name())
+    editor = FrameEditor(sys.argv[1:])
 
     editor.parse_args(sys.argv[1:])
     editor.init_views()
