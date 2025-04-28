@@ -30,4 +30,12 @@ class FrameEditor_TF(Interface):
                 for f in editor.frames.values()]
             Frame.tf_broadcaster.sendTransform(transforms)
 
+    def broadcast(self, editor):
+        now = rospy.Time.now()
+        transforms = [
+            ToTransformStamped(
+                f.position, f.orientation, now, f.name, f.parent)
+            for f in editor.frames.values()]
+        Frame.tf_broadcaster.sendTransform(transforms)
+
 # eof
