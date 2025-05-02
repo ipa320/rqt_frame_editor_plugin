@@ -2,6 +2,10 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Feature: Grouping Option is now available from the GUI
+
 1.2.0 (2025-05-02)
 ------------------
 * Bug fix: Deleted Frames not beeing able to be reused

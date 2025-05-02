@@ -149,6 +149,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.txt_b.editingFinished.connect(self.b_valueChanged)
         widget.txt_c.editingFinished.connect(self.c_valueChanged)
 
+        widget.txt_group.editingFinished.connect(self.group_valueChanged)
+
         widget.btn_rad.toggled.connect(self.update_fields)
 
         widget.combo_style.currentIndexChanged.connect(self.frame_style_changed)
@@ -413,6 +415,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         w.txt_name.setText(f.name)
         w.txt_parent.setText(f.parent)
+        w.txt_group.setText(f.group)
         self.update_measurement()
 
         ## Relative
@@ -677,6 +680,13 @@ class FrameEditorGUI(ProjectPlugin, Interface):
     @Slot()
     def c_valueChanged(self):
         self.set_value(self.widget.txt_c, 'c')
+
+    @Slot()
+    def group_valueChanged(self):
+        value = self.widget.txt_group.text()
+        if self.editor.active_frame.group != value:
+            self.editor.command(Command_SetGroup(self.editor, self.editor.active_frame, value))
+
 
 
     ## FRAME STYLE ##

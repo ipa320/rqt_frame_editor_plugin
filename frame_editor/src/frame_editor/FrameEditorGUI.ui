@@ -65,8 +65,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>312</width>
-              <height>562</height>
+              <width>309</width>
+              <height>524</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -629,6 +629,20 @@
             </widget>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="label_19">
+               <property name="text">
+                <string>Group</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="txt_group"/>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
               <widget class="QLabel" name="label_18">
@@ -1090,8 +1104,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>159</width>
-             <height>586</height>
+             <width>134</width>
+             <height>581</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">
