@@ -2,7 +2,7 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
+1.2.0 (2025-05-02)
 ------------------
 * Bug fix: Deleted Frames not beeing able to be reused
 * Feature: Clear Frame Buffer and Added loading animation for tf frame list when pressing either refresh button or deleting frames
