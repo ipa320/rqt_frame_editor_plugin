@@ -484,4 +484,23 @@ class Command_SetGeometry(QUndoCommand):
         self.element.update_marker()
         self.editor.add_undo_level(4, [self.element])
 
+class Command_SetGroup(QUndoCommand):
+
+    def __init__(self, editor, element, group_name:str):
+        QUndoCommand.__init__(self, "Group")
+        self.editor = editor
+
+        self.element = element
+        self.old_group = element.group
+        self.new_group = group_name
+
+    def redo(self):
+        self.element.set_group(self.new_group)
+        self.editor.add_undo_level(1+4, [self.element])
+
+    def undo(self):
+        self.element.set_color(self.old_group)
+        self.editor.add_undo_level(1+4, [self.element])
+
+
 # eof

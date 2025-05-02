@@ -109,6 +109,9 @@ class Frame(object):
                 rpy[2] = value
             self.orientation = tuple(tft.quaternion_from_euler(*rpy))
 
+    def set_group(self, group):
+        self.group = group  
+        
     @staticmethod
     def can_transform(target_frame, source_frame, time_):
         return utils_tf.can_transform(
