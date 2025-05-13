@@ -118,6 +118,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_delete.clicked.connect(self.btn_delete_clicked)
         widget.btn_duplicate.clicked.connect(self.btn_duplicate_clicked)
         widget.list_frames.currentItemChanged.connect(self.selected_frame_changed)
+        widget.list_tf.currentItemChanged.connect(self.update_measurement)
 
         widget.btn_refresh.clicked.connect(lambda: self.signal_update_tf.emit(True, True))
         
@@ -360,6 +361,34 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         self.old_selected = name
 
+    def update_measurement(self):
+        source = self.widget.list_tf.currentItem()
+        if not source:
+            return # none selected
+        source_name = source.text(0)
+        frame = self.editor.active_frame
+        try:
+            position, orientation = FromTransformStamped(
+                    frame.tf_buffer.lookup_transform(source_name, frame.name, rospy.Time(0)))
+            
+            rot = tf.transformations.euler_from_quaternion(orientation)
+            if self.widget.btn_deg.isChecked():
+                rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
+
+            pos_str = [f"{p:.4f}" for p in position]
+            rot_str = [f"{r:.4f}" for r in rot]
+        except (tf2_ros.ConnectivityException, tf2_ros.LookupException):
+            pos_str  = ['N/A', 'N/A', 'N/A']
+            rot_str = pos_str
+
+        self.widget.valx.setText(pos_str[0])
+        self.widget.valy.setText(pos_str[1])
+        self.widget.valz.setText(pos_str[2])
+        
+        self.widget.vala.setText(rot_str[0])
+        self.widget.valb.setText(rot_str[1])
+        self.widget.valc.setText(rot_str[2])
+
 
     def find_item_in_children(self, parent_item, name):
         """
@@ -384,6 +413,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         w.txt_name.setText(f.name)
         w.txt_parent.setText(f.parent)
+        self.update_measurement()
 
         ## Relative
         w.txt_x.setValue(f.position[0])
@@ -439,6 +469,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         # Perform the selection logic as before
         if not self.editor.active_frame or (self.editor.active_frame.name != name):
             self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
+        self.update_measurement()
 
     ## BUTTONS ##
     ##
