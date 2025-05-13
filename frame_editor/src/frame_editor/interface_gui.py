@@ -28,6 +28,12 @@ class FrameEditor_StyleWidget(Interface):
         self.mesh_button = QtWidgets.QPushButton("Open")
         self.mesh_button.clicked.connect(lambda: self.btn_open_mesh_clicked())
 
+        self.size_label = QtWidgets.QLabel("Size:")
+        self.size_spinbox = QtWidgets.QDoubleSpinBox()
+        self.size_spinbox.editingFinished.connect(lambda: self.size_changed())
+        self.size_spinbox.setDecimals(4) 
+        self.size_spinbox.setMinimum(0.0)
+
         self.diameter_label = QtWidgets.QLabel("Diameter:")
         self.diameter_spinbox = QtWidgets.QDoubleSpinBox()
         self.diameter_spinbox.editingFinished.connect(lambda: self.diameter_changed())
@@ -62,6 +68,9 @@ class FrameEditor_StyleWidget(Interface):
         self.layout.addWidget(self.height_spinbox, 4, 1)
         self.layout.addWidget(self.color_label, 5, 0)
         self.layout.addWidget(self.color_button, 5, 1)
+        self.layout.addWidget(self.size_label, 6, 0)
+        self.layout.addWidget(self.size_spinbox, 6, 1)
+
 
         self.update_widget(None)
 
@@ -98,6 +107,8 @@ class FrameEditor_StyleWidget(Interface):
         self.width_spinbox.hide()
         self.height_label.hide()
         self.height_spinbox.hide()
+        self.size_label.hide()
+        self.size_spinbox.hide()
 
         if frame is None or frame.style == "none":
             self.widget.setEnabled(False)
@@ -106,6 +117,9 @@ class FrameEditor_StyleWidget(Interface):
         if frame.style == "mesh":
             self.mesh_label.show()
             self.mesh_button.show()
+            self.size_label.show()
+            self.size_spinbox.show()
+
         elif frame.style == "sphere":
             self.diameter_label.show()
             self.diameter_spinbox.show()
@@ -126,6 +140,7 @@ class FrameEditor_StyleWidget(Interface):
 
         if frame.style == "mesh":
             self.mesh_label.setText(frame.path)
+            self.size_spinbox.setValue(frame.scale)
         elif frame.style == "sphere":
             self.diameter_spinbox.setValue(frame.diameter)
         else:
@@ -145,6 +160,12 @@ class FrameEditor_StyleWidget(Interface):
     def diameter_changed(self):
         if self.editor.active_frame.diameter != self.diameter_spinbox.value():
             self.editor.command(Command_SetGeometry(self.editor, self.editor.active_frame, "diameter", self.diameter_spinbox.value()))
+
+    @Slot(float)
+    def size_changed(self):
+        if self.editor.active_frame.scale != self.diameter_spinbox.value():
+            self.editor.command(Command_SetSize(self.editor, self.editor.active_frame, self.size_spinbox.value()))
+
 
     @Slot(float)
     def length_changed(self):
