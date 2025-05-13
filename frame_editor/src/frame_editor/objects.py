@@ -226,6 +226,12 @@ class Object_Mesh(Object_Geometry):
 
         super(Object_Mesh, self).__init__(name, position, orientation, parent, "mesh", group)
 
+    def set_size(self, size):
+        self.scale = size
+        self.update_marker()
+        #self.marker.update()
+
+
     def update_marker(self):
         super(Object_Mesh, self).update_marker()
 

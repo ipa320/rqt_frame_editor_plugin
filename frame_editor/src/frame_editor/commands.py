@@ -442,6 +442,26 @@ class Command_SetStyleColor(QUndoCommand):
         self.editor.add_undo_level(4, [self.element])
 
 
+class Command_SetSize(QUndoCommand):
+
+    def __init__(self, editor, element, size):
+        QUndoCommand.__init__(self, "size")
+        self.editor = editor
+
+        self.element = element
+        self.old_size = element.scale
+        self.new_size = size
+
+    def redo(self):
+        self.element.set_size(self.new_size)
+        self.editor.add_undo_level(4, [self.element])
+
+    def undo(self):
+        self.element.set_size(self.old_size)
+        self.editor.add_undo_level(4, [self.element])
+
+
+
 class Command_SetGeometry(QUndoCommand):
 
     def __init__(self, editor, element, parameter, value):
