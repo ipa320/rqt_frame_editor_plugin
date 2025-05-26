@@ -37,6 +37,7 @@ class Frame(object):
         self.style = style
         self.color = (0.0, 0.5, 0.5, 0.75)
         self.group = group
+        self.pinned_frame = None
 
         self.hidden = False
         self.marker = None
