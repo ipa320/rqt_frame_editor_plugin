@@ -119,6 +119,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_duplicate.clicked.connect(self.btn_duplicate_clicked)
         widget.list_frames.currentItemChanged.connect(self.selected_frame_changed)
         widget.list_tf.currentItemChanged.connect(self.update_measurement)
+        widget.pinned_box.stateChanged.connect(self.set_pinned)
 
         widget.btn_refresh.clicked.connect(lambda: self.signal_update_tf.emit(True, True))
         
@@ -154,6 +155,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.btn_rad.toggled.connect(self.update_fields)
 
         widget.combo_style.currentIndexChanged.connect(self.frame_style_changed)
+
+        self.last_selected_frame = None
+        widget.pinned_box.setEnabled(False)
 
         return widget
 
@@ -363,10 +367,19 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         self.old_selected = name
 
+    def set_pinned(self, state):
+        if state == Qt.Checked:
+            self.editor.active_frame.pinned_frame = self.widget.list_tf.currentItem()
+        elif state == Qt.Unchecked:
+            self.editor.active_frame.pinned_frame = None
+
     def update_measurement(self):
+
         source = self.widget.list_tf.currentItem()
         if not source:
+            self.widget.pinned_box.setEnabled(False)
             return # none selected
+        self.widget.pinned_box.setEnabled(True)
         source_name = source.text(0)
         frame = self.editor.active_frame
         try:
@@ -472,7 +485,21 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         # Perform the selection logic as before
         if not self.editor.active_frame or (self.editor.active_frame.name != name):
             self.editor.command(Command_SelectElement(self.editor, self.editor.frames[name]))
+            self.widget.pinned_box.blockSignals(True)
+            if self.editor.active_frame.pinned_frame is not None:
+                # if previously you selected a non-pinned-frame, save it for reset purposes
+                if not self.editor.frames[previous.text(0)].pinned_frame:
+                    self.last_selected_frame = self.widget.list_tf.currentItem()
+                self.widget.pinned_box.setChecked(True)
+                self.widget.list_tf.setCurrentItem(self.editor.active_frame.pinned_frame)
+            else:
+                if self.last_selected_frame:
+                    self.widget.list_tf.setCurrentItem(self.last_selected_frame)
+                self.widget.pinned_box.setChecked(False)
+            self.widget.pinned_box.blockSignals(False)
         self.update_measurement()
+       
+
 
     ## BUTTONS ##
     ##
