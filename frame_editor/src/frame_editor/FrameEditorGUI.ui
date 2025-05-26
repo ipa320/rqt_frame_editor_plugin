@@ -179,6 +179,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QCheckBox" name="pinned_box">
+               <property name="text">
+                <string>Pin</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
            <item>
