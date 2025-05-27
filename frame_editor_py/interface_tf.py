@@ -13,7 +13,7 @@ class FrameEditor_TF(Interface):
         self.editor.observers.append(self)
 
     def update(self, editor, level, elements):
-        now = rospy.Time.now()
+        now = self.editor.node.get_clock().now()
 
         # change if there is a pose change
         change = False

@@ -3,13 +3,13 @@ import os
 import math
 
 import rclpy
-import tf_transformations
+import tf_transformations as tft
 
 from qt_gui_py_common.worker_thread import WorkerThread
 
 from python_qt_binding import loadUi, QtCore, QtWidgets
 from python_qt_binding.QtWidgets import QWidget, QTreeWidgetItem, QTreeWidget, QProgressBar
-from python_qt_binding.QtCore import Slot, Qt, QTimer
+from python_qt_binding.QtCore import Slot, Qt, QTimer, QItemSelectionModel
 from python_qt_binding.QtGui import QColor
 
 from frame_editor_py.editor import Frame, FrameEditor
@@ -31,7 +31,7 @@ class LoadingTreeWidgetItem(QTreeWidgetItem):
         
         # Create a QProgressBar to simulate loading
         self.progress_bar = QProgressBar()
-        self.load_increments = load_time / (100/1000)
+        self.load_increments = int(load_time / (100/1000))
         self.progress_bar.setRange(0, self.load_increments)
         self.progress_bar.setValue(0)
         self.progress_bar.setTextVisible(False)  # Hide the text inside the progress bar
@@ -170,7 +170,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
     @Slot()
     def _update_finished(self):
-        rospy.loginfo("> Shutting down")
+        print("> Shutting down")
 
 
     def update(self, editor, level, elements):
@@ -207,9 +207,12 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         frame_group = QTreeWidgetItem(self.widget.list_tf)
         frame_group.setText(0, "Frames") 
         frame_group.setExpanded(True)  
+        frame_group.setFlags(frame_group.flags() & ~Qt.ItemIsSelectable)
         
         other_group = QTreeWidgetItem(self.widget.list_tf)
         other_group.setText(0, "Others") 
+        other_group.setFlags(other_group.flags() & ~Qt.ItemIsSelectable)
+
         other_group.setExpanded(True)  
         
         items = sorted(self.editor.all_frame_ids(include_temp=False))
@@ -376,8 +379,17 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         elif state == Qt.Unchecked:
             self.editor.active_frame.pinned_frame = None
 
-    def update_measurement(self):
-
+    def update_measurement(self,current: QTreeWidgetItem=None, previous: QTreeWidgetItem=None):
+        if current:
+            if not (current.flags() & Qt.ItemIsSelectable):
+                # Current item is NOT selectable, revert to previous if valid
+                if previous is not None:
+                    self.widget.list_tf.setCurrentItem(previous)
+                    self.widget.list_tf.setFocus()  
+                    self.widget.list_tf.repaint()
+                else:
+                    self.widget.list_tf.setCurrentItem(None)
+                
         source = self.widget.list_tf.currentItem()
         if not source:
             self.widget.pinned_box.setEnabled(False)
@@ -387,9 +399,9 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         frame = self.editor.active_frame
         try:
             position, orientation = FromTransformStamped(
-                    frame.tf_buffer.lookup_transform(source_name, frame.name, rospy.Time(0)))
+                    frame.tf_buffer.lookup_transform(source_name, frame.name, rclpy.time.Time()))
             
-            rot = tf.transformations.euler_from_quaternion(orientation)
+            rot = tft.euler_from_quaternion(orientation)
             if self.widget.btn_deg.isChecked():
                 rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
 
@@ -439,7 +451,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         w.txt_y.setValue(f.position[1])
         w.txt_z.setValue(f.position[2])
 
-        rot = tf_transformations.euler_from_quaternion(f.orientation)
+        rot = tft.euler_from_quaternion(f.orientation)
         if self.widget.btn_deg.isChecked():
             rot = (180.0*rot[0]/math.pi, 180.0*rot[1]/math.pi, 180.0*rot[2]/math.pi)
 
@@ -457,7 +469,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             for txt, p in zip(txt_abs_pos, position):
                 txt.setEnabled(True)
                 txt.setValue(p)
-            rot = tf_transformations.euler_from_quaternion(orientation)
+            rot = tft.euler_from_quaternion(orientation)
             if self.widget.btn_deg.isChecked():
                 rot = map(math.degrees, rot)
             for txt, r in zip(txt_abs_rot, rot):
@@ -575,12 +587,12 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             self.timer_clear_buffer = QTimer(self)
             self.timer_clear_buffer.setSingleShot(True)  # Run only once
             self.timer_clear_buffer.timeout.connect(Frame.tf_buffer.clear)
-            self.timer_clear_buffer.start(sleep_time)
+            self.timer_clear_buffer.start(int(sleep_time))
         
         self.timer_update_list = QTimer(self)
         self.timer_update_list.setSingleShot(True)  # Run only once
         self.timer_update_list.timeout.connect(self.update_tf_list)
-        self.timer_update_list.start(sleep_time*2)  
+        self.timer_update_list.start(int(sleep_time*2))  
 
 
     @Slot(bool)

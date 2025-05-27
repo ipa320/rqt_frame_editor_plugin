@@ -3,7 +3,7 @@ import copy
 import time
 
 from rclpy.time import Time
-import tf_transformations
+import tf_transformations as tft
 
 from python_qt_binding.QtWidgets import QUndoCommand
 
@@ -128,8 +128,8 @@ class Command_AlignElement(QUndoCommand):
         self.new_position = tuple(pos)
 
         ## Orientation
-        rpy = list(tf_transformations.euler_from_quaternion(element.orientation))
-        rpy_new = tf_transformations.euler_from_quaternion(orientation)
+        rpy = list(tft.euler_from_quaternion(element.orientation))
+        rpy_new = tft.euler_from_quaternion(orientation)
         if "a" in mode:
             rpy[0] = rpy_new[0]
         if "b" in mode:
@@ -138,7 +138,7 @@ class Command_AlignElement(QUndoCommand):
             rpy[2] = rpy_new[2]
 
         if "a" in mode or "b" in mode or "c" in mode:
-            self.new_orientation = tf_transformations.quaternion_from_euler(*rpy)
+            self.new_orientation = tft.quaternion_from_euler(*rpy)
         else:
             self.new_orientation = self.old_orientation
 

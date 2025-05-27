@@ -3,7 +3,6 @@ from qt_gui.plugin import Plugin
 
 from python_qt_binding import QtWidgets, QtCore, QtGui
 import os
-import rospy
 
 class ProjectPlugin(Plugin):
 
@@ -121,7 +120,7 @@ class ProjectPlugin(Plugin):
                 else:
                     # Already some file loaded
                     # Ask to add or replace
-                    rospy.logwarn("current filename '{}'".format(self.editor.get_file_name()))
+                    print("current filename '{}'".format(self.editor.get_file_name()))
                     choice = QtWidgets.QMessageBox.question(self.widget,
                                                            "Keep current frames?",
                                                            "Do you want to keep frames in your list, which are not in the currently loaded file?",
@@ -137,7 +136,7 @@ class ProjectPlugin(Plugin):
 
     def load_file(self, file_name):
         if not self.editor.load_file(file_name):
-            rospy.logerr("ERROR LOADING FILE")
+            print("ERROR LOADING FILE")
             return False
         else:
             self.update_current_filename()
@@ -189,11 +188,11 @@ class ProjectPlugin(Plugin):
 
     def save_file(self, file_name):
         if not self.write_file(file_name):
-            rospy.logwarn("Saving canceled")
+            print("Saving canceled")
             return False
         else:
             self.update_current_filename()
-            rospy.loginfo("File saved")
+            print("File saved")
             return True
 
     def write_file(self, file_name):

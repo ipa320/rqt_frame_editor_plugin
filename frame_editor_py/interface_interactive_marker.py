@@ -63,7 +63,7 @@ class FrameEditor_InteractiveMarker(Interface):
 
 
     def callback_marker(self, feedback):
-        print(feedback)
+        # print(f"feedback: {feedback}")
         self.editor.command(Command_SetPose(self.editor, self.editor.active_frame, FromPoint(feedback.pose.position), FromQuaternion(feedback.pose.orientation)))
 
 

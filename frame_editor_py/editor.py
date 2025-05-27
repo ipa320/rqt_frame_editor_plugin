@@ -31,12 +31,16 @@ import random
 
 class FrameEditor(QtCore.QObject):
 
-    def __init__(self):
-        super(FrameEditor, self).__init__()  #
+    def __init__(self, context):
+        self.static = FrameEditor.parse_args_static(context.argv())
+
         # super(FrameEditor, self).__init__('frame_editor')  # Initialize ROS 2 Node
         random_suffix = str(random.random()).replace('.', '')  # Convert to string and remove the decimal point
         self.node = Node(f"frame_editor_{random_suffix}")
-        Frame.init_tf(self.node)
+        self.node.get_logger().info("now init Frame!")
+        Frame.init_tf(self.node,self.static)
+
+        super(FrameEditor, self).__init__()  #
         
         self.frames = {}
         self.active_frame = None
@@ -132,17 +136,17 @@ class FrameEditor(QtCore.QObject):
     ## PRINT ##
     ##
     def print_all(self):
-        rospy.loginfo("> Printing all frames")
+        self.node.get_logger().info("> Printing all frames")
 
         for frame in self.frames:
-            frame.print_all()
+            frame.print_all(self.node)
 
 
     ## FILE I/O ##
     ##
     def load_file(self, file_name):
         if file_name:
-            print(f"> Loading file {file_name}")
+            self.node.get_logger().info(f"> Loading file {file_name}")
             data = yaml.safe_load(open(file_name, 'r'))
             # data = self.node.get_parameter([Parameter(self.namespace, value=data)])  # ROS 2 - To set parameter
             self.load_data(data)
@@ -158,7 +162,7 @@ class FrameEditor(QtCore.QObject):
     def load_params(self, namespace):
         params = self.node.get_parameters_by_prefix(self.namespace)
         if not params:
-            print("> No data to load")
+            self.node.get_logger().info("> No data to load")
         else:
             data = params[0].value
             self.load_data(data)
@@ -216,7 +220,7 @@ class FrameEditor(QtCore.QObject):
 
         self.undo_stack.endMacro()
 
-        rospy.loginfo("> Loading done")
+        self.node.get_logger().info("> Loading done")
 
     def save_file(self, filename):
 
@@ -269,25 +273,25 @@ class FrameEditor(QtCore.QObject):
 
         # Getting the parameter and printing its value
         param = self.get_parameter(self.namespace)
-        print(param.value)
+        self.node.get_logger().info(param.value)
         
         ## Dump param to file
         if filename == '':
             filename = self.full_file_path
-        print("Saving to file {}".format(filename))
+        self.node.get_logger().info("Saving to file {}".format(filename))
         
         parameters = self.node.get_parameters_by_prefix(self.namespace)
         for param in parameters:
             if isinstance(param, Parameter):
                 data[param.name] = param.value
             else:
-                print(f"Unknown parameter type: {type(param)}")
+                self.node.get_logger().info(f"Unknown parameter type: {type(param)}")
                 
         with open(filename, 'w') as file:
             yaml.dump(data, file)
             
         
-        print("Saving done")
+        self.node.get_logger().info("Saving done")
 
         self.full_file_path = filename
         return True
@@ -313,7 +317,7 @@ class FrameEditor(QtCore.QObject):
                     QtWidgets.QMessageBox.Yes)
 
                     if reply == QtWidgets.QMessageBox.Yes:
-                        rospy.loginfo("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
+                        self.node.get_logger().info("Saving: package: {} + relative path: {}".format(rospackage, rel_path))
                         frame.package = rospackage
                         frame.path = rel_path
                         return
@@ -325,13 +329,16 @@ class FrameEditor(QtCore.QObject):
             pass
 
     def run(self):
-        print("> Going for some spins with rate {}".format(self.hz))
+        if not self.static:
+            self.node.get_logger().info("> Going for some spins with rate {}".format(self.hz))
+        else:
+            self.node.get_logger().info("> Going to static broadcaster")
         rate = self.node.create_rate(self.hz) # hz
         while rclpy.ok():
             self.broadcast()
             rate.sleep()
         
-        print("> Shutting down Frameeditor")
+        self.node.get_logger().info("> Shutting down Frameeditor")
         rclpy.shutdown()
             
 
@@ -373,9 +380,9 @@ class FrameEditor(QtCore.QObject):
         if '--ros-args' in argv:
             argv = argv[:argv.index('--ros-args')]
         args, unknowns = parser.parse_known_args(argv)
-        rospy.loginfo('arguments: {}'.format(args))
+        self.node.get_logger().info('arguments: {}'.format(args))
         if unknowns:
-            rospy.logwarn('unknown parameters found: {}'.format(unknowns))
+            self.node.get_logger().info('unknown parameters found: {}'.format(unknowns))
 
         self.static = args.static
 
@@ -393,7 +400,7 @@ class FrameEditor(QtCore.QObject):
             if len(arg_path) == 1:
                 #load file
                 filename = arg_path[0]
-                rospy.loginfo("Loading {}".format(filename))
+                self.node.get_logger().info("Loading {}".format(filename))
                 success = self.load_file(str(filename))
             elif len(arg_path) == 2:
                 #load rospack
@@ -403,18 +410,18 @@ class FrameEditor(QtCore.QObject):
                 package_share_directory = get_package_share_directory(package_name)
                 filename = os.path.join(package_share_directory, file_path_in_package)
 
-                print("Loading {}".format(filename))
+                self.node.get_logger().info("Loading {}".format(filename))
                 success = self.load_file(str(filename))
             else:
-                rospy.logwarn("Load argument not understood! --load {}".format(arg_path))
-                rospy.logwarn("Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'")
-                rospy.logwarn("or use --load 'fullPathToMyYaml.yaml'")
+                self.node.get_logger().error("Load argument not understood! --load {}".format(arg_path))
+                self.node.get_logger().error("Please use --load 'myRosPackage pathInMyPackage/myYaml.yaml'")
+                self.node.get_logger().error("or use --load 'fullPathToMyYaml.yaml'")
                 success = None
 
             if success:
                 return filename
             elif success == False:
-                rospy.logerr("ERROR LOADING FILE")
+                self.node.get_logger().error("ERROR LOADING FILE")
             return ''
 
     def init_views(self):
@@ -426,7 +433,7 @@ class FrameEditor(QtCore.QObject):
     
     def shutdown(self):
         """Clean up and shut down the ROS 2 system."""
-        print("Shutting down FrameNode node")
+        self.node.get_logger().info("Shutting down FrameNode node")
         rclpy.shutdown()
 
 
@@ -438,7 +445,7 @@ if __name__ == "__main__":
     editor.parse_args(sys.argv[1:])
     editor.init_views()
 
-    rospy.loginfo("Frame editor ready!")
+    editor.node.get_logger().info("Frame editor ready!")
     editor.run()
 
 # eof

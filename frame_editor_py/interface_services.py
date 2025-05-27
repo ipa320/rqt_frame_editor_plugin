@@ -36,20 +36,20 @@ class FrameEditor_Services(Interface):
         self.editor.node.create_service(SaveYaml, f'{self.editor.node.get_name()}/save_yaml', self.callback_save_yaml)
 
     def callback_align_frame(self, request, response):
-        print("> Request to align frame {} with frame {} mode {}".format(request.name, request.source_name, request.mode))
+        self.editor.node.get_logger().info("> Request to align frame {} with frame {} mode {}".format(request.name, request.source_name, request.mode))
 
         response.error_code = 0
 
         if request.name == "":
-            rospy.logerr(" Error: No name given")
+            self.editor.node.get_logger().error(" Error: No name given")
             response.error_code = 1
 
         elif request.source_name == "":
-            rospy.logerr(" Error: No source name given")
+            self.editor.node.get_logger().error(" Error: No source name given")
             response.error_code = 3
 
         elif request.name not in self.editor.frames:
-            rospy.logerr(" Error: Frame not found: {}".format(request.name))
+            self.editor.node.get_logger().error(" Error: Frame not found: {}".format(request.name))
             response.error_code = 2
 
         else:
@@ -70,7 +70,7 @@ class FrameEditor_Services(Interface):
 
 
     def callback_edit_frame(self, request, response):
-        print("> Request to edit frame {}".format(request.name))
+        self.editor.node.get_logger().info("> Request to edit frame {}".format(request.name))
 
         response.error_code = 0
 
@@ -79,7 +79,7 @@ class FrameEditor_Services(Interface):
             self.editor.command(Command_SelectElement(self.editor, None))
 
         elif request.name not in self.editor.frames:
-            rospy.logerr(" Error: Frame not found: {}".format(request.name))
+            self.editor.node.get_logger().error(" Error: Frame not found: {}".format(request.name))
             response.error_code = 2
 
         else:
@@ -90,21 +90,21 @@ class FrameEditor_Services(Interface):
 
 
     def callback_get_frame(self, request, response):
-        print("> Request to get frame {}".format(request.name))
+        self.editor.node.get_logger().info("> Request to get frame {}".format(request.name))
 
         response.error_code = 0
 
         if request.name == "":
-            rospy.logerr(" Error: No name given")
+            self.editor.node.get_logger().error(" Error: No name given")
             response.error_code = 1
 
         elif request.name not in self.editor.frames:
-            rospy.logerr(" Error: Frame not found: {}".format(request.name))
+            self.editor.node.get_logger().error(" Error: Frame not found: {}".format(request.name))
             response.error_code = 2
 
         else:
             f = self.editor.frames[request.name]
-            f.print_all()
+            f.print_all(self.editor.node)
             response.name = f.name
             response.parent = f.parent
             response.pose = ToPose(f.position, f.orientation)
@@ -113,7 +113,7 @@ class FrameEditor_Services(Interface):
     
 
     def callback_get_frame_names(self, request, response):
-        print("> Request to get frame names")
+        self.editor.node.get_logger().info("> Request to get frame names")
 
         response.error_code = 0
 
@@ -124,16 +124,16 @@ class FrameEditor_Services(Interface):
 
 
     def callback_remove_frame(self, request, response):
-        print("> Request to remove frame {}".format(request.name))
+        self.editor.node.get_logger().info("> Request to remove frame {}".format(request.name))
 
         response.error_code = 0
 
         if request.name == "":
-            rospy.logerr(" Error: No name given")
+            self.editor.node.get_logger().error(" Error: No name given")
             response.error_code = 1
 
         elif request.name not in self.editor.frames:
-            rospy.logerr(" Error: Frame not found: {}".format(request.name))
+            self.editor.node.get_logger().error(" Error: Frame not found: {}".format(request.name))
             response.error_code = 2
 
         else:
@@ -143,10 +143,10 @@ class FrameEditor_Services(Interface):
 
 
     def callback_set_frame(self, request, response):
-        print("> Request to set (or add) frame {} {}".format(request.name, request.parent))
+        self.editor.node.get_logger().info("> Request to set (or add) frame {} {}".format(request.name, request.parent))
 
         if request.name == "":
-            rospy.logerr(" Error: No name given")
+            self.editor.node.get_logger().error(" Error: No name given")
             response.error_code = 1
             return response
 
@@ -154,7 +154,7 @@ class FrameEditor_Services(Interface):
             if request.name in self.editor.frames:
                 request.parent = self.editor.frames[request.name].parent
             else:
-                rospy.logerr("Error: No parent given and frame previously not existing")
+                self.editor.node.get_logger().error("Error: No parent given and frame previously not existing")
                 response.error_code = 2
                 return response
 
@@ -169,16 +169,16 @@ class FrameEditor_Services(Interface):
 
 
     def callback_set_parent_frame(self, request, response):
-        print("> Request to set parent_frame {} {}".format(request.name, request.parent))
+        self.editor.node.get_logger().info("> Request to set parent_frame {} {}".format(request.name, request.parent))
 
         response.error_code = 0
 
         if request.name == "":
-            rospy.logerr(" Error: No frame_name given")
+            self.editor.node.get_logger().error(" Error: No frame_name given")
             response.error_code = 1
 
         elif request.parent == "":
-            rospy.logerr(" Error: No parent_name given")
+            self.editor.node.get_logger().error(" Error: No parent_name given")
             response.error_code = 2
 
         else:
@@ -188,7 +188,7 @@ class FrameEditor_Services(Interface):
         return response
 
     def callback_load_yaml(self, request, response):
-        print("> Request to load yaml file:'{}'".format(request.filename))
+        self.editor.node.get_logger().info("> Request to load yaml file:'{}'".format(request.filename))
 
         try:
             self.editor.load_file(os.path.expanduser(request.filename))
@@ -201,7 +201,7 @@ class FrameEditor_Services(Interface):
         return response
 
     def callback_save_yaml(self, request, response):
-        print("> Request to save yaml file to:'{}'".format(request.filename))
+        self.editor.node.get_logger().info("> Request to save yaml file to:'{}'".format(request.filename))
 
         try:
             self.editor.save_file(os.path.expanduser(request.filename))
@@ -214,16 +214,16 @@ class FrameEditor_Services(Interface):
         return response
 
     def callback_copy_frame(self, request, response):
-        print("> Request to copy frame '{}' with new name '{}' and new parent name '{}'".format(request.source_name, request.name, request.parent))
+        self.editor.node.get_logger().info("> Request to copy frame '{}' with new name '{}' and new parent name '{}'".format(request.source_name, request.name, request.parent))
 
         response.error_code = 0
 
         if request.name == "":
-            rospy.logerr(" Error: No name given")
+            self.editor.node.get_logger().error(" Error: No name given")
             response.error_code = 1
 
         elif request.source_name == "":
-            rospy.logerr(" Error: No source name given")
+            self.editor.node.get_logger().error(" Error: No source name given")
             response.error_code = 3
 
         else:
@@ -232,14 +232,14 @@ class FrameEditor_Services(Interface):
             try:
                 # If not existing yet: create frame
                 if request.name not in self.editor.frames:
-                    rospy.loginfo(">> add")
+                    self.editor.node.get_logger().info(">> add")
 
                     # No parent specified: use source's parent
                     if request.parent == "":
                         if request.source_name in self.editor.frames:
                             request.parent = self.editor.frames[request.source_name].parent
                         else:
-                            rospy.logerr(" Error: No parent name given")
+                            self.editor.node.get_logger().error(" Error: No parent name given")
                             response.error_code = 3
                             return response
 
@@ -253,15 +253,15 @@ class FrameEditor_Services(Interface):
 
                     Frame.wait_for_transform(request.source_name, request.parent, rclpy.Duration(1.0))
                     if (request.parent != "") and (frame.parent != request.parent):
-                        rospy.loginfo(">> rebase")
+                        self.editor.node.get_logger().info(">> rebase")
                         self.editor.command(Command_RebaseElement(self.editor, frame, request.source_name, request.parent))
                     else:
-                        rospy.loginfo(">> align")
+                        self.editor.node.get_logger().info(">> align")
                         self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
                     Frame.wait_for_transform(frame.parent, frame.name, rclpy.Duration(1.0))
 
             except Exception as e:
-                rospy.logerr("Error: unhandled exception {}".format(e))
+                self.editor.node.get_logger().error("Error: unhandled exception {}".format(e))
                 response.error_code = 9
 
         return response

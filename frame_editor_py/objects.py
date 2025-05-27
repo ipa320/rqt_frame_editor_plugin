@@ -10,8 +10,8 @@ import tf2_ros
 
 import yaml
 
-from frame_editor.constructors_geometry import *
-from frame_editor.constructors_std import *
+from frame_editor_py.constructors_geometry import *
+from frame_editor_py.constructors_std import *
 from frame_editor.srv import *
 from frame_editor_py import utils_tf
 
@@ -45,12 +45,15 @@ class Frame(object):
 
     @staticmethod
     def init_tf(node, static=True):
+        node.get_logger().warn("############################")
         if Frame.tf_buffer is None:
             Frame.node = node
             if static:
-                Frame.tf_broadcaster = tf2_ros.StaticTransformBroadcaster()
+                node.get_logger().info("GOING STATIC")
+                Frame.tf_broadcaster = tf2_ros.StaticTransformBroadcaster(node)
             else:
-                Frame.tf_broadcaster = tf2_ros.TransformBroadcaster()
+                node.get_logger().info("GOING DYNAMIC")
+                Frame.tf_broadcaster = tf2_ros.TransformBroadcaster(node)
             Frame.tf_buffer = tf2_ros.Buffer()
             Frame.tf_listener = tf2_ros.TransformListener(Frame.tf_buffer, node, spin_thread=True)
 
@@ -60,10 +63,11 @@ class Frame(object):
         tf2_structure = yaml.load(tf2_structure_in_yaml, Loader=yaml.Loader)
         try:
             bc = tf2_structure[name]["broadcaster"]
-            return bc == rospy.get_name()
+            return bc == Frame.node.get_name()
         except KeyError:
+            Frame.node.get_logger().error("KEYERR")
             return False
-
+        
     @classmethod
     def create_new_id(cls):
         cls.__id_counter = cls.__id_counter + 1
@@ -73,8 +77,8 @@ class Frame(object):
     def pose(self):
         return ToPose(self.position, self.orientation)
 
-    def print_all(self):
-        print("  {} (parent: {}) {} {} {}".format(self.name, self.parent, self.position, self.orientation, self.group))
+    def print_all(self, node:Node):
+        node.get_logger().info("  {} (parent: {}) {} {} {}".format(self.name, self.parent, self.position, self.orientation, self.group))
 
     def value(self, symbol):
         if symbol == 'x':
