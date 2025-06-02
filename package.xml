@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>frame_editor</name>
-  <version>2.1.1</version>
+  <version>2.0.1</version>
   <description>The frame_editor package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
@@ -41,13 +41,13 @@
   <exec_depend>builtin_interfaces</exec_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>qt_gui_py_common</exec_depend>
-  
+
   <member_of_group>rosidl_interface_packages</member_of_group>
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <build_type>ament_cmake</build_type>
-    <rqt_gui plugin="${prefix}/plugin.xml"/>
+    <rqt_gui plugin="${prefix}/plugin.xml" />
   </export>
 </package>
