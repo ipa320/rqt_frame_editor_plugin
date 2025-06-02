@@ -2,8 +2,8 @@
 Changelog for package frame_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.2 (2025-06-02)
+------------------
 * First Port to ROS 2
 * Feature: Grouping Option is now available from the GUI
 * Feature: Pinning a frame to another in the gui is now possible
