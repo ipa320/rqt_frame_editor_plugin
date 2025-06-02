@@ -105,6 +105,7 @@ class FrameEditor(QtCore.QObject):
     def tf_dict():
         y = Frame.tf_buffer.all_frames_as_yaml()
         d = yaml.safe_load(y)
+        # logging.get_logger("frame_editor").warn(f'{Frame.tf_buffer.frame_id}')
         if isinstance(d, dict):
             return d
         if isinstance(d, list) and len(d) == 0:

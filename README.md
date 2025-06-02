@@ -1,6 +1,11 @@
 frame editor rqt-plugin
 =========================================
 
+TODOS:
+* Update Readme for ROS 2
+
+
+
 * This repository contains the **frame editor rqt-plugin.**
 
 * Frame-editor helps you **creating and arranging tf-frames.** 
