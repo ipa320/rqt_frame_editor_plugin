@@ -30,7 +30,11 @@ from frame_editor.interface_tf import FrameEditor_TF
 class FrameEditor(QtCore.QObject):
 
     def __init__(self, context):
-        self.static = FrameEditor.parse_args_static(context.argv())
+        try:
+            argv = context.argv()
+        except AttributeError:
+            argv = context
+        self.static = FrameEditor.parse_args_static(argv)
         Frame.init_tf(self.static)
         super(FrameEditor, self).__init__()
 
@@ -343,6 +347,7 @@ class FrameEditor(QtCore.QObject):
 
         args, unknowns = parser.parse_known_args(argv)
         rospy.loginfo('arguments: {}'.format(args))
+        unknowns = [u for u in unknowns if not u.startswith('__')]
         if unknowns:
             rospy.logwarn('unknown parameters found: {}'.format(unknowns))
 
