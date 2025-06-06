@@ -34,7 +34,8 @@ frame editor rqt-plugin
 
 ### Additional features: 
 * Group frames: You can group frames by adding a "group" entry in the yaml file. Frames with the same "group" entry will grouped.
-
+* Pin frames: An active frame will be pinned by clicking the pin box. That means the selected source_frame will be automatically reselected when the target_frame is selected.
+* 
 ### Installation:
 #### Clone this repository into your catkin workspace.
 
@@ -45,7 +46,7 @@ git clone https://github.com/ipa320/rqt_frame_editor_plugin.git
 #### Update your catkin workspace, e.g.
 
 ``` 
-catkin_make
+catkin build
 ```
 
 #### Refresh rqt
@@ -104,13 +105,12 @@ ServiceException: service [/align_frame] already registered
 Rviz is not giving your mouse event to the interactive marker. Disable the marker plugin and the you can touch the interactive marker.
 
 ### Acknowledgements:
-This project is a result of the LIAA project.
-http://www.project-leanautomation.eu/
 
-![LIAA](http://www.project-leanautomation.eu/fileadmin/img/LIAALogo/Logo_LIAA.png "LIAA")
+Updates from 2024 on (including ROS2 port) are part of RIG (Robotics Institute Germany) project.
 
-![EC](http://www.project-leanautomation.eu/typo3temp/pics/b3ba71db31.jpg "EC")
+| Logo | Project | Runtime |
+|------|---------|---------|
+| <img src="/frame_editor/etc/img/RIG.jpg" alt="RIG" width="50"/> | <a href="https://robotics-institute-germany.de/">Robotics Institute Germany</a> | 01.07.2024 – 30.06.2028 |
+| <img src="http://www.project-leanautomation.eu/fileadmin/img/LIAALogo/Logo_LIAA.png" alt="LIAA" width="100"/> | <a href="http://www.project-leanautomation.eu/">Lean Automation (LIAA)</a><br/>Grant: 608604 | 02.09.2013 – 31.08.2017 |
+| <img src="http://www.project-leanautomation.eu/typo3temp/pics/b3ba71db31.jpg" alt="European Commission" width="100"/> | European Commission | — |
 
-LIAA received funding from the European Union’s Seventh Framework Programme for research, technological development and demonstration under grant agreement no. 608604.
-
-Project runtime: 02.09.2013 – 31.08.2017.
