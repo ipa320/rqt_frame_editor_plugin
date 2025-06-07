@@ -1,11 +1,6 @@
 frame editor rqt-plugin
 =========================================
 
-TODOS:
-* Update Readme for ROS 2
-
-
-
 * This repository contains the **frame editor rqt-plugin.**
 
 * Frame-editor helps you **creating and arranging tf-frames.** 
@@ -18,36 +13,36 @@ TODOS:
 
 * Most features are **also available via ros services**, if you want to use the functions but not the interface.
 
-![The rqt plugin frame_editor](/frame_editor/etc/img/rqt_frame_editor.png "The rqt plugin frame_editor")
+![The rqt plugin frame_editor](/etc/img/rqt_frame_editor.png "The rqt plugin frame_editor")
 
 * Feature: Moving frames
 
-![Moving Frames](/frame_editor/etc/img/moving_frames.gif "Feature: Moving frames")
+![Moving Frames](/etc/img/moving_frames.gif "Feature: Moving frames")
 
 
 * Feature: Add Frames and Change their respective parents
 
-![Parent Frames](/frame_editor/etc/img/parent_frames.gif "Feature: Parent frames")
+![Parent Frames](/etc/img/parent_frames.gif "Feature: Parent frames")
 
 * Feature: Filter and Delete Frames
 
-![Filter and Delete Frames](/frame_editor/etc/img/filter_delete_frames.gif "Feature: Filter and Delete Frames")
+![Filter and Delete Frames](/etc/img/filter_delete_frames.gif "Feature: Filter and Delete Frames")
 
 
-![The rviz view](/frame_editor/etc/img/rviz.png "Using an interactive marker to manipulated a tf-frame")
+![The rviz view](/etc/img/rviz.png "Using an interactive marker to manipulated a tf-frame")
 
 
 ### Additional features: 
 * Group frames: You can group frames by adding a "group" entry in the yaml file. Frames with the same "group" entry will grouped.
 
 ### Installation:
-#### Clone this repository into your catkin workspace.
+#### Clone this repository into your colcon workspace.
 
 ``` 
 git clone https://github.com/ipa320/rqt_frame_editor_plugin.git
 ```
 
-#### Update your catkin workspace, e.g.
+#### Update your colcon workspace, e.g.
 
 ``` 
 colcon build --symlink-install
@@ -66,7 +61,7 @@ rqt --force-discover
 rqt
 ```
 
-![The rqt plugin frame_editor](/frame_editor/etc/img/rqt_frame_editor_exp.png "The rqt plugin frame_editor with remarks")
+![The rqt plugin frame_editor](/etc/img/rqt_frame_editor_exp.png "The rqt plugin frame_editor with remarks")
 
 
 #### To be able to use the interactive marker to move frames around you have to add the InteractiveMarkers-plugin to rviz and select the topic '/frame_editor_interactive/update'
@@ -103,20 +98,11 @@ ServiceException: service [/align_frame] already registered
 Rviz is not giving your mouse event to the interactive marker. Disable the marker plugin and the you can touch the interactive marker.
 
 ### Acknowledgements:
-This project is a result of the LIAA project.
-http://www.project-leanautomation.eu/
 
 Updates from 2024 on (including ROS2 port) are part of RIG (Robotics Institute Germany) project.
 
-![RIG](https://robotics-institute-germany.de/ "RIG")
-
-![LIAA](http://www.project-leanautomation.eu/fileadmin/img/LIAALogo/Logo_LIAA.png "LIAA")
-
-![EC](http://www.project-leanautomation.eu/typo3temp/pics/b3ba71db31.jpg "EC")
-
-
-RIG received funding from the Federal Ministry of Education and Research (BMBF)
-
-LIAA received funding from the European Union’s Seventh Framework Programme for research, technological development and demonstration under grant agreement no. 608604.
-
-Project runtime: 02.09.2013 – 31.08.2017.
+| Logo | Project | Runtime |
+|------|---------|---------|
+| <img src="/frame_editor/etc/img/RIG.jpg" alt="RIG" width="50"/> | <a href="https://robotics-institute-germany.de/">Robotics Institute Germany</a> | 01.07.2024 – 30.06.2028 |
+| <img src="http://www.project-leanautomation.eu/fileadmin/img/LIAALogo/Logo_LIAA.png" alt="LIAA" width="100"/> | <a href="http://www.project-leanautomation.eu/">Lean Automation (LIAA)</a><br/>Grant: 608604 | 02.09.2013 – 31.08.2017 |
+| <img src="http://www.project-leanautomation.eu/typo3temp/pics/b3ba71db31.jpg" alt="European Commission" width="100"/> | European Commission | — |
