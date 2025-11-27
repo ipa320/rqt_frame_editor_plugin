@@ -29,14 +29,14 @@ class Frame(object):
 
     __id_counter = -1
 
-    def __init__(self, name, position=(0,0,0), orientation=(0,0,0,1), parent="world", style="none", group=""):
-        self.name = name
+    def __init__(self, name:str, position:tuple=(0,0,0), orientation:tuple=(0,0,0,1), parent:str="world", style:str="none", group:str=""):
+        self.name = str(name)
         self.position = position
         self.orientation = orientation
-        self.parent = parent
-        self.style = style
+        self.parent = str(parent)
+        self.style = str(style)
         self.color = (0.0, 0.5, 0.5, 0.75)
-        self.group = group
+        self.group = str(group)
         self.pinned_frame = None
 
         self.hidden = False
