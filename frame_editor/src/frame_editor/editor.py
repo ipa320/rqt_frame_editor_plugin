@@ -109,15 +109,15 @@ class FrameEditor(QtCore.QObject):
 
     @staticmethod
     def frame_is_temporary(frame_id):
-        return frame_id.startswith('_')
+        return str(frame_id).startswith('_')
 
     @staticmethod
     def all_frame_ids(include_temp=True):
-        return [f for f in FrameEditor.tf_dict() if
+        return [str(f) for f in FrameEditor.tf_dict() if
                 not FrameEditor.frame_is_temporary(f) or include_temp]
 
     def all_editor_frame_ids(self, include_temp=True):
-        return [f for f in self.frames.keys() if
+        return [str(f) for f in self.frames.keys() if
                 not FrameEditor.frame_is_temporary(f) or include_temp]
 
     def iter_frames(self, include_temp=True):
