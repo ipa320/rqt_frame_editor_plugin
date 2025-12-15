@@ -30,6 +30,7 @@ class FrameEditor_Services(Interface):
         rospy.Service("~set_frame", SetFrame, self.callback_set_frame)
         rospy.Service("~set_parent", SetParentFrame, self.callback_set_parent_frame)
         rospy.Service("~copy_frame", CopyFrame, self.callback_copy_frame)
+        rospy.Service("~rename_frame", RenameFrame, self.callback_rename_frame)
 
         rospy.Service("~load_yaml", LoadYaml, self.callback_load_yaml)
         rospy.Service("~save_yaml", SaveYaml, self.callback_save_yaml)
@@ -271,6 +272,37 @@ class FrameEditor_Services(Interface):
                         self.editor.command(Command_AlignElement(self.editor, frame, request.source_name, ['x', 'y', 'z', 'a', 'b', 'c']))
                     Frame.wait_for_transform(frame.parent, frame.name, rospy.Duration(1.0))
 
+            except Exception as e:
+                rospy.logerr("Error: unhandled exception {}".format(e))
+                response.error_code = 9
+
+        return response
+    
+    def callback_rename_frame(self, request):
+        rospy.loginfo("> Request to rename frame '{}' with new name '{}'".format(request.source_name, request.new_name))
+
+        response = RenameFrameResponse()
+        response.error_code = 0
+
+        if request.new_name == "":
+            rospy.logerr(" Error: No name given")
+            response.error_code = 1
+
+        elif request.source_name == "":
+            rospy.logerr(" Error: No source name given")
+            response.error_code = 3
+
+        elif request.source_name not in self.editor.frames:
+            rospy.logerr(f" Error: Frame not found: {request.source_name}")
+            response.error_code = 2
+            
+        elif request.new_name in self.editor.frames:
+            rospy.logerr(f" Error: New frame name already exists: {request.new_name}")
+            response.error_code = 4
+
+        else:
+            try:
+                self.editor.command(Command_RenameElement(self.editor, self.editor.frames[request.source_name], request.new_name))
             except Exception as e:
                 rospy.logerr("Error: unhandled exception {}".format(e))
                 response.error_code = 9

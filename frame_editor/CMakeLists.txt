@@ -65,6 +65,7 @@ add_service_files(
   GetFrame.srv
   GetFrameNames.srv
   RemoveFrame.srv
+  RenameFrame.srv
   SetFrame.srv
   SetParentFrame.srv
   CopyFrame.srv

@@ -188,7 +188,61 @@ class Command_CopyElement(QUndoCommand):
         self.element.hidden = True
         self.editor.add_undo_level(1, [self.element])
 
+class Command_RenameElement(QUndoCommand):
+    '''Copys a source frame's transformation and sets a new parent
+    '''
 
+    def __init__(self, editor, element, new_name):
+        QUndoCommand.__init__(self, "Rename")
+        self.editor = editor
+        self.element = element
+
+        if editor.active_frame is element:
+            self.was_active = True
+        else:
+            self.was_active = False
+
+        self.new_name = new_name
+        self.old_name = element.name
+
+        self.element.name = self.new_name
+        
+    def redo(self):
+        if self.was_active:
+            self.editor.active_frame = self.element
+            self.editor.add_undo_level(2)
+
+        # Remove old frame
+        if self.editor.frames.get(self.old_name):
+            del self.editor.frames[self.old_name]
+
+        # Add new frame
+        self.element.name = self.new_name
+        self.editor.frames[self.new_name] = self.element
+        self.editor.add_undo_level(1, [self.element])
+
+        # Update parent names 
+        for frame in self.editor.frames.values():
+            if frame.parent == self.old_name:
+                frame.parent = self.new_name
+        self.editor.add_undo_level(4, [frame])
+
+    def undo(self):
+        if self.was_active:
+            self.editor.active_frame = self.element
+            self.editor.add_undo_level(2)
+
+        if self.editor.frames.get(self.new_name):
+            del self.editor.frames[self.new_name]
+
+        self.element.name = self.old_name
+        self.editor.frames[self.old_name] = self.element
+        self.editor.add_undo_level(1, [self.element])
+
+        for frame in self.editor.frames.values():
+            if frame.parent == self.new_name:
+                frame.parent = self.old_name
+        self.editor.add_undo_level(4, [frame])
 
 class Command_RebaseElement(QUndoCommand):
     '''Copys a source frame's transformation and sets a new parent

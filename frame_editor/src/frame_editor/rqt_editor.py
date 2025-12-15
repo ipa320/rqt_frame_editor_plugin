@@ -116,6 +116,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         ##
         widget.btn_add.clicked.connect(self.btn_add_clicked)
         widget.btn_delete.clicked.connect(self.btn_delete_clicked)
+        widget.btn_rename.clicked.connect(self.btn_rename_clicked)
         widget.btn_duplicate.clicked.connect(self.btn_duplicate_clicked)
         widget.list_frames.currentItemChanged.connect(self.selected_frame_changed)
         widget.list_tf.currentItemChanged.connect(self.update_measurement)
@@ -151,6 +152,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.txt_c.editingFinished.connect(self.c_valueChanged)
 
         widget.txt_group.editingFinished.connect(self.group_valueChanged)
+        widget.txt_name.editingFinished.connect(self.frameName_valueChanged)
 
         widget.btn_rad.toggled.connect(self.update_fields)
 
@@ -559,6 +561,24 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         self.editor.command(Command_CopyElement(self.editor, name, source_name, parent_name))
         self.signal_update_tf.emit(False, False)
+        
+    @Slot(bool)
+    def btn_rename_clicked(self, checked):
+        item = self.widget.list_frames.currentItem()
+        if not item:
+            return
+
+        # Check if the item is a frame. Early returns if selected item is not a frame (e.g. a group)
+        source_name = item.text(0)
+        if self.editor.frames.get(source_name) is None:
+            return
+
+        new_name = self.get_valid_frame_name("Rename Frame", default_name=source_name)
+        if not new_name:
+            return
+
+        self.editor.command(Command_RenameElement(self.editor, self.editor.frames[source_name], new_name))
+        self.signal_update_tf.emit(True, True)
 
     def get_sleep_time(self):
         return max(5.0 / self.editor.hz, 0.1)
@@ -585,7 +605,13 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         item = self.widget.list_frames.currentItem()
         if not item:
             return
-        self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[item.text(0)]))
+        
+        # Check if the item is a frame. Early returns if selected item is not a frame (e.g. a group)
+        source_name = item.text(0)
+        if self.editor.frames.get(source_name) is None:
+            return
+
+        self.editor.command(Command_RemoveElement(self.editor, self.editor.frames[source_name]))
         self.signal_update_tf.emit(True, True)
         
     ## PARENTING ##
@@ -714,7 +740,24 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         if self.editor.active_frame.group != value:
             self.editor.command(Command_SetGroup(self.editor, self.editor.active_frame, value))
 
+    @Slot()
+    def frameName_valueChanged(self):
+        item = self.widget.list_frames.currentItem()
+        if not item:
+            return
+        source_name = item.text(0)
 
+        new_name = self.widget.txt_name.text()
+        existing_tf_frames = set(self.editor.all_frame_ids())
+        existing_editor_frames = set(self.editor.all_editor_frame_ids())
+
+        # allow recreating if frame was published by frameditor node originally
+        if new_name in existing_editor_frames or (new_name in existing_tf_frames and not Frame.was_published_by_frameeditor(new_name)):
+            self.widget.txt_name.setText(source_name)
+            return None
+        
+        self.editor.command(Command_RenameElement(self.editor, self.editor.frames[source_name], new_name))
+        self.signal_update_tf.emit(True, True)
 
     ## FRAME STYLE ##
     ##
