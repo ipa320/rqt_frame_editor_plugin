@@ -123,6 +123,17 @@
                  </property>
                 </widget>
                </item>
+               <item>
+                <widget class="QPushButton" name="btn_rename">
+                 <property name="text">
+                  <string>Rename</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="text-editor">
+                   <normaloff>.</normaloff>.</iconset>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
             </layout>
@@ -174,9 +185,7 @@
              </item>
              <item>
               <widget class="QLineEdit" name="txt_name">
-               <property name="readOnly">
                 <bool>true</bool>
-               </property>
               </widget>
              </item>
              <item>
