@@ -293,7 +293,7 @@ class FrameEditor_Services(Interface):
             response.error_code = 3
 
         elif request.source_name not in self.editor.frames:
-            rospy.logerr(f" Error: Frame not found: {request.source_name}")
+            rospy.logerr(f" Error: Source Frame not found: {request.source_name}")
             response.error_code = 2
             
         elif request.new_name in self.editor.frames:
@@ -302,7 +302,10 @@ class FrameEditor_Services(Interface):
 
         else:
             try:
-                self.editor.command(Command_RenameElement(self.editor, self.editor.frames[request.source_name], request.new_name))
+                self.editor.command(Command_RenameElement(self.editor, self.editor.frames.get(request.source_name), request.new_name))
+            except AttributeError as e:
+                rospy.logerr("Error: The source frame was not found. {}".format(e))
+                response.error_code = 9
             except Exception as e:
                 rospy.logerr("Error: unhandled exception {}".format(e))
                 response.error_code = 9

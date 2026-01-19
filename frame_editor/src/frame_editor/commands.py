@@ -197,10 +197,7 @@ class Command_RenameElement(QUndoCommand):
         self.editor = editor
         self.element = element
 
-        if editor.active_frame is element:
-            self.was_active = True
-        else:
-            self.was_active = False
+        self.was_active = editor.active_frame is element
 
         self.new_name = new_name
         self.old_name = element.name
@@ -213,8 +210,7 @@ class Command_RenameElement(QUndoCommand):
             self.editor.add_undo_level(2)
 
         # Remove old frame
-        if self.editor.frames.get(self.old_name):
-            del self.editor.frames[self.old_name]
+        self.editor.frames.pop(self.old_name, None)
 
         # Add new frame
         self.element.name = self.new_name
@@ -232,8 +228,7 @@ class Command_RenameElement(QUndoCommand):
             self.editor.active_frame = self.element
             self.editor.add_undo_level(2)
 
-        if self.editor.frames.get(self.new_name):
-            del self.editor.frames[self.new_name]
+        self.editor.frames.pop(self.new_name, None)
 
         self.element.name = self.old_name
         self.editor.frames[self.old_name] = self.element
