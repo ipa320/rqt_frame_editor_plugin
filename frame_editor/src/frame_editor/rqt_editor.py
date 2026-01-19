@@ -752,8 +752,10 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         existing_editor_frames = set(self.editor.all_editor_frame_ids())
 
         # allow recreating if frame was published by frameditor node originally
-        if new_name in existing_editor_frames or (new_name in existing_tf_frames and not Frame.was_published_by_frameeditor(new_name)):
+        if source_name != new_name and (new_name in existing_editor_frames or (new_name in existing_tf_frames and not Frame.was_published_by_frameeditor(new_name))):
             self.widget.txt_name.setText(source_name)
+            QtWidgets.QMessageBox.warning(self.widget, "Invalid Frame Name",
+            f"The frame name {new_name} already exists. Cannot create a new frame with the same name.")
             return None
         
         self.editor.command(Command_RenameElement(self.editor, self.editor.frames[source_name], new_name))
