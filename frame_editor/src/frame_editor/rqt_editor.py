@@ -151,8 +151,8 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         widget.txt_b.editingFinished.connect(self.b_valueChanged)
         widget.txt_c.editingFinished.connect(self.c_valueChanged)
 
-        widget.txt_group.editingFinished.connect(self.group_valueChanged)
-        widget.txt_name.editingFinished.connect(self.frameName_valueChanged)
+        widget.txt_group.returnPressed.connect(self.group_valueChanged)
+        widget.txt_name.returnPressed.connect(self.frameName_valueChanged)
 
         widget.btn_rad.toggled.connect(self.update_fields)
 
@@ -742,20 +742,21 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
     @Slot()
     def frameName_valueChanged(self):
-        item = self.widget.list_frames.currentItem()
-        if not item:
-            return
-        source_name = item.text(0)
-
+        source_name = self.editor.active_frame.name
         new_name = self.widget.txt_name.text()
+
+        # early abort when names are the same
+        if source_name == new_name:
+            return
+
         existing_tf_frames = set(self.editor.all_frame_ids())
         existing_editor_frames = set(self.editor.all_editor_frame_ids())
 
         # allow recreating if frame was published by frameditor node originally
-        if source_name != new_name and (new_name in existing_editor_frames or (new_name in existing_tf_frames and not Frame.was_published_by_frameeditor(new_name))):
+        if new_name in existing_editor_frames or (new_name in existing_tf_frames and not Frame.was_published_by_frameeditor(new_name)):
             self.widget.txt_name.setText(source_name)
             QtWidgets.QMessageBox.warning(self.widget, "Invalid Frame Name",
-            f"The frame name {new_name} already exists. Cannot create a new frame with the same name.")
+            f"The frame name <b>{new_name}</b> already exists. Cannot create a new frame with the same name.")
             return None
         
         self.editor.command(Command_RenameElement(self.editor, self.editor.frames[source_name], new_name))
