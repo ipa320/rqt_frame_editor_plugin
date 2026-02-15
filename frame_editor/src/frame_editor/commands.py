@@ -548,7 +548,7 @@ class Command_SetGroup(QUndoCommand):
         self.editor.add_undo_level(1+4, [self.element])
 
     def undo(self):
-        self.element.set_color(self.old_group)
+        self.element.set_group(self.old_group)
         self.editor.add_undo_level(1+4, [self.element])
 
 
