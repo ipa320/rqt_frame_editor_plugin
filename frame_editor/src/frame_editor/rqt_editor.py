@@ -211,7 +211,7 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         other_group.setText(0, "Others") 
         other_group.setExpanded(True)  
         
-        items = sorted(self.editor.all_frame_ids(include_temp=False))
+        items = sorted(self.editor.all_frame_ids(include_temp=True))
         # Loop through the frames and add them to the appropriate group
         for item in items:
             tree_item = QTreeWidgetItem()  # Create a new tree item
@@ -418,6 +418,15 @@ class FrameEditorGUI(ProjectPlugin, Interface):
                 return child_item  # Return the item if it matches
 
         return None  # Return None if no match is found in this branch
+    
+    def all_children_are_temp(self, parent_item):
+        """
+        Check if all children of the given parent frame are temporary frames
+        """
+        if any(frame.parent == parent_item and not FrameEditor.frame_is_temporary(frame_id=frame.name)
+               for frame in self.editor.frames.values()):
+            return False
+        return True
 
     @Slot()
     def update_fields(self):
@@ -535,13 +544,19 @@ class FrameEditorGUI(ProjectPlugin, Interface):
         if not name:
             return
 
-        available_parents = self.editor.all_frame_ids(include_temp=False)
+        available_parents = self.editor.all_frame_ids(include_temp=True)
         if not available_parents:
             available_parents = ["world"]
 
         parent, ok = QtWidgets.QInputDialog.getItem(self.widget, "Add New Frame", "Parent Name:", sorted(available_parents))
 
         if not ok or parent == "":
+            return
+
+        # Prevent setting temporary frames as parents for non-temporary frames
+        if FrameEditor.frame_is_temporary(frame_id=parent) and not FrameEditor.frame_is_temporary(frame_id=name):
+            QtWidgets.QMessageBox.warning(self.widget, "Invalid Parent Frame",
+            f"Temporary frames can only be set as a parent frame for other temporary frames.")
             return
 
         self.editor.command(Command_AddElement(self.editor, Frame(name, parent=parent)))
@@ -575,6 +590,13 @@ class FrameEditorGUI(ProjectPlugin, Interface):
 
         new_name = self.get_valid_frame_name("Rename Frame", default_name=source_name)
         if not new_name:
+            return
+        
+        # check if the new name would be a temporary name. If so, all children of the frame have to be temporary as well
+        if FrameEditor.frame_is_temporary(frame_id=new_name) and not self.all_children_are_temp(source_name):
+            self.widget.txt_name.setText(source_name)
+            QtWidgets.QMessageBox.warning(self.widget, "Invalid Frame Name",
+            f"The frame cannot be renamed as a temporary frame because not all children are temporary.")
             return
 
         self.editor.command(Command_RenameElement(self.editor, self.editor.frames[source_name], new_name))
@@ -627,12 +649,19 @@ class FrameEditorGUI(ProjectPlugin, Interface):
     def set_parent(self, keep_absolute):
         parent = self.widget.list_tf.currentItem()
         if not parent:
-            return # none selected
-
-        if parent.text(0) == self.editor.active_frame.name:
+            return # none 
+        
+        parent_name = parent.text(0)
+        child_name = self.editor.active_frame.name
+        if parent_name == child_name:
             return # you can't be your own parent
 
-        self.editor.command(Command_SetParent(self.editor, self.editor.active_frame, parent.text(0), keep_absolute))
+        if FrameEditor.frame_is_temporary(frame_id=parent_name) and not FrameEditor.frame_is_temporary(frame_id=child_name):
+            QtWidgets.QMessageBox.warning(self.widget, "Invalid Parent Frame",
+            f"Temporary frames can only be set as a parent frame for other temporary frames.")
+            return
+
+        self.editor.command(Command_SetParent(self.editor, self.editor.active_frame, parent_name, keep_absolute))
 
 
     ## SET BUTTONS ##
@@ -757,6 +786,13 @@ class FrameEditorGUI(ProjectPlugin, Interface):
             self.widget.txt_name.setText(source_name)
             QtWidgets.QMessageBox.warning(self.widget, "Invalid Frame Name",
             f"The frame name <b>{new_name}</b> already exists. Cannot create a new frame with the same name.")
+            return None
+        
+        # check if the new name would be a temporary name. If so, all children of the frame have to be temporary as well
+        if FrameEditor.frame_is_temporary(frame_id=new_name) and not self.all_children_are_temp(source_name):
+            self.widget.txt_name.setText(source_name)
+            QtWidgets.QMessageBox.warning(self.widget, "Invalid Frame Name",
+            f"The frame cannot be renamed as a temporary frame because not all children are temporary.")
             return None
         
         self.editor.command(Command_RenameElement(self.editor, self.editor.frames[source_name], new_name))
